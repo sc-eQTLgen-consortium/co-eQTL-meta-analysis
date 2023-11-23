@@ -1,0 +1,95 @@
+configfile: "./gene_pair_corrs.yaml"
+
+import pandas as pd
+
+n_donors_file = config["list_of_donors"]
+out_dir = config["output_directory"]
+top_dir = config["top_directory"]
+simg_dir = config["singularity_path"]
+snake_dir = config["snakefile_path"]
+scripts_dir = snake_dir+"scripts/"
+wg3_dir = config["wg3_path"]
+
+cohort = config["cohort"]
+cell_types = config["cell_type"]
+
+try:
+    donor_file_path = f"{snake_dir}/donor_data/{cohort}_{cell_types}_donor_list.tsv"
+    donor_file_path = donor_file_path.replace(" ","")
+    donors = pd.read_csv(donor_file_path)
+    donors_list = [i for i in donors['x']]
+    metrics = ['corr','pval','zscore']
+
+    rule all:
+        input:
+            #expand(out_dir+cohort+"/"+"corr"+"_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
+            expand(out_dir+cohort+"/combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz", metric=metrics,cell_type=cell_types)
+        output:
+            touch(out_dir+cell_types+"_done.txt")
+
+    rule createDonorRds:
+        output:
+            temp(expand(out_dir+cohort+"/donor_rds/{cell_type}_{donor}.rds", cell_type=cell_types,donor=donors_list))
+        shell:
+            """
+            mkdir -p {out_dir}
+            mkdir -p {out_dir}{cohort}
+            mkdir -p {out_dir}{cohort}/donor_rds
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}create_donor_rds.R {cell_types} {cohort} {wg3_dir} {out_dir}
+            """
+
+    rule calculate_correlations:
+        input:
+            out_dir+cohort+"/donor_rds/{cell_type}_{donor}.rds"
+        output:
+            temp(out_dir+cohort+"/corr_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz"),
+            temp(out_dir+cohort+"/pval_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz"),
+            temp(out_dir+cohort+"/zscore_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz")
+        params:
+            ct = lambda wildcards: f"{wildcards.cell_type}",
+            d = lambda wildcards: f"{wildcards.donor}",
+            rds_path = lambda wildcards: (f"{out_dir}{cohort}/donor_rds/").replace(" ","")
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor_rds.R {params.ct} {cohort} {params.d} {wg3_dir} {params.rds_path} {out_dir}
+            """
+
+    rule aggregate_final_results:
+        input:
+            expand(out_dir+cohort+"/"+"{metric}"+"_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz", metric=metrics,cell_type=cell_types,donor=donors_list)
+        output:
+            out_dir+cohort+"/combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz"
+        params:
+            ct = lambda wildcards: f"{wildcards.cell_type}",
+            m = lambda wildcards: f"{wildcards.metric}",
+            list_of_donors = (f"{donors_list}").replace(" ","")
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.ct} {params.m} {output} {out_dir}{cohort}
+            """
+
+except:
+
+    print("Donor list file is required.")
+    print(cell_types)
+
+    rule all:
+        input:
+            snake_dir+"gene_lists/"+cohort+"_"+cell_types+"_genes.tsv",
+            snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
+        output:
+            touch(out_dir+cell_types+"_step1_done.txt")
+
+    rule makeDonorLists:
+        output:
+            snake_dir+"gene_lists/"+cohort+"_"+cell_types+"_genes.tsv",
+            snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
+        shell:
+            """
+            mkdir -p {snake_dir}/donor_data
+            mkdir -p {snake_dir}/gene_lists
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}donor_ids.R {cell_types} {cohort} {wg3_dir} {snake_dir}/donor_data/ {snake_dir}/gene_lists/
+            """
+
+
+        
