@@ -23,22 +23,24 @@ print("Loading big rds file")
 sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
 
 expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-colnames(expressing_genes) <- 'sum_of_exp'
-expressing_genes$zeros <- rowSums(sc_data@assays$data@data==0)
-expressing_genes2 <- as.data.frame(expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),])
+expressing_genes = cbind(rownames(sc_data@assays$data@data),expressing_genes)
+print("data frame loaded")
 
-print("not including ribosomal or mitochondrial genes")
-genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes2),value=TRUE, invert=TRUE)
+colnames(expressing_genes) <- c('gene_names','sum_of_exp')
+expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
 
-expressing_genes3 <- expressing_genes2[rownames(expressing_genes2) %in% genes.use, ]
+#warning following code removes genes with ensemble ID
+genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
+print("Ribosomal and mitochondrial genes removed.")
+expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
 
 ### outputting donor rds
 print("Selecting either top 1000 genes or selected subset of genes")
 if(genes_to_use=="nan"){
-  genes <- expressing_genes3[1:1000,]
+  genes <- expressing_genes[1:1000,]
 } else{
   genes_to_use = read.table(genes_to_use, header=T)[,1]
-  genes = expressing_genes3[rownames(expressing_genes3) %in% genes_to_use,]
+  genes = expressing_genes[rownames(expressing_genes) %in% genes_to_use,]
 }
 
 sc_data_S <- sc_data[rownames(genes),]
