@@ -34,5 +34,5 @@ for i in list_of_donors:
 
 
 df.index=index_value
-df.to_csv(outfile, sep='\t', compression='gzip')
+df.to_csv(outfile, sep='\t', na_rep='NA', compression='gzip')
 
