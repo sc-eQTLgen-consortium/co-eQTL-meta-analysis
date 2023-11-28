@@ -7,14 +7,20 @@
 top_directory: /scratch/hb-sceqtlgen/ # a location above everything else
 list_of_donors: /scratch/hb-sceqtlgen/calculate_correlation_metrics/donor_rds/oneK1K/donor_list.tsv # must end with donor_rds/cohort_id/donor_list.tsv
 output_directory: /scratch/hb-sceqtlgen/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
-singularity_path: /scratch/hb-sceqtlgen/containers/wp3_extended.sif  # location of singularity image with all installed software
+singularity_path: /scratch/hb-sceqtlgen/containers/wp3_extended.sif # location of singularity image with all installed software
 snakefile_path: /scratch/hb-sceqtlgen/calculate_correlation_metrics/ # location of this file and the snakefile
-wg3_path: /scratch/hb-sceqtlgen/oneK1K/input/L1/  # location of seurat input file
+wg3_path: /scratch/hb-sceqtlgen/oneK1K/input/L1/ # location of seurat input file
 
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
+cohort: oneK1K # ID of cohort, just as it is written in the wg3 file path
 cell_type: CD8_T # chosen cell type
+
+##############################################################################################
+####### The following arguments are situational. You don't have to fill anything in here #####
+##############################################################################################
+
+gene_list_path: /scratch/hb-sceqtlgen/gene_lists/shuang_genes.tsv # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
 
