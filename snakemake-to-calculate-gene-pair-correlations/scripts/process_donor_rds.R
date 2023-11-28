@@ -35,10 +35,10 @@ weighted_corr <- function(normalized_counts_mtr_d, raw_counts_mtr_d,method){
 }
 
 
-get_corr_values_donor_from_rds_file <- function(donor,dir_with_seurat,cohort_id,output_dir,gene_pairs,cell_type){
+get_corr_values_donor_from_rds_file <- function(donor,dir_with_seurat,cohort_id,output_dir,gene_pairs,cell_type,gene_names){
 
   cell_type_data <- readRDS(paste0(dir_with_seurat,cell_type,'_',donor,'.rds'))
-  cell_type_data_S <- cell_type_data[rownames(genes),]
+  cell_type_data_S <- cell_type_data[rownames(gene_names),]
         
   # Getting a number of counts per cell
   raw_counts_mtr <- as.data.frame(as.matrix(cell_type_data_S@assays$RNA@counts ))
@@ -94,34 +94,35 @@ get_corr_values_donor_from_rds_file <- function(donor,dir_with_seurat,cohort_id,
 cell_type = args[1]
 cohort_id = args[2]
 donor = args[3]
-dir_with_seurat = args[4]
+gene_list_file = args[4]
 path_for_donor_rds = args[5]
 output_dir = args[6]
+alt_gene_list = args[7]
 
 # selection of genes 
 
-sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
-
-mono_expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-colnames(mono_expressing_genes) <- 'sum_of_exp'
-mono_expressing_genes$zeros <- rowSums(sc_data@assays$data@data==0)
-mono_expressing_genes2 <- as.data.frame(mono_expressing_genes[order(mono_expressing_genes$sum_of_exp, decreasing = T),])
-
-genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(mono_expressing_genes2),value=TRUE, invert=TRUE)
-
-mono_expressing_genes3 <- mono_expressing_genes2[rownames(mono_expressing_genes2) %in% genes.use, ]
-genes <- mono_expressing_genes3[1:1000,]
+print(paste("Cell type:",cell_type))
+print(paste("Cohort:",cohort_id))
+print(paste("Donor:",donor))
+print(paste("gene list file:",gene_list_file))
+print(paste("donor rds path:",path_for_donor_rds))
+print(paste("output directory:",output_dir))
+print(paste("alternative gene list path:",alt_gene_list))
 
 print("Calculating all possible gene pairs unidirectionally")
-n=1
+if(alt_gene_list == 'nan'){
+  gene_names = read.table(gene_list_file,header=T)[,1]
+} else {
+  gene_names = read.table(alt_gene_list, header=T)[,1]
+}
+print(paste("length of object gene_names:",length(gene_names)))
+
 gene_pairs = c()
-gene_names = rownames(genes)
+n = 1
 for (i in seq(length(gene_names)-1)){ 
   gene_pairs = c(gene_pairs, paste(rep(gene_names[n],(length(gene_names)-n)),gene_names[(n+1):length(gene_names)],sep='_')) 
   n = n+1
 }
 
 print("Starting correlation functions.")
-get_corr_values_donor_from_rds_file(donor,path_for_donor_rds,cohort_id,output_dir,gene_pairs,cell_type)
-
-
+get_corr_values_donor_from_rds_file(donor,path_for_donor_rds,cohort_id,output_dir,gene_pairs,cell_type,gene_names)
