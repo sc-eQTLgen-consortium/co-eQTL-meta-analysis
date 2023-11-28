@@ -17,27 +17,29 @@ output_dir <- donor_rds_dir
 
 sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
 
+print("seurat object loaded, continuing with analysis")
+
 donortab  <- as.data.frame(table(sc_data$Assignment))
 donor_list <- donortab[donortab$Freq >10,]$Var1
 donor <- unique(sc_data$Assignment)[2]
 
+print("donors filtered.")
+
 expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-colnames(expressing_genes) <- 'sum_of_exp'
-expressing_genes$zeros <- rowSums(sc_data@assays$data@data==0)
-expressing_genes2 <- as.data.frame(expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),])
+expressing_genes = cbind(rownames(sc_data@assays$data@data),expressing_genes)
+print("data frame loaded")
 
-genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes2),value=TRUE, invert=TRUE)
+colnames(expressing_genes) <- c('gene_names','sum_of_exp')
+expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
 
-expressing_genes3 <- expressing_genes2[rownames(expressing_genes2) %in% genes.use, ]
+#warning following code removes genes with ensemble ID
+genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
+print("Ribosomal and mitochondrial genes removed.")
+expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
 
 ### outputting donor rds
 print("Selecting top 1000 genes")
-if(alt_gene_list=='nan'){
-  genes <- expressing_genes3[1:1000,]
-} else {
-  genes_to_use = read.table(alt_gene_list, header=T)[,1]
-  genes = expressing_genes3[rownames(expressing_genes3) %in% genes_to_use,]
-}
+genes <- expressing_genes[1:1000,]
 
 write.table(rownames(genes), paste(gene_list_out,cohort_id,'_',cell_type,'_genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
 write.table(sort(donor_list), paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_list.tsv'),sep='\t', row.names = F, quote = F)
