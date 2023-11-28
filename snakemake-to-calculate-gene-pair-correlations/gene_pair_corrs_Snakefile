@@ -12,6 +12,7 @@ wg3_dir = config["wg3_path"]
 
 cohort = config["cohort"]
 cell_types = config["cell_type"]
+gene_list = config["gene_list_path"]
 
 try:
     donor_file_path = f"{snake_dir}/donor_data/{cohort}_{cell_types}_donor_list.tsv"
@@ -35,7 +36,7 @@ try:
             mkdir -p {out_dir}
             mkdir -p {out_dir}{cohort}
             mkdir -p {out_dir}{cohort}/donor_rds
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}create_donor_rds.R {cell_types} {cohort} {wg3_dir} {out_dir}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}create_donor_rds.R {cell_types} {cohort} {wg3_dir} {out_dir} {gene_list}
             """
 
     rule calculate_correlations:
@@ -48,10 +49,11 @@ try:
         params:
             ct = lambda wildcards: f"{wildcards.cell_type}",
             d = lambda wildcards: f"{wildcards.donor}",
-            rds_path = lambda wildcards: (f"{out_dir}{cohort}/donor_rds/").replace(" ","")
+            rds_path = lambda wildcards: (f"{out_dir}{cohort}/donor_rds/").replace(" ",""),
+            gene_list = lambda wildcards: (f"{snake_dir}/gene_lists/{cohort}_{wildcards.cell_type}_genes.tsv").replace(" ","")
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor_rds.R {params.ct} {cohort} {params.d} {wg3_dir} {params.rds_path} {out_dir}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor_rds.R {params.ct} {cohort} {params.d} {params.gene_list} {params.rds_path} {out_dir} {gene_list}
             """
 
     rule aggregate_final_results:
@@ -84,12 +86,14 @@ except:
         output:
             snake_dir+"gene_lists/"+cohort+"_"+cell_types+"_genes.tsv",
             snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
+        params:
+            donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
+            donor_rds_out_path = (f"{scripts_dir}donor_ids.R").replace(" ",""),
+            gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
         shell:
             """
             mkdir -p {snake_dir}/donor_data
             mkdir -p {snake_dir}/gene_lists
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}donor_ids.R {cell_types} {cohort} {wg3_dir} {snake_dir}/donor_data/ {snake_dir}/gene_lists/
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_out_path} {cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {gene_list}
             """
 
-
-        
