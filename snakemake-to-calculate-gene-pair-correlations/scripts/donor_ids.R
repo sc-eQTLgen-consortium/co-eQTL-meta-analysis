@@ -9,6 +9,7 @@ cohort_id = args[2]
 dir_with_seurat = args[3]
 donor_rds_dir = args[4]
 gene_list_out = args[5]
+alt_gene_list = args[6]
 
 library(Seurat)
 
@@ -31,7 +32,12 @@ expressing_genes3 <- expressing_genes2[rownames(expressing_genes2) %in% genes.us
 
 ### outputting donor rds
 print("Selecting top 1000 genes")
-genes <- expressing_genes3[1:1000,]
+if(alt_gene_list=='nan'){
+  genes <- expressing_genes3[1:1000,]
+} else {
+  genes_to_use = read.table(alt_gene_list, header=T)[,1]
+  genes = expressing_genes3[rownames(expressing_genes3) %in% genes_to_use,]
+}
 
 write.table(rownames(genes), paste(gene_list_out,cohort_id,'_',cell_type,'_genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
 write.table(sort(donor_list), paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_list.tsv'),sep='\t', row.names = F, quote = F)
