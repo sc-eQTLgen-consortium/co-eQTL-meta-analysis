@@ -22,5 +22,5 @@ cell_type: CD8_T # chosen cell type
 ####### The following arguments are situational. You don't have to fill anything in here #####
 ##############################################################################################
 
-gene_list_path: /scratch/hb-sceqtlgen/gene_lists/shuang_genes.tsv # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
+gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
 
