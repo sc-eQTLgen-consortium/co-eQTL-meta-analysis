@@ -5,6 +5,7 @@ cell_type = args[1]
 cohort_id = args[2]
 dir_with_seurat = args[3]
 donor_rds_dir = args[4]
+genes_to_use = args[5]
 
 library(Seurat)
 library(matrixStats)
@@ -21,19 +22,25 @@ print(paste("output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep
 print("Loading big rds file")
 sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
 
-mono_expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-colnames(mono_expressing_genes) <- 'sum_of_exp'
-mono_expressing_genes$zeros <- rowSums(sc_data@assays$data@data==0)
-mono_expressing_genes2 <- as.data.frame(mono_expressing_genes[order(mono_expressing_genes$sum_of_exp, decreasing = T),])
+expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
+colnames(expressing_genes) <- 'sum_of_exp'
+expressing_genes$zeros <- rowSums(sc_data@assays$data@data==0)
+expressing_genes2 <- as.data.frame(expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),])
 
-genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(mono_expressing_genes2),value=TRUE, invert=TRUE)
+print("not including ribosomal or mitochondrial genes")
+genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes2),value=TRUE, invert=TRUE)
 
-mono_expressing_genes3 <- mono_expressing_genes2[rownames(mono_expressing_genes2) %in% genes.use, ]
+expressing_genes3 <- expressing_genes2[rownames(expressing_genes2) %in% genes.use, ]
 
 ### outputting donor rds
-print("Selecting top 1000 genes")
-genes <- mono_expressing_genes3[1:1000,]
-  
+print("Selecting either top 1000 genes or selected subset of genes")
+if(genes_to_use=="nan"){
+  genes <- expressing_genes3[1:1000,]
+} else{
+  genes_to_use = read.table(genes_to_use, header=T)[,1]
+  genes = expressing_genes3[rownames(expressing_genes3) %in% genes_to_use,]
+}
+
 sc_data_S <- sc_data[rownames(genes),]
   
 # Getting a number of counts per cell
