@@ -26,7 +26,7 @@ donor <- unique(sc_data$Assignment)[2]
 print("donors filtered.")
 
 expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-expressing_genes = cbind(rownames(sc_data@assays$data@data),expressing_genes)
+expressing_genes <- cbind(rownames(sc_data@assays$data@data),expressing_genes)
 print("data frame loaded")
 
 colnames(expressing_genes) <- c('gene_names','sum_of_exp')
