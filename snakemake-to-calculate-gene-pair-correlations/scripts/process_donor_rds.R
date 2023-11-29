@@ -111,18 +111,24 @@ print(paste("alternative gene list path:",alt_gene_list))
 
 print("Calculating all possible gene pairs unidirectionally")
 if(alt_gene_list == 'nan'){
-  gene_names = read.table(gene_list_file,header=T)[,1]
+  gene_names = as.data.frame(read.table(gene_list_file,header=T)[,1])
+  colnames(gene_names) = c('gene')
+  rownames(gene_names) = gene_names$gene
 } else {
-  gene_names = read.table(alt_gene_list, header=T)[,1]
+  gene_names = as.data.frame(read.table(alt_gene_list, header=T)[,1])
+  colnames(gene_names) = c('gene')
+  rownames(gene_names) = gene_names$gene
 }
-print(paste("length of object gene_names:",length(gene_names)))
+print(paste("Number of genes in list:",length(gene_names$gene)))
 
 gene_pairs = c()
 n = 1
-for (i in seq(length(gene_names)-1)){ 
-  gene_pairs = c(gene_pairs, paste(rep(gene_names[n],(length(gene_names)-n)),gene_names[(n+1):length(gene_names)],sep='_')) 
+for (i in seq(length(gene_names$gene)-1)){ 
+  gene_pairs = c(gene_pairs, paste(rep(gene_names$gene[n],(length(gene_names$gene)-n)),gene_names$gene[(n+1):length(gene_names$gene)],sep='_')) 
   n = n+1
 }
 
 print("Starting correlation functions.")
 get_corr_values_donor_from_rds_file(donor,path_for_donor_rds,cohort_id,output_dir,gene_pairs,cell_type,gene_names)
+
+
