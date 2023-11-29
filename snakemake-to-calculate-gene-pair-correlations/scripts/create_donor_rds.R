@@ -29,16 +29,15 @@ print("data frame loaded")
 colnames(expressing_genes) <- c('gene_names','sum_of_exp')
 expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
 
-#warning following code removes genes with ensemble ID
-genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
-print("Ribosomal and mitochondrial genes removed.")
-expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
-
 ### outputting donor rds
-print("Selecting either top 1000 genes or selected subset of genes")
 if(genes_to_use=="nan"){
+  print("As no gene list provided, top 1000 genes will be calculated after removal of ribosomal and mitochondrial genes.")
+  #warning following code removes genes with ensemble ID
+  genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
+  expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
   genes <- expressing_genes[1:1000,]
 } else{
+  print("Using gene list provided.")
   genes_to_use = read.table(genes_to_use, header=T)[,1]
   genes = expressing_genes[rownames(expressing_genes) %in% genes_to_use,]
 }
