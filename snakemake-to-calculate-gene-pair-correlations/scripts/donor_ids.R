@@ -21,6 +21,7 @@ print("seurat object loaded, continuing with analysis")
 
 donortab  <- as.data.frame(table(sc_data$Assignment))
 donor_list <- donortab[donortab$Freq >10,]$Var1
+donor_list <- gsub(pattern='_', replacement='', x=donor_list)
 donor <- unique(sc_data$Assignment)[2]
 
 print("donors filtered.")
