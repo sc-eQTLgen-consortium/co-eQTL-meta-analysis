@@ -18,7 +18,8 @@ try:
     donor_file_path = f"{snake_dir}/donor_data/{cohort}_{cell_types}_donor_list.tsv"
     donor_file_path = donor_file_path.replace(" ","")
     donors = pd.read_csv(donor_file_path)
-    donors_list = [i for i in donors['x']]
+    donors_list = [i for i in donors['filt_labels']]
+    original_donor_ids = [i for i in donors['original_labels']]
     metrics = ['corr','pval','zscore']
 
     rule all:
@@ -64,10 +65,11 @@ try:
         params:
             ct = lambda wildcards: f"{wildcards.cell_type}",
             m = lambda wildcards: f"{wildcards.metric}",
-            list_of_donors = (f"{donors_list}").replace(" ","")
+            list_of_donors = (f"{donors_list}").replace(" ",""),
+            original_ids = (f"{original_donor_ids}").replace(" ","")
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.ct} {params.m} {output} {out_dir}{cohort}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {output} {out_dir}{cohort}
             """
 
 except:
