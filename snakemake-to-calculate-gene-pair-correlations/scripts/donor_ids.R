@@ -20,8 +20,9 @@ sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.
 print("seurat object loaded, continuing with analysis")
 
 donortab  <- as.data.frame(table(sc_data$Assignment))
-donor_list <- donortab[donortab$Freq >10,]$Var1
-donor_list <- gsub(pattern='_', replacement='', x=donor_list)
+donor_list <- list(donortab[donortab$Freq >10,]$Var1)
+names(donor_list) <- c('original_labels')
+donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
 donor <- unique(sc_data$Assignment)[2]
 
 print("donors filtered.")
@@ -43,6 +44,6 @@ print("Selecting top 1000 genes")
 genes <- expressing_genes[1:1000,]
 
 write.table(rownames(genes), paste(gene_list_out,cohort_id,'_',cell_type,'_genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
-write.table(sort(donor_list), paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_list.tsv'),sep='\t', row.names = F, quote = F)
+write.table(donor_list, paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_list.tsv'),sep='\t', row.names = F, quote = F)
 write.table(as.data.frame(table(sc_data$Assignment)), paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_counts.tsv'),sep='\t', row.names = F, quote = F)
 
