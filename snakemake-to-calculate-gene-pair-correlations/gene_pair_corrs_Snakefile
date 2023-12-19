@@ -2,7 +2,6 @@ configfile: "./gene_pair_corrs.yaml"
 
 import pandas as pd
 
-n_donors_file = config["list_of_donors"]
 out_dir = config["output_directory"]
 top_dir = config["top_directory"]
 simg_dir = config["singularity_path"]
