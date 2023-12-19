@@ -5,7 +5,6 @@
 ######################################################################################
 
 top_directory: /scratch/hb-sceqtlgen/ # a location above everything else
-list_of_donors: /scratch/hb-sceqtlgen/calculate_correlation_metrics/donor_rds/oneK1K/donor_list.tsv # must end with donor_rds/cohort_id/donor_list.tsv
 output_directory: /scratch/hb-sceqtlgen/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
 singularity_path: /scratch/hb-sceqtlgen/containers/wp3_extended.sif # location of singularity image with all installed software
 snakefile_path: /scratch/hb-sceqtlgen/calculate_correlation_metrics/ # location of this file and the snakefile
