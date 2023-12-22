@@ -32,6 +32,7 @@ expressing_genes <- cbind(rownames(sc_data@assays$data@data),expressing_genes)
 print("data frame loaded")
 
 colnames(expressing_genes) <- c('gene_names','sum_of_exp')
+expressing_genes$sum_of_exp <- as.numeric(expressing_genes$sum_of_exp)
 expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
 
 #warning following code removes genes with ensemble ID
