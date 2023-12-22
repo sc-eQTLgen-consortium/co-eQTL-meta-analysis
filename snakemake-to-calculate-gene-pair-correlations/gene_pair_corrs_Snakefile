@@ -1,6 +1,7 @@
 configfile: "./gene_pair_corrs.yaml"
 
 import pandas as pd
+import os
 
 out_dir = config["output_directory"]
 top_dir = config["top_directory"]
@@ -13,9 +14,11 @@ cohort = config["cohort"]
 cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
 
-try:
-    donor_file_path = f"{snake_dir}/donor_data/{cohort}_{cell_types}_donor_list.tsv"
-    donor_file_path = donor_file_path.replace(" ","")
+donor_file_path = f"{snake_dir}/donor_data/{cohort}_{cell_types}_donor_list.tsv"
+donor_file_path = donor_file_path.replace(" ","")
+print(f"Pipeline is being run for {cell_types} cells.")
+
+if(os.path.exists(donor_file_path)):
     donors = pd.read_csv(donor_file_path, sep='\t')
     donors_list = [i for i in donors['filt_labels']]
     original_donor_ids = [i for i in donors['original_labels']]
@@ -71,8 +74,7 @@ try:
             singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {output} {out_dir}{cohort}
             """
 
-except:
-
+else:
     print("Donor list file is being generated for subsequent runs of the pipeline.")
     print(f"Pipeline is being run for {cell_types} cells.")
 
@@ -98,5 +100,3 @@ except:
             singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_out_path} {cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {gene_list}
             """
 
-
-        
