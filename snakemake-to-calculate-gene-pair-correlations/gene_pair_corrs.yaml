@@ -8,7 +8,7 @@ top_directory: /scratch/hb-sceqtlgen/ # a location above everything else
 output_directory: /scratch/hb-sceqtlgen/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
 singularity_path: /scratch/hb-sceqtlgen/containers/wp3_extended.sif # location of singularity image with all installed software
 snakefile_path: /scratch/hb-sceqtlgen/calculate_correlation_metrics/ # location of this file and the snakefile
-wg3_path: /scratch/hb-sceqtlgen/oneK1K/input/L1/ # location of seurat input file
+wg3_path: /scratch/hb-sceqtlgen/ # directory containing folder with name of cohort which contains the input/L1 folders 
 
 ##########################################################################
 ####### The following arguments are for information about your study #####
