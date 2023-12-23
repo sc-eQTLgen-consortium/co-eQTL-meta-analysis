@@ -9,8 +9,9 @@ simg_dir = config["singularity_path"]
 snake_dir = config["snakefile_path"]
 scripts_dir = snake_dir+"scripts/"
 wg3_dir = config["wg3_path"]
-
 cohort = config["cohort"]
+wg3_dir = f"{wg3_dir}/{cohort}/input/L1/"
+
 cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
 
