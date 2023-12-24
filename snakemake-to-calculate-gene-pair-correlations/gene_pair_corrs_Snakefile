@@ -88,7 +88,6 @@ else:
 
     rule makeDonorLists:
         output:
-            snake_dir+"gene_lists/"+cohort+"_"+cell_types+"_genes.tsv",
             snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
         params:
             donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
