@@ -25,26 +25,33 @@ names(donor_list) <- c('original_labels')
 donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
 donor <- unique(sc_data$Assignment)[2]
 
-print("donors filtered.")
-
-expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-expressing_genes <- cbind(rownames(sc_data@assays$data@data),expressing_genes)
-print("data frame loaded")
-
-colnames(expressing_genes) <- c('gene_names','sum_of_exp')
-expressing_genes$sum_of_exp <- as.numeric(expressing_genes$sum_of_exp)
-expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
-
-#warning following code removes genes with ensemble ID
-genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
-print("Ribosomal and mitochondrial genes removed.")
-expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
-
-### outputting donor rds
-print("Selecting top 1000 genes")
-genes <- expressing_genes[1:1000,]
-
-write.table(rownames(genes), paste(gene_list_out,cohort_id,'_',cell_type,'_genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
 write.table(donor_list, paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_list.tsv'),sep='\t', row.names = F, quote = F)
 write.table(as.data.frame(table(sc_data$Assignment)), paste0(output_dir,'/',cohort_id,'_',cell_type,'_donor_counts.tsv'),sep='\t', row.names = F, quote = F)
+
+print("donors filtered.")
+
+if alt_gene_list == 'nan':
+  print("Creating list of most expressed genes.")
+  
+  expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
+  expressing_genes <- cbind(rownames(sc_data@assays$data@data),expressing_genes)
+  print("data frame loaded")
+  
+  colnames(expressing_genes) <- c('gene_names','sum_of_exp')
+  expressing_genes$sum_of_exp <- as.numeric(expressing_genes$sum_of_exp)
+  expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
+  
+  ###warning following code removes genes with ensemble ID
+  #genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
+  #print("Ribosomal and mitochondrial genes removed.")
+  #expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
+  
+  ### outputting donor rds
+  print("Selecting top expressed genes")
+  genes <- expressing_genes[1:3000,]
+  
+  write.table(rownames(genes), paste(gene_list_out,cohort_id,'_',cell_type,'_genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
+
+else:
+  print("A gene list was provided, no new gene list will be generated.")
 
