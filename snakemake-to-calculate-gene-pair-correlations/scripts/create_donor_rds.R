@@ -58,7 +58,7 @@ print(paste("Saving rds file per donor to ",donor_rds_dir,cohort_id,'/','donor_r
 for(donor in donor_list){
   donor_filename = gsub(pattern='_',replacement='',x=donor)
   donor_rds <- sc_data_S[,sc_data_S$Assignment ==donor ]
-  saveRDS(donor_rds, paste(donor_rds_dir,cohort_id,'/',"donor_rds",'/',cell_type,'_',donor_filename,'.rds',sep=""))
+  saveRDS(donor_rds, paste(donor_rds_dir,cohort_id,'/',"donor_rds",'/',cell_type,'-',donor_filename,'.rds',sep=""))
 }
 
 print("done.")
