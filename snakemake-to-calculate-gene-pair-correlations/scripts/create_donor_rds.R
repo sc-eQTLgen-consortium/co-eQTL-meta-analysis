@@ -14,7 +14,7 @@ library(stringr)
 
 print(paste("cell type:",cell_type))
 print(paste("cohort id:",cohort_id))
-print(paste("seurate file: ",dir_with_seurat,cell_type,".Qced.Normalized.SCs.Rds",sep=''))
+print(paste("seurat file: ",dir_with_seurat,cell_type,".Qced.Normalized.SCs.Rds",sep=''))
 print(paste("output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
 
 # selection of genes 
