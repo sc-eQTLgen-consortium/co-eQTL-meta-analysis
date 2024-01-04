@@ -20,13 +20,13 @@ print(f"Metric: {metric}")
 print(f"Cohort: {cohort}")
 print(f"Output directory: {outfile}")
 print(f"Input directory: {infile}")
-print(f"Input file: {infile}/{metric}_{cell_type}_ind_pearson_weighted.tsv.gz")
+print(f"Input file: {infile}/{metric}-{cell_type}-ind-pearson-weighted.tsv.gz")
 
 df=pd.DataFrame()
 
 index_value=0
 for i in range(len(list_of_donors)):
-  file=f"{infile}/{metric}_{cell_type}_{list_of_donors[i]}_pearson_weighted.tsv.gz"
+  file=f"{infile}/{metric}-{cell_type}-{list_of_donors[i]}-pearson-weighted.tsv.gz"
   ind=pd.read_csv(file, sep='\t')
   df[f"{original_ids[i]}"] = [val for val in ind['x']]
   try:
