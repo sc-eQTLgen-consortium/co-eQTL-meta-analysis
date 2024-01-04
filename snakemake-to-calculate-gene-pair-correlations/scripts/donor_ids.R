@@ -30,7 +30,7 @@ write.table(as.data.frame(table(sc_data$Assignment)), paste0(output_dir,'/',coho
 
 print("donors filtered.")
 
-if alt_gene_list == 'nan':
+if (alt_gene_list == 'nan'){
   print("Creating list of most expressed genes.")
   
   expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
@@ -52,6 +52,6 @@ if alt_gene_list == 'nan':
   
   write.table(rownames(genes), paste(gene_list_out,cohort_id,'_',cell_type,'_genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
 
-else:
+} else{
   print("A gene list was provided, no new gene list will be generated.")
-
+}
