@@ -27,14 +27,14 @@ if(os.path.exists(donor_file_path)):
 
     rule all:
         input:
-            #expand(out_dir+cohort+"/"+"corr"+"_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
-            expand(out_dir+cohort+"/{cohort}_combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz", cohort=cohort,metric=metrics,cell_type=cell_types)
+            #expand(out_dir+cohort+"/"+"corr"+"-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
+            expand(out_dir+cohort+"/{cohort}-combined-{metric}-{cell_type}-top-1000-pearson-weighted.tsv.gz", cohort=cohort,metric=metrics,cell_type=cell_types)
         output:
-            touch(out_dir+cohort+"_"+cell_types+"_done.txt")
+            touch(out_dir+cohort+"-"+cell_types+"-done.txt")
 
     rule createDonorRds:
         output:
-            temp(expand(out_dir+cohort+"/donor_rds/{cell_type}_{donor}.rds", cell_type=cell_types,donor=donors_list))
+            temp(expand(out_dir+cohort+"/donor_rds/{cell_type}-{donor}.rds", cell_type=cell_types,donor=donors_list))
         shell:
             """
             mkdir -p {out_dir}
@@ -45,16 +45,16 @@ if(os.path.exists(donor_file_path)):
 
     rule calculate_correlations:
         input:
-            out_dir+cohort+"/donor_rds/{cell_type}_{donor}.rds"
+            out_dir+cohort+"/donor_rds/{cell_type}-{donor}.rds"
         output:
-            temp(out_dir+cohort+"/corr_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz"),
-            temp(out_dir+cohort+"/pval_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz"),
-            temp(out_dir+cohort+"/zscore_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz")
+            temp(out_dir+cohort+"/corr-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz"),
+            temp(out_dir+cohort+"/pval-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz"),
+            temp(out_dir+cohort+"/zscore-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz")
         params:
             ct = lambda wildcards: f"{wildcards.cell_type}",
             d = lambda wildcards: f"{wildcards.donor}",
             rds_path = lambda wildcards: (f"{out_dir}{cohort}/donor_rds/").replace(" ",""),
-            gene_list = lambda wildcards: (f"{snake_dir}/gene_lists/{cohort}_{wildcards.cell_type}_genes.tsv").replace(" ","")
+            gene_list = lambda wildcards: (f"{snake_dir}/gene_lists/{cohort}-{wildcards.cell_type}-genes.tsv").replace(" ","")
         shell:
             """
             singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor_rds.R {params.ct} {cohort} {params.d} {params.gene_list} {params.rds_path} {out_dir} {gene_list}
@@ -62,9 +62,9 @@ if(os.path.exists(donor_file_path)):
 
     rule aggregate_final_results:
         input:
-            expand(out_dir+cohort+"/"+"{metric}"+"_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz", metric=metrics,cell_type=cell_types,donor=donors_list)
+            expand(out_dir+cohort+"/"+"{{metric}}"+"-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
         output:
-            out_dir+cohort+"/{cohort}_combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz"
+            out_dir+cohort+"/{cohort}-combined-{metric}-{cell_type}-top-1000-pearson-weighted.tsv.gz"
         params:
             ct = lambda wildcards: f"{wildcards.cell_type}",
             m = lambda wildcards: f"{wildcards.metric}",
