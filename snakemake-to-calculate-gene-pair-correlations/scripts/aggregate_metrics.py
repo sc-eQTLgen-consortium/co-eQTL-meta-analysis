@@ -10,12 +10,14 @@ list_of_donors = json.loads(sys.argv[1])
 original_ids = json.loads(sys.argv[2])
 cell_type = sys.argv[3]
 metric = sys.argv[4]
-outfile = sys.argv[5]
-infile = sys.argv[6]
+cohort = sys.argv[5]
+outfile = sys.argv[6]
+infile = sys.argv[7]
 
 print(f"First 10 donors of list: {list_of_donors[0:10]}")
 print(f"Cell Type: {cell_type}")
 print(f"Metric: {metric}")
+print(f"Cohort: {cohort}")
 print(f"Output directory: {outfile}")
 print(f"Input directory: {infile}")
 print(f"Input file: {infile}/{metric}_{cell_type}_ind_pearson_weighted.tsv.gz")
