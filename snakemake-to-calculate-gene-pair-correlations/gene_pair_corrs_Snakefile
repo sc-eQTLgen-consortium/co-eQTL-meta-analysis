@@ -28,9 +28,9 @@ if(os.path.exists(donor_file_path)):
     rule all:
         input:
             #expand(out_dir+cohort+"/"+"corr"+"_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
-            expand(out_dir+cohort+"/combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz", metric=metrics,cell_type=cell_types)
+            expand(out_dir+cohort+"/{cohort}_combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz", cohort=cohort,metric=metrics,cell_type=cell_types)
         output:
-            touch(out_dir+cell_types+"_done.txt")
+            touch(out_dir+cohort+"_"+cell_types+"_done.txt")
 
     rule createDonorRds:
         output:
@@ -64,15 +64,16 @@ if(os.path.exists(donor_file_path)):
         input:
             expand(out_dir+cohort+"/"+"{metric}"+"_"+"{cell_type}"+"_"+"{donor}"+"_pearson_weighted.tsv.gz", metric=metrics,cell_type=cell_types,donor=donors_list)
         output:
-            out_dir+cohort+"/combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz"
+            out_dir+cohort+"/{cohort}_combined_{metric}_{cell_type}_top_1000_pearson_weighted.tsv.gz"
         params:
             ct = lambda wildcards: f"{wildcards.cell_type}",
             m = lambda wildcards: f"{wildcards.metric}",
+            coh = lambda wildcards: f"{wildcards.cohort}",
             list_of_donors = (f"{donors_list}").replace(" ",""),
             original_ids = (f"{original_donor_ids}").replace(" ","")
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {output} {out_dir}{cohort}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {params.coh} {output} {out_dir}{cohort}
             """
 
 else:
@@ -84,7 +85,7 @@ else:
             snake_dir+"gene_lists/"+cohort+"_"+cell_types+"_genes.tsv",
             snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
         output:
-            touch(out_dir+cell_types+"_step1_done.txt")
+            touch(out_dir+cohort+"_"+cell_types+"_step1_done.txt")
 
     rule makeDonorLists:
         output:
