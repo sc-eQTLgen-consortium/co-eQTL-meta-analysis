@@ -37,7 +37,7 @@ weighted_corr <- function(normalized_counts_mtr_d, raw_counts_mtr_d,method){
 
 get_corr_values_donor_from_rds_file <- function(donor,dir_with_seurat,cohort_id,output_dir,gene_pairs,cell_type,gene_names){
 
-  cell_type_data <- readRDS(paste0(dir_with_seurat,cell_type,'_',donor,'.rds'))
+  cell_type_data <- readRDS(paste0(dir_with_seurat,cell_type,'-',donor,'.rds'))
   cell_type_data_S <- cell_type_data[rownames(gene_names),]
         
   # Getting a number of counts per cell
@@ -75,15 +75,15 @@ get_corr_values_donor_from_rds_file <- function(donor,dir_with_seurat,cohort_id,
   mat_pval_PCC <- merge(gene_pairs, mat_pval_PCC, by='x' , all.x=T)
   rownames(mat_pval_PCC) <- mat_pval_PCC$x
 
-  corr_w_gz = gzfile(gsub(' ','',paste0(output_dir,cohort_id,'/','corr_',cell_type,"_",donor,"_",method,'_weighted.tsv.gz')),'w')
+  corr_w_gz = gzfile(gsub(' ','',paste0(output_dir,cohort_id,'/','corr-',cell_type,"-",donor,"-",method,'-weighted.tsv.gz')),'w')
   write.table(paste(rownames(mat_pval_PCC),mat_pval_PCC$corVec,sep='\t'), corr_w_gz,sep='\t', row.names = F, quote = F)
   close(corr_w_gz)
 
-  pval_w_gz = gzfile(gsub(' ','',paste0(output_dir,cohort_id,'/','pval_',cell_type,"_",donor,"_",method,'_weighted.tsv.gz')),'w')
+  pval_w_gz = gzfile(gsub(' ','',paste0(output_dir,cohort_id,'/','pval-',cell_type,"-",donor,"-",method,'-weighted.tsv.gz')),'w')
   write.table(paste(rownames(mat_pval_PCC),mat_pval_PCC$pvVec,sep='\t'), pval_w_gz,sep='\t', row.names = F, quote = F)
   close(pval_w_gz)
 
-  zsco_w_gz = gzfile(gsub(' ','',paste0(output_dir,cohort_id,'/','zscore_',cell_type,"_",donor,"_",method,'_weighted.tsv.gz')),'w')
+  zsco_w_gz = gzfile(gsub(' ','',paste0(output_dir,cohort_id,'/','zscore-',cell_type,"-",donor,"-",method,'-weighted.tsv.gz')),'w')
   write.table(paste(rownames(mat_pval_PCC),mat_pval_PCC$ZscMat,sep='\t'), zsco_w_gz,sep='\t', row.names = F, quote = F)
   close(zsco_w_gz)
 
