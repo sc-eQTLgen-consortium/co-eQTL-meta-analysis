@@ -17,6 +17,22 @@ wg3_path: /scratch/hb-sceqtlgen/ # directory containing folder with name of coho
 cohort: oneK1K # ID of cohort, just as it is written in the wg3 file path
 cell_type: CD8_T # chosen cell type
 
+##############################################################################################################
+###### The following arguments are common parameters that may need to be changed depending on the dataset #####
+###############################################################################################################
+
+donor_list:
+  donor_list_memory: 16 ### The amount of memory (GB) used per thread for the make_donor_lists step
+
+create_donor:
+  create_donor_memory: 16 ### The amount of memory (GB) used per thread for the create_donor step
+
+process_donor:
+  process_donor_memory: 8 ### The amount of memory (GB) used per thread for the process_donor step
+
+aggregate_metrics:
+  aggregate_metrics_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
 ##############################################################################################
