@@ -33,6 +33,8 @@ if(os.path.exists(donor_file_path)):
             touch(out_dir+cohort+"-"+cell_types+"-done.txt")
 
     rule createDonorRds:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"]
         output:
             temp(expand(out_dir+cohort+"/donor_rds/{cell_type}-{donor}.rds", cell_type=cell_types,donor=donors_list))
         shell:
@@ -44,6 +46,8 @@ if(os.path.exists(donor_file_path)):
             """
 
     rule calculate_correlations:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"]
         input:
             out_dir+cohort+"/donor_rds/{cell_type}-{donor}.rds"
         output:
@@ -61,6 +65,8 @@ if(os.path.exists(donor_file_path)):
             """
 
     rule aggregate_final_results:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"]
         input:
             expand(out_dir+cohort+"/"+"{{metric}}"+"-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
         output:
@@ -88,6 +94,8 @@ else:
             touch(out_dir+cohort+"_"+cell_types+"_step1_done.txt")
 
     rule makeDonorLists:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_list"]["donor_list_memory"]
         output:
             snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
         params:
