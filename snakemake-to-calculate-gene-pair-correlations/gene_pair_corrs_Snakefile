@@ -24,6 +24,7 @@ if(os.path.exists(donor_file_path)):
     donors_list = [i for i in donors['filt_labels']]
     original_donor_ids = [i for i in donors['original_labels']]
     metrics = ['corr','pval','zscore']
+    min_samples = 20
 
     rule all:
         input:
@@ -76,10 +77,11 @@ if(os.path.exists(donor_file_path)):
             m = lambda wildcards: f"{wildcards.metric}",
             coh = lambda wildcards: f"{wildcards.cohort}",
             list_of_donors = (f"{donors_list}").replace(" ",""),
-            original_ids = (f"{original_donor_ids}").replace(" ","")
+            original_ids = (f"{original_donor_ids}").replace(" ",""),
+            m_s = min_samples
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {params.coh} {output} {out_dir}{cohort}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {params.coh} {output} {out_dir}{cohort} {params.m_s}
             """
 
 else:
