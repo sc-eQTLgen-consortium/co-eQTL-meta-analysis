@@ -22,6 +22,7 @@ print(f"Cohort: {cohort}")
 print(f"Output directory: {outfile}")
 print(f"Input directory: {infile}")
 print(f"Input file: {infile}/{metric}-{cell_type}-ind-pearson-weighted.tsv.gz")
+print(f"minimum number of correlations allowed per gene pair: {min_samples}")
 
 df=pd.DataFrame()
 
