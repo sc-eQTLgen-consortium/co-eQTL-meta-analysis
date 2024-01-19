@@ -35,13 +35,18 @@ for i in range(len(list_of_donors)):
   except:
     continue
 
-#Sorting all gene pairs to be in alphabetical order
+print("Sorting all gene pairs to be in alphabetical order")
 df.index=index_value
 x=[i.split('_') for i in df.index.values]
 y=[i.sort() for i in x]
 y=[f"{i[0]}_{i[1]}" for i in x]
 df.index=y
 df.sort_index(inplace=True)
+
+x=20
+print(f"Dropping individuals with no values and gene pairs that do not have at least {x} values")
+file.dropna(how='all',axis=1)
+file.dropna(thresh=20,axis=0)
 
 df.to_csv(outfile, sep='\t', na_rep='NA', compression='gzip')
 
