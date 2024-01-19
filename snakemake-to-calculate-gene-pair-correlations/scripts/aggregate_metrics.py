@@ -13,6 +13,7 @@ metric = sys.argv[4]
 cohort = sys.argv[5]
 outfile = sys.argv[6]
 infile = sys.argv[7]
+min_samples = sys.argv[8]
 
 print(f"First 10 donors of list: {list_of_donors[0:10]}")
 print(f"Cell Type: {cell_type}")
@@ -43,10 +44,9 @@ y=[f"{i[0]}_{i[1]}" for i in x]
 df.index=y
 df.sort_index(inplace=True)
 
-x=20
-print(f"Dropping individuals with no values and gene pairs that do not have at least {x} values")
+print(f"Dropping individuals with no values and gene pairs that do not have at least {min_samples} values")
 file.dropna(how='all',axis=1)
-file.dropna(thresh=20,axis=0)
+file.dropna(thresh=min_samples,axis=0)
 
 df.to_csv(outfile, sep='\t', na_rep='NA', compression='gzip')
 
