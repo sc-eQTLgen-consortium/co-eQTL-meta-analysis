@@ -46,8 +46,8 @@ df.index=y
 df.sort_index(inplace=True)
 
 print(f"Dropping individuals with no values and gene pairs that do not have at least {min_samples} values")
-file.dropna(how='all',axis=1)
-file.dropna(thresh=min_samples,axis=0)
+df.dropna(how='all',axis=1)
+df.dropna(thresh=min_samples,axis=0)
 
 df.to_csv(outfile, sep='\t', na_rep='NA', compression='gzip')
 
