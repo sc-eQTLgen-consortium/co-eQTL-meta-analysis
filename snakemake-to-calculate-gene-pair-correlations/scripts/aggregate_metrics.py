@@ -26,19 +26,11 @@ print(f"minimum number of correlations allowed per gene pair: {min_samples}")
 
 df=pd.DataFrame()
 
-index_value=0
 for i in range(len(list_of_donors)):
   file=f"{infile}/{metric}-{cell_type}-{list_of_donors[i]}-pearson-weighted.tsv.gz"
-  ind=pd.read_csv(file, sep='\t')
-  df[f"{original_ids[i]}"] = [val for val in ind['x']]
-  try:
-    if index_value == 0:
-      index_value=ind.index.values
-  except:
-    continue
+  df[f"{original_ids[i]}"] = pd.read_csv(file, sep='\t')
 
 print("Sorting all gene pairs to be in alphabetical order")
-df.index=index_value
 x=[i.split('_') for i in df.index.values]
 y=[i.sort() for i in x]
 y=[f"{i[0]}_{i[1]}" for i in x]
