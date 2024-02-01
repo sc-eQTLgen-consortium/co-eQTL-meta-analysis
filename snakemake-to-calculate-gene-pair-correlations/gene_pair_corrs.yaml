@@ -2,40 +2,54 @@
 
 ######################################################################################
 ####### The following arguments are for indicating file locations on your system #####
-######################################################################################
+##########+############################################################################
 
-top_directory: /scratch/hb-sceqtlgen/ # a location above everything else
-output_directory: /scratch/hb-sceqtlgen/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
-singularity_path: /scratch/hb-sceqtlgen/containers/wp3_extended.sif # location of singularity image with all installed software
-snakefile_path: /scratch/hb-sceqtlgen/calculate_correlation_metrics/ # location of this file and the snakefile
-wg3_path: /scratch/hb-sceqtlgen/ # directory containing folder with name of cohort which contains the input/L1 folders 
+top_directory: /groups/umcg-biogen/tmp02/ # a location above everything else
+output_directory: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/output/ # this is where the final output and the intermediate files will be saved
+singularity_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/wp3_extended.sif # location of singularity image with all installed software
+snakefile_dir: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/ # location of this file and the snakefile
+seurat_dir: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-04-11-WorkGroup3eQTLAndDEA/2023-04-12-Mathys2019/input/L1/ # location of seurat input file
+donor_list_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/2023-04-12-Mathys2019_EX_donor_list.tsv # path to donor list of interest
 
+##############################################################################################################
+##### The following arguments are common parameters that may need to be changed depending on the dataset #####
+##############################################################################################################
+
+cluster_time: {0: "05:59:00", 1: "23:59:00", 2: "6-23:59:00"} ### Options for dynamic time usage for cluster submissions of jobs
+
+create_donor:
+  create_donor_memory: 8 ### The amount of memory (GB) used per thread for the create_donor step
+  create_donor_threads: 1 ### The number threads that will be used for the create_donor step
+  create_donor_time: 0 ### The time setting to use
+
+process_donor:
+  process_donor_memory: 8 ### The amount of memory (GB) used per thread for the process_donor step
+  process_donor_threads: 1 ### The number threads that will be used for the process_donor step
+  process_donor_time: 0 ### The time setting to use
+
+aggregate_metrics:
+  aggregate_metrics_memory: 8 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  aggregate_metrics_threads: 1 ### The number threads that will be used for the aggregate_metrics step
+  aggregate_metrics_time: 0 ### The time setting to use
+
+create_matrix:
+  create_matrix_memory: 8 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  create_matrix_threads: 1 ### The number threads that will be used for the aggregate_metrics step
+  create_matrix_time: 0 ### The time setting to use
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: oneK1K # ID of cohort, just as it is written in the wg3 file path
-cell_type: CD8_T # chosen cell type
-
-##############################################################################################################
-###### The following arguments are common parameters that may need to be changed depending on the dataset #####
-###############################################################################################################
-
-donor_list:
-  donor_list_memory: 16 ### The amount of memory (GB) used per thread for the make_donor_lists step
-
-create_donor:
-  create_donor_memory: 16 ### The amount of memory (GB) used per thread for the create_donor step
-
-process_donor:
-  process_donor_memory: 8 ### The amount of memory (GB) used per thread for the process_donor step
-
-aggregate_metrics:
-  aggregate_metrics_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+cohort: 2023-04-12-Mathys2019 # ID of cohort, just as it is written in the wg3 file path
+cell_type: EX # chosen cell type
 
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
 ##############################################################################################
 
-gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
-
+gene_list_path: nan # path to gene list of interest.  
+n_genes: 10 # number of genes to perform correlation analysis on
+method: 'pearson' # Correlation method
+weight: 'weighted' # Whether or not weighted correlation should be performed. Either 'weighted' or 'unweighted'
+metadata: False # Whether to extract expression metadata. Either 'True' or 'False'
+aggregation_method: 'fishersz' # Aggregation method for combining correlation coefficients. Either 'fishersz' or 'mean'
