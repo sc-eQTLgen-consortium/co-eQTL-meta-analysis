@@ -1,113 +1,158 @@
+import pandas as pd
 configfile: "./gene_pair_corrs.yaml"
 
-import pandas as pd
-import os
+# Add trailing /.
+if not config["top_directory"].endswith("/"):
+    config["top_directory"] += "/"
+if not config["output_directory"].endswith("/"):
+    config["output_directory"] += "/"
+if not config["snakefile_dir"].endswith("/"):
+    config["snakefile_dir"] += "/"
+if not config["seurat_dir"].endswith("/"):
+    config["seurat_dir"] += "/"
 
-out_dir = config["output_directory"]
-top_dir = config["top_directory"]
-simg_dir = config["singularity_path"]
-snake_dir = config["snakefile_path"]
-scripts_dir = snake_dir+"scripts/"
-wg3_dir = config["wg3_path"]
-cohort = config["cohort"]
-wg3_dir = f"{wg3_dir}/{cohort}/input/L1/"
+# Check if the singularity image exists.
+if not os.path.exists(config["singularity_path"]):
+    logger.info("Error, the singularity image does not exist.\n\nExiting.")
+    exit("MissingSIFFile")
 
-cell_types = config["cell_type"]
-gene_list = config["gene_list_path"]
+    # Check if the Seurat file exists.
+if not os.path.exists(config["seurat_dir"]):
+    logger.info("Error, the seurat file does not exist.\n\nExiting.")
+    exit("MissingSIFFile")
 
-donor_file_path = f"{snake_dir}/donor_data/{cohort}_{cell_types}_donor_list.tsv"
-donor_file_path = donor_file_path.replace(" ","")
-print(f"Pipeline is being run for {cell_types} cells.")
+# Load donor list
+donor_df = pd.read_csv(config["donor_list_path"], sep = "\t", header = None)
+donor_list = list(donor_df[0])
 
-if(os.path.exists(donor_file_path)):
-    donors = pd.read_csv(donor_file_path, sep='\t')
-    donors_list = [i for i in donors['filt_labels']]
-    original_donor_ids = [i for i in donors['original_labels']]
-    metrics = ['corr','pval','zscore']
-    min_samples = 20
+# Define metrics
+metrics = ['corr', 'pval', 'zscore']
 
-    rule all:
-        input:
-            #expand(out_dir+cohort+"/"+"corr"+"-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
-            expand(out_dir+cohort+"/{cohort}-combined-{metric}-{cell_type}-top-1000-pearson-weighted.tsv.gz", cohort=cohort,metric=metrics,cell_type=cell_types)
-        output:
-            touch(out_dir+cohort+"-"+cell_types+"-done.txt")
+wildcard_constraints:
+    n="[0-9]+"
 
-    rule createDonorRds:
-        resources:
-            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"]
-        output:
-            temp(expand(out_dir+cohort+"/donor_rds/{cell_type}-{donor}.rds", cell_type=cell_types,donor=donors_list))
-        shell:
-            """
-            mkdir -p {out_dir}
-            mkdir -p {out_dir}{cohort}
-            mkdir -p {out_dir}{cohort}/donor_rds
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}create_donor_rds.R {cell_types} {cohort} {wg3_dir} {out_dir} {gene_list}
-            """
+rule all:
+    input:  
+        expand(config["output_directory"] + config["cohort"] + "/matrix-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+               metric = metrics,
+               ct = config["cell_type"],
+               n = config["n_genes"],
+               method = config["method"],
+               weight = config["weight"])
 
-    rule calculate_correlations:
-        resources:
-            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"]
-        input:
-            out_dir+cohort+"/donor_rds/{cell_type}-{donor}.rds"
-        output:
-            temp(out_dir+cohort+"/corr-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz"),
-            temp(out_dir+cohort+"/pval-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz"),
-            temp(out_dir+cohort+"/zscore-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz")
-        params:
-            ct = lambda wildcards: f"{wildcards.cell_type}",
-            d = lambda wildcards: f"{wildcards.donor}",
-            rds_path = lambda wildcards: (f"{out_dir}{cohort}/donor_rds/").replace(" ",""),
-            gene_list = lambda wildcards: (f"{snake_dir}/gene_lists/{cohort}-{wildcards.cell_type}-genes.tsv").replace(" ","")
-        shell:
-            """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor_rds.R {params.ct} {cohort} {params.d} {params.gene_list} {params.rds_path} {out_dir} {gene_list}
-            """
+rule createDonorRds:
+    input: 
+        config["seurat_dir"] +  "{ct}.Qced.Normalized.SCs.Rds"
+    output:
+        rds = temp(expand(config["output_directory"] + config["cohort"] + "/donor_rds/{donor}-{ct}-top-{n}.rds",donor=donor_list,allow_missing=True)),
+        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
+        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz"
+    resources:
+        mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_donor"]["create_donor_time"]]
+    threads: config["create_donor"]["create_donor_threads"]  
+    params:
+        out = config["output_directory"],
+        top = config["top_directory"],
+        sif = config["singularity_path"],
+        scripts = config["snakefile_dir"]+"scripts/",
+        cohort = config["cohort"],
+        genes = config["gene_list_path"],
+        donors = config["donor_list_path"]
+    shell:
+        """
+        singularity exec --bind {params.top} {params.sif} Rscript {params.scripts}create_donor_rds.R \
+            --celltype {wildcards.ct} \
+            --cohort {params.cohort} \
+            --genelist {params.genes} \
+            --n {wildcards.n} \
+            --donors {params.donors} \
+            --genepath {output.gene_list} \
+            --donorpath {output.donor_list} \
+            --input {input} \
+            --output {params.out}
+        """
 
-    rule aggregate_final_results:
-        resources:
-            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"]
-        input:
-            expand(out_dir+cohort+"/"+"{{metric}}"+"-"+"{cell_type}"+"-"+"{donor}"+"-pearson-weighted.tsv.gz", cell_type=cell_types,donor=donors_list)
-        output:
-            out_dir+cohort+"/{cohort}-combined-{metric}-{cell_type}-top-1000-pearson-weighted.tsv.gz"
-        params:
-            ct = lambda wildcards: f"{wildcards.cell_type}",
-            m = lambda wildcards: f"{wildcards.metric}",
-            coh = lambda wildcards: f"{wildcards.cohort}",
-            list_of_donors = (f"{donors_list}").replace(" ",""),
-            original_ids = (f"{original_donor_ids}").replace(" ",""),
-            m_s = min_samples
-        shell:
-            """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_metrics.py {params.list_of_donors} {params.original_ids} {params.ct} {params.m} {params.coh} {output} {out_dir}{cohort} {params.m_s}
-            """
+rule calculate_correlations:
+    input:
+        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
+        rds = config["output_directory"] + config["cohort"] + "/donor_rds/{donor}-{ct}-top-{n}.rds"
+    output:
+        corr = temp(expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", metric=metrics, allow_missing=True)),
 
-else:
-    print("Donor list file is being generated for subsequent runs of the pipeline.")
-    print(f"Pipeline is being run for {cell_types} cells.")
+    resources:
+        mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["process_donor"]["process_donor_time"]]
+    threads: config["process_donor"]["process_donor_threads"] 
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path"],
+        scripts = config["snakefile_dir"]+"scripts/",
+        cohort = config["cohort"],
+        out = config["output_directory"], 
+        metadata = "--metadata True" if config["metadata"] else ""
+    shell:
+        """
+        singularity exec --bind {params.top} {params.sif} Rscript {params.scripts}process_donor_rds.R \
+            --celltype {wildcards.ct} \
+            --cohort {params.cohort} \
+            --n {wildcards.n} \
+            --donor {wildcards.donor} \
+            --method {wildcards.method} \
+            --weight {wildcards.weight} \
+            --genelist {input.gene_list} \
+            --input {input.rds} \
+            --output {params.out} \
+            {params.metadata} 
+        """
 
-    rule all:
-        input:
-            snake_dir+"gene_lists/"+cohort+"_"+cell_types+"_genes.tsv",
-            snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
-        output:
-            touch(out_dir+cohort+"_"+cell_types+"_step1_done.txt")
+rule aggregate_final_results:
+    input:
+        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
+        corr = expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", donor=donor_list, allow_missing=True)
+    output:
+        config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+    resources:
+        mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["aggregate_metrics"]["aggregate_metrics_time"]]
+    threads: config["aggregate_metrics"]["aggregate_metrics_threads"] 
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path"],
+        scripts = config["snakefile_dir"]+"scripts/",
+        out = config["output_directory"],
+        cohort = config["cohort"],
+        out_dir = config["output_directory"]
+    shell:
+        """
+        singularity exec --bind {params.top} {params.sif} python {params.scripts}aggregate_metrics.py \
+            --celltype {wildcards.ct} \
+            --cohort {params.cohort} \
+            --n {wildcards.n} \
+            --method {wildcards.method} \
+            --weight {wildcards.weight} \
+            --metric {wildcards.metric} \
+            --input {input.donor_list} {params.out} \
+            --output {output}      
+        """
 
-    rule makeDonorLists:
-        resources:
-            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_list"]["donor_list_memory"]
-        output:
-            snake_dir+"donor_data/"+cohort+"_"+cell_types+"_donor_list.tsv"
-        params:
-            donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
-            donor_rds_out_path = (f"{scripts_dir}donor_ids.R").replace(" ",""),
-            gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
-        shell:
-            """
-            mkdir -p {snake_dir}/donor_data
-            mkdir -p {snake_dir}/gene_lists
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_out_path} {cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {gene_list}
-            """
-
+rule create_matrix:
+    input: 
+        config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+    output:
+        config["output_directory"] + config["cohort"] + "/matrix-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+    resources:
+        mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_matrix"]["create_matrix_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_matrix"]["create_matrix_time"]]
+    threads: config["create_matrix"]["create_matrix_threads"] 
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path"],
+        scripts = config["snakefile_dir"]+"scripts/",
+    shell:
+        """ 
+        singularity exec --bind {params.top} {params.sif} python {params.scripts}create_matrix.py \
+            --n {wildcards.n} \
+            --input {input} \
+            --output {output}
+        """
