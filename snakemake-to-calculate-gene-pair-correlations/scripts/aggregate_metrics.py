@@ -5,41 +5,52 @@ Aggregates files from donors for a particular cell type
 import pandas as pd 
 import sys
 import json
+import argparse
+import gzip
 
-list_of_donors = json.loads(sys.argv[1])
-original_ids = json.loads(sys.argv[2])
-cell_type = sys.argv[3]
-metric = sys.argv[4]
-cohort = sys.argv[5]
-outfile = sys.argv[6]
-infile = sys.argv[7]
-min_samples = sys.argv[8]
+parser = argparse.ArgumentParser(description="")
+parser.add_argument("--celltype", required=True, type=str, help="Cell type")
+parser.add_argument("--cohort", required=True, type=str, help="Cohort ID")
+parser.add_argument("--n", required=True, type=str, help="Number of genes")
+parser.add_argument("--method", required=True, type=str, help="Correlation method")
+parser.add_argument("--weight", required=True, type=str, help="Whether correlation is weighted or unweighted")
+parser.add_argument("--metric", required=True, type=str, help="Correlation metric")
+parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
+parser.add_argument("--output", required=True, type=str, help="Aggregated output file")
+args = parser.parse_args()
 
-print(f"First 10 donors of list: {list_of_donors[0:10]}")
-print(f"Cell Type: {cell_type}")
-print(f"Metric: {metric}")
-print(f"Cohort: {cohort}")
-print(f"Output directory: {outfile}")
-print(f"Input directory: {infile}")
-print(f"Input file: {infile}/{metric}-{cell_type}-ind-pearson-weighted.tsv.gz")
-print(f"minimum number of correlations allowed per gene pair: {min_samples}")
+print("Options in effect:")
+for arg in vars(args):
+    print("  --{} {}".format(arg, getattr(args, arg)))
+print("")
 
-df=pd.DataFrame()
+# Load donor data
+donor_df = pd.read_csv(args.input[0], sep = "\t", compression='gzip')
+original_ids = donor_df['original_ids']
+alt_ids = donor_df['alt_ids']
+del(donor_df)
 
-for i in range(len(list_of_donors)):
-  file=f"{infile}/{metric}-{cell_type}-{list_of_donors[i]}-pearson-weighted.tsv.gz"
-  df[f"{original_ids[i]}"] = pd.read_csv(file, sep='\t')
+corr_dict = {}
+for i in range(len(alt_ids)):
+    file = f"{args.input[1]}{args.cohort}/{alt_ids[i]}-{args.metric}-{args.celltype}-top-{args.n}-{args.method}-{args.weight}.tsv.gz"
+    gene_list = []
+    corr_list = []
+    with gzip.open(file, 'rt') as f:
+        next(f)
+        for line in f:
+            values = line.strip("\n").split("\t")
+            gene_pair,corr = values[0],values[1]
+            gene_list.append(gene_pair)
+            corr_list.append(corr)
 
-print("Sorting all gene pairs to be in alphabetical order")
+    corr_dict[original_ids[i]] = corr_list
+
+df = pd.DataFrame(data=corr_dict,index=gene_list,columns=corr_dict.keys())
+
 x=[i.split('_') for i in df.index.values]
 y=[i.sort() for i in x]
 y=[f"{i[0]}_{i[1]}" for i in x]
 df.index=y
 df.sort_index(inplace=True)
 
-print(f"Dropping individuals with no values and gene pairs that do not have at least {min_samples} values")
-df.dropna(how='all',axis=1,inplace=True)
-df.dropna(thresh=min_samples,axis=0,inplace=True)
-
-df.to_csv(outfile, sep='\t', na_rep='NA', compression='gzip')
-
+df.to_csv(args.output, sep='\t', na_rep='NA', compression='gzip')
