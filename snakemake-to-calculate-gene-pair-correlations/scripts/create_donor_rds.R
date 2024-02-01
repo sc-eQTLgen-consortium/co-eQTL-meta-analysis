@@ -1,65 +1,77 @@
+.libPaths("/usr/local/lib/R/site-library")
+
 #!/usr/bin/env Rscript
-args = commandArgs(trailingOnly=TRUE)
+suppressPackageStartupMessages(library("optparse"))
+suppressPackageStartupMessages(library("Seurat"))
+suppressPackageStartupMessages(library("yaml"))
+suppressPackageStartupMessages(library("stringr"))
+suppressPackageStartupMessages(library("weights"))
 
-cell_type = args[1]
-cohort_id = args[2]
-dir_with_seurat = args[3]
-donor_rds_dir = args[4]
-genes_to_use = args[5]
+option_list <- list(
+  make_option("--celltype", type = "character", help = "Cell type"),
+  make_option("--cohort", type = "character", help = "Cohort ID"),
+  make_option("--genelist", type = "character", help = "List of genes. If not including a specific set of genes set to: nan"),
+  make_option("--n", type = "integer", help = "Number of genes"),
+  make_option("--donors", type = "character", help = "List of donors"),
+  make_option("--genepath", type = "character", help = "Output gene list filepath"),
+  make_option("--donorpath", type = "character", help = "Output donor list filepath"),
+  make_option("--input", type = "character", help = "Input rds filepath"),
+  make_option("--output", type = "character", help = "Output directory")
+)
 
-library(Seurat)
-library(matrixStats)
-library(weights)
-library(stringr)
+parser <- OptionParser(option_list = option_list)
+args <- parse_args(parser)
 
-print(paste("cell type:",cell_type))
-print(paste("cohort id:",cohort_id))
-print(paste("seurat file: ",dir_with_seurat,cell_type,".Qced.Normalized.SCs.Rds",sep=''))
-print(paste("output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
+print("Options in effect:")
+for (name in names(args)) {
+  print(paste0("  --", name, " ", args[[name]]))
+}
 
-# selection of genes 
+cat("\n\nLoading Rds file:", args$input)
+sc_data <- readRDS(args$input)
 
-print("Loading big rds file")
-sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
+cat("\nExtracting expressed genes")
+expr_genes <- data.frame(sum_expr = rowSums(sc_data@assays$data@data),gene_name = rownames(sc_data@assays$data@data))
+expr_genes <- expr_genes[order(expr_genes$sum_expr, decreasing = T),]
 
-expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
-expressing_genes = cbind(rownames(sc_data@assays$data@data),expressing_genes)
-print("data frame loaded")
-
-colnames(expressing_genes) <- c('gene_names','sum_of_exp')
-expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
-
-### outputting donor rds
-if(genes_to_use=="nan"){
-  print("As no gene list provided, top 1000 genes will be calculated after removal of ribosomal and mitochondrial genes.")
+if(args$genelist == "nan"){
+  cat("\nNo gene list provided.") 
+  cat("\nUsing",args$n,"most expressed genes (exluding ribosomal and mitochondrial genes)")
   #warning following code removes genes with ensemble ID
-  genes.use <- grep(pattern = "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL",rownames(expressing_genes),value=TRUE, invert=TRUE)
-  expressing_genes <- expressing_genes[rownames(expressing_genes) %in% genes.use,]
-  genes <- expressing_genes[1:1000,]
-} else{
-  print("Using gene list provided.")
-  genes_to_use = read.table(genes_to_use, header=T)[,1]
-  genes = expressing_genes[rownames(expressing_genes) %in% genes_to_use,]
+  pattern <- "^RP[SL][[:digit:]]|^RP[[:digit:]]|^RPSA|^MT|^ENSG|^RPL"
+  genes.use <- grep(pattern, expr_genes$gene_name ,value=TRUE, invert=TRUE)
+  expr_genes <- expr_genes[expr_genes$gene_name %in% genes.use,]
+  genes <- expr_genes[1:args$n,]
+} else {
+  cat("\nUsing provided gene list")
+  gene_list = read.table(args$genelist, header=F)[,1]
+  genes <- expr_genes[expr_genes$gene_name %in% gene_list,]
 }
 
-sc_data_S <- sc_data[rownames(genes),]
-  
-# Getting a number of counts per cell
-raw_counts_mtr <-  as.data.frame(as.matrix(sc_data_S@assays$RNA@counts ))
-  
-number_of_counts <- as.data.frame(colSums(raw_counts_mtr))
-ncells_per_donor <- as.data.frame(table(sc_data$Assignment))
+write.table(rownames(genes), file = gzfile(args$genepath), sep = "\t", col.names = FALSE, quote = FALSE, row.names = FALSE)
+cat(paste("\nGene list saved to:", args$genepath))
 
-donortab  <- as.data.frame(table(sc_data$Assignment))
-donor_list <- donortab[donortab$Freq >10,]$Var1
+sc_data_filtered <- sc_data[rownames(genes),]
+rm(sc_data,expr_genes)
 
-print(paste("Saving rds file per donor to ",donor_rds_dir,cohort_id,'/','donor_rds',sep=''))
+cat("\n\nUsing provided donor list")
+donor_list <- read.table(args$donors, header=F)$V1
+donor_count <- as.data.frame(table(sc_data_filtered$Assignment))
+donor_count <- donor_count[donor_count$Var1 %in% donor_list, ]
+# Geting alternative id (only if ids contain "_")
+colnames(donor_count) <- c("original_ids", "count")
+donor_count$alt_ids <- gsub(pattern='_', replacement='', x=donor_count$original_ids)
 
+write.table(donor_count, file = gzfile(args$donorpath), sep = "\t", quote = FALSE, row.names = FALSE)
+cat("\nDonor data saved to:",args$donorpath)
+
+rm(gene_list,genes,donor_count)
+
+cat("\n\nSaving rds file per donor: n = ", length(donor_list))
 for(donor in donor_list){
-  donor_filename = gsub(pattern='_',replacement='',x=donor)
-  donor_rds <- sc_data_S[,sc_data_S$Assignment ==donor ]
-  saveRDS(donor_rds, paste(donor_rds_dir,cohort_id,'/',"donor_rds",'/',cell_type,'-',donor_filename,'.rds',sep=""))
+  donor_filename <- gsub(pattern='_',replacement='',x=donor)
+  donor_rds <- sc_data_filtered[,sc_data_filtered$Assignment == donor ]
+  donor_output <- paste0(args$output,args$cohort,"/donor_rds/",donor,"-",args$celltype,"-top-",args$n,".rds")
+  saveRDS(donor_rds, donor_output)
+  rm(donor_rds)
 }
-
-print("done.")
-
