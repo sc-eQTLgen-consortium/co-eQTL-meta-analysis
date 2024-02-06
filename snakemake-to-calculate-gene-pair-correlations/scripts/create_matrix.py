@@ -8,10 +8,8 @@ import gzip
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--n", required=True, type=str, help="Number of genes")
-parser.add_argument("--aggrmethod", required=True, type=str, help="Aggregation method")
 parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
 parser.add_argument("--output", required=True, type=str, help="Aggregated output file")
-#parser.add_argument("--metric", required=True, type=str, help="Correlation metric")
 args = parser.parse_args()
 
 print("Options in effect:")
@@ -31,7 +29,7 @@ with gzip.open(args.input[0], 'rt') as f:
     for line in f:
         values = line.strip("\n").split("\t")
         gene1,gene2 = values[0].split("_")
-        corr = [float(i) for i in values[1:]]
+        corr = values[1:]
 
         if gene1 not in positions:
             positions[gene1] = index_counter
@@ -42,13 +40,10 @@ with gzip.open(args.input[0], 'rt') as f:
             positions[gene2] = index_counter
             index_counter += 1
         index2 = positions[gene2]
-
-        if args.aggrmethod == 'mean':
-            corr_combined = np.array(corr).mean()
-        elif args.aggrmethod == 'fishersz':
-            # Fishersz transformation
-        else: 
-            raise ValueError("Unsupported aggregation method: {}".format(args.aggrmethod))
+        
+        corr_numeric = np.genfromtxt(corr, dtype=float, missing_values='NA', 
+                                     filling_values=np.nan)        
+        corr_combined = np.nanmean(corr_numeric)
 
         m[index1, index2] = corr_combined
         m[index2, index1] = corr_combined
