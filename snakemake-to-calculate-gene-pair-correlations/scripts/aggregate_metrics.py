@@ -13,7 +13,7 @@ metric = sys.argv[4]
 cohort = sys.argv[5]
 outfile = sys.argv[6]
 infile = sys.argv[7]
-min_samples = sys.argv[8]
+min_samples = int(sys.argv[8])
 
 print(f"First 10 donors of list: {list_of_donors[0:10]}")
 print(f"Cell Type: {cell_type}")
