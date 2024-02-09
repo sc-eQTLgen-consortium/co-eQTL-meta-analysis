@@ -104,6 +104,7 @@ cat("\nNumber of genes loaded:", length(gene_list))
 
 cat("\n\nLoading RDS file:",args$input)
 sc_data <- readRDS(args$input)
+sc_data <- sc_data[gene_list,]
 
 cat("\nExtracting counts")  
 n_counts <- as.data.frame(as.matrix(sc_data@assays$data@data))
