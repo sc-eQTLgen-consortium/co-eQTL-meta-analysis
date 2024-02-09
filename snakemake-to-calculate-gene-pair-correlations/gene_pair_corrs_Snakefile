@@ -33,7 +33,8 @@ wildcard_constraints:
 
 rule all:
     input:  
-        expand(config["output_directory"] + config["cohort"] + "/matrix-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        expand(config["output_directory"] + config["cohort"] + "/matrix-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+               meta_analysis = config["meta_analysis"],
                metric = metrics,
                ct = config["cell_type"],
                n = config["n_genes"],
@@ -138,7 +139,8 @@ rule aggregate_final_results:
 
 rule create_matrix:
     input: 
-        config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
+        corr = config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
         config["output_directory"] + config["cohort"] + "/matrix-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
@@ -153,6 +155,8 @@ rule create_matrix:
         """ 
         singularity exec --bind {params.top} {params.sif} python {params.scripts}create_matrix.py \
             --n {wildcards.n} \
-            --input {input} \
+            --meta_analysis {wildcards.meta_analysis} \
+            --donor_list {input.donor_list} \
+            --input {input.corr} \
             --output {output}
         """
