@@ -40,12 +40,7 @@ get_corr_values_donor_from_rds_file <- function(donor,dir_with_seurat,cohort_id,
   cell_type_data <- readRDS(paste0(dir_with_seurat,cell_type,'-',donor,'.rds'))
   cell_type_data_S <- cell_type_data[rownames(gene_names),]
         
-  # Getting a number of counts per cell
-  raw_counts_mtr <- as.data.frame(as.matrix(cell_type_data_S@assays$RNA@counts ))
-        
-  number_of_counts <- as.data.frame(colSums(raw_counts_mtr))
-  ncells_per_donor <- as.data.frame(table(cell_type_data$Assignment))
-	  
+  # Getting a number of counts per cell  
   raw_counts_mtr_d <- as.data.frame(as.matrix(cell_type_data_S@assays$RNA@counts ))
   normalized_counts_mtr_d <- as.data.frame(as.matrix(cell_type_data_S@assays$data@data ))
 	    
