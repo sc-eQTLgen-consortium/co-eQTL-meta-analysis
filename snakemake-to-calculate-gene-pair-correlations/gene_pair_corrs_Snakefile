@@ -15,8 +15,8 @@ if not config["seurat_dir"].endswith("/"):
 if not os.path.exists(config["singularity_path"]):
     logger.info("Error, the singularity image does not exist.\n\nExiting.")
     exit("MissingSIFFile")
-
-    # Check if the Seurat file exists.
+    
+# Check if the Seurat file exists.
 if not os.path.exists(config["seurat_dir"]):
     logger.info("Error, the seurat file does not exist.\n\nExiting.")
     exit("MissingSIFFile")
@@ -34,8 +34,7 @@ wildcard_constraints:
 rule all:
     input:  
         expand(config["output_directory"] + config["cohort"] + "/matrix-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-               meta_analysis = config["meta_analysis"],
-               metric = metrics,
+               meta_analysis = config["meta-analysis"],
                ct = config["cell_type"],
                n = config["n_genes"],
                method = config["method"],
@@ -79,8 +78,7 @@ rule calculate_correlations:
         gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
         rds = config["output_directory"] + config["cohort"] + "/donor_rds/{donor}-{ct}-top-{n}.rds"
     output:
-        corr = temp(expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", metric=metrics, allow_missing=True)),
-
+        corr = temp(expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", metric=metrics, allow_missing=True))
     resources:
         mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["process_donor"]["process_donor_time"]]
@@ -110,7 +108,7 @@ rule calculate_correlations:
 rule aggregate_final_results:
     input:
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
-        corr = expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", donor=donor_list, allow_missing=True)
+        corr = expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", metric=metrics,donor=donor_list, allow_missing=True)
     output:
         config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
@@ -140,9 +138,9 @@ rule aggregate_final_results:
 rule create_matrix:
     input: 
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
-        corr = config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
-        config["output_directory"] + config["cohort"] + "/matrix-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        config["output_directory"] + config["cohort"] + "/matrix-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_matrix"]["create_matrix_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_matrix"]["create_matrix_time"]]
