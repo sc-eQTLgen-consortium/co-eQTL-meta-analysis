@@ -15,7 +15,7 @@ if not config["seurat_dir"].endswith("/"):
 if not os.path.exists(config["singularity_path"]):
     logger.info("Error, the singularity image does not exist.\n\nExiting.")
     exit("MissingSIFFile")
-    
+
 # Check if the Seurat file exists.
 if not os.path.exists(config["seurat_dir"]):
     logger.info("Error, the seurat file does not exist.\n\nExiting.")
@@ -26,25 +26,39 @@ donor_df = pd.read_csv(config["donor_list_path"], sep = "\t", header = None)
 donor_list = list(donor_df[0])
 
 # Define metrics
-metrics = ['corr', 'pval', 'zscore']
+metrics = ['corr', 'std', 'pval', 'zscore']
+
+# Define weight
+weight = "unweighted"
+if config["weight"]:
+    weight = "weighted"
 
 wildcard_constraints:
     n="[0-9]+"
 
 rule all:
     input:  
-        expand(config["output_directory"] + config["cohort"] + "/matrix-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-               meta_analysis = config["meta-analysis"],
-               ct = config["cell_type"],
-               n = config["n_genes"],
-               method = config["method"],
-               weight = config["weight"])
+        corr = expand(config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+                      meta_analysis = config["meta-analysis"],
+                      ct = config["cell_type"],
+                      n = config["n_genes"],
+                      method = config["method"],
+                      weight = weight),
+        pval = expand(config["output_directory"] + config["cohort"] + "/matrix-pval-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+                      meta_analysis = config["meta-analysis"],
+                      ct = config["cell_type"],
+                      n = config["n_genes"],
+                      method = config["method"],
+                      weight = weight)
 
 rule createDonorRds:
     input: 
         config["seurat_dir"] +  "{ct}.Qced.Normalized.SCs.Rds"
     output:
-        rds = temp(expand(config["output_directory"] + config["cohort"] + "/donor_rds/{donor}-{ct}-top-{n}.rds",donor=donor_list,allow_missing=True)),
+        counts = config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz",
+        weights = expand(config["output_directory"] + config["cohort"] + "/donor_weight/correlation-weight-{donor}-{ct}-top-{n}.tsv.gz",donor=donor_list, allow_missing=True),
+        barcodes = expand(config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True),
+        donor_genes = expand(config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True),
         gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz"
     resources:
@@ -59,9 +73,29 @@ rule createDonorRds:
         cohort = config["cohort"],
         genes = config["gene_list_path"],
         donors = config["donor_list_path"]
+        
+rule create_counts:
+    input: 
+        config["seurat_dir"] +  "{ct}.Qced.Normalized.SCs.Rds"
+    output:
+        counts = config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz",
+        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz"
+    resources:
+        mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_donor"]["create_donor_time"]]
+    threads: config["create_donor"]["create_donor_threads"]  
+    params:
+        out = config["output_directory"],
+        top = config["top_directory"],
+        sif = config["singularity_path"],
+        scripts = config["snakefile_dir"]+"scripts/",
+        cohort = config["cohort"],
+        genes = config["gene_list_path"],
+        donors = config["donor_list_path"]
+    
     shell:
         """
-        singularity exec --bind {params.top} {params.sif} Rscript {params.scripts}create_donor_rds.R \
+        singularity exec --bind {params.top} {params.sif} Rscript {params.scripts}process_rds.R \
             --celltype {wildcards.ct} \
             --cohort {params.cohort} \
             --genelist {params.genes} \
@@ -75,10 +109,12 @@ rule createDonorRds:
 
 rule calculate_correlations:
     input:
-        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
-        rds = config["output_directory"] + config["cohort"] + "/donor_rds/{donor}-{ct}-top-{n}.rds"
+        counts = config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz",
+        weights = config["output_directory"] + config["cohort"] + "/donor_weight/correlation-weight-{donor}-{ct}-top-{n}.tsv.gz",
+        gene_list = config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz",
+        barcodes = config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz" 
     output:
-        corr = temp(expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", metric=metrics, allow_missing=True))
+        corr = config["output_directory"] + config["cohort"] + "/{donor}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
         mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["process_donor"]["process_donor_time"]]
@@ -89,28 +125,28 @@ rule calculate_correlations:
         scripts = config["snakefile_dir"]+"scripts/",
         cohort = config["cohort"],
         out = config["output_directory"], 
-        metadata = "--metadata True" if config["metadata"] else ""
+        metadata = "--metadata True" if config["metadata"] else "",
+        weighted = config["weight"]
     shell:
         """
-        singularity exec --bind {params.top} {params.sif} Rscript {params.scripts}process_donor_rds.R \
-            --celltype {wildcards.ct} \
-            --cohort {params.cohort} \
-            --n {wildcards.n} \
-            --donor {wildcards.donor} \
+        singularity exec --bind {params.top} {params.sif} python {params.scripts}calculate_correlation.py \
+            --counts {input.counts} \
             --method {wildcards.method} \
-            --weight {wildcards.weight} \
-            --genelist {input.gene_list} \
-            --input {input.rds} \
-            --output {params.out} \
-            {params.metadata} 
+            --weight {params.weighted} {input.weights}\
+            --cell_barcodes {input.barcodes} \
+            --gene_list {input.gene_list} \
+            --output {output.corr}
         """
 
 rule aggregate_final_results:
     input:
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
-        corr = expand(config["output_directory"] + config["cohort"] + "/{donor}-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz", metric=metrics,donor=donor_list, allow_missing=True)
+        corr = expand(config["output_directory"] + config["cohort"] + "/{donor}-{ct}-top-{n}-{method}-{weight}.tsv.gz",donor=donor_list,allow_missing=True)
     output:
-        config["output_directory"] + config["cohort"] + "/combined-{metric}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        std = config["output_directory"] + config["cohort"] + "/combined-std-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        pval = config["output_directory"] + config["cohort"] + "/combined-pval-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        zscore = config["output_directory"] + config["cohort"] + "/combined-zscore-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["aggregate_metrics"]["aggregate_metrics_time"]]
@@ -130,17 +166,18 @@ rule aggregate_final_results:
             --n {wildcards.n} \
             --method {wildcards.method} \
             --weight {wildcards.weight} \
-            --metric {wildcards.metric} \
             --input {input.donor_list} {params.out} \
-            --output {output}      
+            --output {output.corr} {output.std} {output.pval} {output.zscore}
         """
+
 
 rule create_matrix:
     input: 
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
-        config["output_directory"] + config["cohort"] + "/matrix-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        pval = config["output_directory"] + config["cohort"] + "/matrix-pval-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_matrix"]["create_matrix_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_matrix"]["create_matrix_time"]]
@@ -156,5 +193,5 @@ rule create_matrix:
             --meta_analysis {wildcards.meta_analysis} \
             --donor_list {input.donor_list} \
             --input {input.corr} \
-            --output {output}
+            --output {output.corr} {output.pval}
         """

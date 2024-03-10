@@ -48,8 +48,8 @@ cell_type: EX # chosen cell type
 ##############################################################################################
 
 gene_list_path: nan # path to gene list of interest.  
-n_genes: 10 # number of genes to perform correlation analysis on
+n_genes: 1000 # number of genes to perform correlation analysis on
 method: 'pearson' # Correlation method
-weight: 'weighted' # Whether or not weighted correlation should be performed. Either 'weighted' or 'unweighted'
+weight: True # Whether or not weighted correlation should be performed. Either 'weighted' or 'unweighted'
 metadata: False # Whether to extract expression metadata. Either 'True' or 'False'
 meta-analysis: 'fishersz' # Meta-analysis method used to combine correlation over donors. Either 'fishersz' or 'mean'
