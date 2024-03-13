@@ -73,26 +73,6 @@ rule createDonorRds:
         cohort = config["cohort"],
         genes = config["gene_list_path"],
         donors = config["donor_list_path"]
-        
-rule create_counts:
-    input: 
-        config["seurat_dir"] +  "{ct}.Qced.Normalized.SCs.Rds"
-    output:
-        counts = config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz",
-        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz"
-    resources:
-        mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
-        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_donor"]["create_donor_time"]]
-    threads: config["create_donor"]["create_donor_threads"]  
-    params:
-        out = config["output_directory"],
-        top = config["top_directory"],
-        sif = config["singularity_path"],
-        scripts = config["snakefile_dir"]+"scripts/",
-        cohort = config["cohort"],
-        genes = config["gene_list_path"],
-        donors = config["donor_list_path"]
-    
     shell:
         """
         singularity exec --bind {params.top} {params.sif} Rscript {params.scripts}process_rds.R \
@@ -194,4 +174,3 @@ rule create_matrix:
             --donor_list {input.donor_list} \
             --input {input.corr} \
             --output {output.corr} {output.pval}
-        """

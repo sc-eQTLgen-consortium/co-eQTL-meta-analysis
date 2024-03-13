@@ -18,24 +18,24 @@ donor_list_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsorti
 cluster_time: {0: "05:59:00", 1: "23:59:00", 2: "6-23:59:00"} ### Options for dynamic time usage for cluster submissions of jobs
 
 create_donor:
-  create_donor_memory: 8 ### The amount of memory (GB) used per thread for the create_donor step
+  create_donor_memory: 16 ### The amount of memory (GB) used per thread for the create_donor step
   create_donor_threads: 1 ### The number threads that will be used for the create_donor step
   create_donor_time: 0 ### The time setting to use
 
 process_donor:
-  process_donor_memory: 8 ### The amount of memory (GB) used per thread for the process_donor step
+  process_donor_memory: 16 ### The amount of memory (GB) used per thread for the process_donor step
   process_donor_threads: 1 ### The number threads that will be used for the process_donor step
-  process_donor_time: 0 ### The time setting to use
+  process_donor_time: 1 ### The time setting to use
 
 aggregate_metrics:
-  aggregate_metrics_memory: 8 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  aggregate_metrics_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
   aggregate_metrics_threads: 1 ### The number threads that will be used for the aggregate_metrics step
-  aggregate_metrics_time: 0 ### The time setting to use
+  aggregate_metrics_time: 1 ### The time setting to use
 
 create_matrix:
-  create_matrix_memory: 8 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  create_matrix_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
   create_matrix_threads: 1 ### The number threads that will be used for the aggregate_metrics step
-  create_matrix_time: 0 ### The time setting to use
+  create_matrix_time: 1 ### The time setting to use
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
@@ -48,7 +48,7 @@ cell_type: EX # chosen cell type
 ##############################################################################################
 
 gene_list_path: nan # path to gene list of interest.  
-n_genes: 1000 # number of genes to perform correlation analysis on
+n_genes: 36539 # number of genes to perform correlation analysis on
 method: 'pearson' # Correlation method
 weight: True # Whether or not weighted correlation should be performed. Either 'weighted' or 'unweighted'
 metadata: False # Whether to extract expression metadata. Either 'True' or 'False'
