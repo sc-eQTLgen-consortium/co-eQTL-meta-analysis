@@ -25,17 +25,17 @@ create_donor:
 process_donor:
   process_donor_memory: 16 ### The amount of memory (GB) used per thread for the process_donor step
   process_donor_threads: 1 ### The number threads that will be used for the process_donor step
-  process_donor_time: 1 ### The time setting to use
+  process_donor_time: 2 ### The time setting to use
 
 aggregate_metrics:
   aggregate_metrics_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
   aggregate_metrics_threads: 1 ### The number threads that will be used for the aggregate_metrics step
-  aggregate_metrics_time: 1 ### The time setting to use
+  aggregate_metrics_time: 2 ### The time setting to use
 
 create_matrix:
-  create_matrix_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  create_matrix_memory: 64 ### The amount of memory (GB) used per thread for the aggregate_metrics step
   create_matrix_threads: 1 ### The number threads that will be used for the aggregate_metrics step
-  create_matrix_time: 1 ### The time setting to use
+  create_matrix_time: 2 ### The time setting to use
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################

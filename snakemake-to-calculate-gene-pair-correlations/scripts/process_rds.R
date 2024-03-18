@@ -49,9 +49,6 @@ if(args$genelist == "nan"){
   genes <- expr_genes[expr_genes$gene_name %in% gene_list,]
 }
 
-cat("\nSaving gene list")
-write.table(rownames(genes), file = gzfile(args$genepath), sep = "\t", col.names = FALSE, quote = FALSE, row.names = FALSE)
-cat(paste("\nGene list saved to:", args$genepath))
 
 sc_data_filtered <- sc_data[rownames(genes),]
 
@@ -104,11 +101,15 @@ for(donor in donor_list){
 
 rm(donor_rds,cell_barcodes,n_counts,raw_counts,raw_counts_df,filtered_genes,weights)
 genes_to_keep <- unique(unlist(gene_filter_list))
-sc_data_filtered <- sc_data_filtered[rownames(genes_to_keep),]
+sc_data_filtered <- sc_data_filtered[genes_to_keep,]
+cat("\nSaving gene list")
+write.table(genes_to_keep, file = gzfile(args$genepath), sep = "\t", col.names = FALSE, quote = FALSE, row.names = FALSE)
+cat(paste("\nGene list saved to:", args$genepath))
 
 cat("\nNumber of genes after filtering (over all samples):",length(genes_to_keep))
 
 n_counts <- as.data.frame(as.matrix(sc_data_filtered@assays$data@data))
+cat("\nNumber of genes after filtering n_counts:",nrow(n_counts))
 rm(sc_data_filtered)
 countOutput <- paste0(args$output,args$cohort,"/normalized-counts-",args$celltype,"-top-",args$n,".tsv.gz")
 cat("\n\nSaving normalized counts:",countOutput)
