@@ -9,7 +9,7 @@ import gzip
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--celltype", required=True, type=str, help="Cell type")
 parser.add_argument("--cohort", required=True, type=str, help="Cohort ID")
-parser.add_argument("--n", required=True, type=str, help="Number of genes")
+parser.add_argument("--n", required=True, type=int, help="Number of genes")
 parser.add_argument("--method", required=True, type=str, help="Correlation method")
 parser.add_argument("--weight", required=True, type=str, help="Whether correlation is weighted or unweighted")
 parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
@@ -47,39 +47,52 @@ for outfile in output_files:
     outfile.write("\t")
     outfile.write("\t".join([f"{alt_id}" for alt_id in alt_ids]) + "\n")
 
-line_count = 0
-safety = (int(args.n) * int(args.n)) - int(args.n)
+
 all_eof = False
-while not all_eof:
-    lines = []
-    eof = 0
+max_n_lines = (((args.n * args.n) / 2) - args.n) + 100  # just doing 100 extra for safety
+for _ in range(max_n_lines):
+    eof_files = 0
     
     corr_list = []
     std_list = []
     pval_list = []
     zscore_list = []
     
+    active_gene = None
     for file_handle in file_handles:
         line = file_handle.readline()
+        if not line:
+            eof_files += 1
+                    
+            corr_list.append("")
+            std_list.append("")
+            pval_list.append("")
+            zscore_list.append("") 
+            continue
+        
         values = line.strip("\n").split("\t")
         
         gene = values[0]
+        if active_gene is None:
+            active_gene = gene
+        else:
+            if gene != active_gene:
+                print("this is bad")  # edit this
+                exit()
+        
         corr_list.append(values[1])
         std_list.append(values[2])
         pval_list.append(values[3])
         zscore_list.append(values[4]) 
 
-        if not line:
-            eof += 1
-            continue
-        
-    output_files[0].write(f"{gene}\t" + "\t".join([f"{corr}" for corr in corr_list]) + "\n")
-    output_files[1].write(f"{gene}\t" + "\t".join([f"{std}" for std in std_list]) + "\n")
-    output_files[2].write(f"{gene}\t" + "\t".join([f"{pval}" for pval in pval_list]) + "\n")
-    output_files[3].write(f"{gene}\t" + "\t".join([f"{zscore}" for zscore in zscore_list]) + "\n")
-    
-    line_count += 1
-    
-    if eof == len(file_handles) or line_count > safety:
+    if eof_files == len(file_handles):
         all_eof = True
         break
+        
+    output_files[0].write(f"{active_gene}\t" + "\t".join(corr_list) + "\n")
+    output_files[1].write(f"{active_gene}\t" + "\t".join(std_list) + "\n")
+    output_files[2].write(f"{active_gene}\t" + "\t".join(pval_list) + "\n")
+    output_files[3].write(f"{active_gene}\t" + "\t".join(zscore_list) + "\n")
+
+for outfile in output_files:
+    outfile.close()
