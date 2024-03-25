@@ -155,6 +155,7 @@ rule aggregate_final_results:
 rule create_matrix:
     input: 
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
+        gene_list = config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
         corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
@@ -170,8 +171,8 @@ rule create_matrix:
     shell:
         """ 
         singularity exec --bind {params.top} {params.sif} python {params.scripts}create_matrix.py \
-            --n {wildcards.n} \
             --meta_analysis {wildcards.meta_analysis} \
             --donor_list {input.donor_list} \
+            --gene_list {input.gene_list} \
             --input {input.corr} \
             --output {output.corr} {output.pval}

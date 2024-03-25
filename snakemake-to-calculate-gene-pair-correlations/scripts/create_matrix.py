@@ -8,9 +8,9 @@ import gzip
 import scipy.stats 
 
 parser = argparse.ArgumentParser(description="")
-parser.add_argument("--n", required=True, type=str, help="Number of genes")
 parser.add_argument("--meta_analysis", required=True, type=str, help="Meta-analysis method used to combine correlation over donors")
 parser.add_argument("--donor_list", required=True, type=str, help="Donor list path")
+parser.add_argument("--gene_list", required=True, type=str, help="Gene list path")
 parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
 parser.add_argument("--output", required=True, nargs="+", type=str, help="Aggregated output file")
 args = parser.parse_args()
@@ -67,10 +67,12 @@ def calc_p_value(z):
     return pval
 
 donor_list = pd.read_csv(args.donor_list, sep = "\t", compression='gzip',header=0)
+gene_list = pd.read_csv(args.gene_list, sep = "\t", compression='gzip',header=None).iloc[:, 0].tolist()
+n = len(gene_list)
 
-m_corr = np.empty((int(args.n), int(args.n)), dtype=np.float64)
+m_corr = np.empty((n, n), dtype=np.float64)
 np.fill_diagonal(m_corr,1.0)
-m_pval = np.empty((int(args.n), int(args.n)), dtype=np.float64)
+m_pval = np.empty((n, n), dtype=np.float64)
 np.fill_diagonal(m_pval,1.0)
 
 positions = {}
@@ -99,7 +101,7 @@ with gzip.open(args.input[0], 'rt') as f:
             positions[gene2] = index_counter
             index_counter += 1
         index2 = positions[gene2]
-               
+        
         if args.meta_analysis == 'fishersz':
             corr_combined,pval = fishers_z_transformation(corr,N)
         elif args.meta_analysis == 'mean':
