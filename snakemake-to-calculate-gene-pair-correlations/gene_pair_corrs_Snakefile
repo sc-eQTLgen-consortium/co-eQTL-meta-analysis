@@ -151,11 +151,10 @@ rule aggregate_final_results:
             --output {output.corr} {output.std} {output.pval} {output.zscore}
         """
 
-
 rule create_matrix:
     input: 
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
-        gene_list = config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz",
+        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
         corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
@@ -167,7 +166,7 @@ rule create_matrix:
     params:
         top = config["top_directory"],
         sif = config["singularity_path"],
-        scripts = config["snakefile_dir"]+"scripts/",
+        scripts = config["snakefile_dir"]+"scripts/"
     shell:
         """ 
         singularity exec --bind {params.top} {params.sif} python {params.scripts}create_matrix.py \
