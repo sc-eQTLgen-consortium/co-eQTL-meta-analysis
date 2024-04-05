@@ -49,7 +49,7 @@ for outfile in output_files:
 
 
 all_eof = False
-max_n_lines = (((args.n * args.n) / 2) - args.n) + 100  # just doing 100 extra for safety
+max_n_lines = int((((args.n * args.n) / 2) - args.n) + 100)  # just doing 100 extra for safety
 for _ in range(max_n_lines):
     eof_files = 0
     
