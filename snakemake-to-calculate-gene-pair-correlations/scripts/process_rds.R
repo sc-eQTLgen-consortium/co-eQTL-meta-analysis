@@ -49,7 +49,6 @@ if(args$genelist == "nan"){
   genes <- expr_genes[expr_genes$gene_name %in% gene_list,]
 }
 
-
 sc_data_filtered <- sc_data[rownames(genes),]
 
 rm(sc_data,expr_genes)
@@ -89,6 +88,9 @@ for(donor in donor_list){
   gene_filter_list <- append(gene_filter_list,list(filtered_genes))
 
   # save list of genes per donor
+  if (length(filtered_genes) < 1){
+    filtered_genes <- list("None")
+  }
   genesOut  <- paste0(args$output,args$cohort,"/donor_gene_list/filtered-genes-",donor,"-",args$celltype,"-top-",args$n,".tsv.gz")
   write.table(filtered_genes, gzfile(genesOut),sep="\t",row.names = FALSE, col.names=FALSE, quote = FALSE)
 
