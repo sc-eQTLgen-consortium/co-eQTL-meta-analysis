@@ -33,7 +33,7 @@ aggregate_metrics:
   aggregate_metrics_time: 2 ### The time setting to use
 
 create_matrix:
-  create_matrix_memory: 64 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  create_matrix_memory: 32 ### The amount of memory (GB) used per thread for the create_matrix step
   create_matrix_threads: 1 ### The number threads that will be used for the aggregate_metrics step
   create_matrix_time: 2 ### The time setting to use
 ##########################################################################
@@ -41,7 +41,7 @@ create_matrix:
 ##########################################################################
 
 cohort: 2023-04-12-Mathys2019 # ID of cohort, just as it is written in the wg3 file path
-cell_type: EX # chosen cell type
+cell_type: MIC # chosen cell type
 
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
