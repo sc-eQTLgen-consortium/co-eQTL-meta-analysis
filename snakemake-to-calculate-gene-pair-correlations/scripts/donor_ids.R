@@ -10,14 +10,40 @@ dir_with_seurat = args[3]
 donor_rds_dir = args[4]
 gene_list_out = args[5]
 alt_gene_list = args[6]
+smf = args[7]
 
 library(Seurat)
+library(stringr)
 
 output_dir <- donor_rds_dir
 
 sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
 
 print("seurat object loaded, continuing with analysis")
+
+print("Filtering RDS file with smf and Pcs files")
+smf = read.csv(smf,sep='\t')
+Pcs = read.csv(paste(dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
+
+# Filter out donors that are not in the smf file
+x = sc_data@meta.data$Assignment %in% smf$genotype_id
+if (sum(x) != length(sc_data@meta.data$Assignment)){
+  cells.use = colnames(sc_data[,x])
+  subset_file = subset(sc_data, cells=cells.use)
+  sc_data = subset_file
+}
+
+# Filter out donors that are not in Pcs file
+Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
+Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data$Assignment]
+x=sc_data@meta.data$Assignment %in% Pcs_donors
+if (sum(x) != length(sc_data@meta.data$Assignment)){
+  cells.use = colnames(sc_data[,x])
+  subset_file = subset(sc_data, cells=cells.use)
+  sc_data = subset_file
+}
+
+
 
 donortab  <- as.data.frame(table(sc_data$Assignment))
 donor_list <- list(donortab[donortab$Freq >10,]$Var1)
