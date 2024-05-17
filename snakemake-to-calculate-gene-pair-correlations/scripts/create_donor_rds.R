@@ -6,6 +6,7 @@ cohort_id = args[2]
 dir_with_seurat = args[3]
 donor_rds_dir = args[4]
 genes_to_use = args[5]
+smf = args[6]
 
 library(Seurat)
 library(matrixStats)
@@ -16,11 +17,35 @@ print(paste("cell type:",cell_type))
 print(paste("cohort id:",cohort_id))
 print(paste("seurat file: ",dir_with_seurat,cell_type,".Qced.Normalized.SCs.Rds",sep=''))
 print(paste("output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
+print(paste("Sample mapping file: ",smf,sep=''))
+print(paste("Pcs file: ",dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''))
 
 # selection of genes 
 
 print("Loading big rds file")
 sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
+
+print("Filtering RDS file with smf and Pcs files")
+smf = read.csv(smf,sep='\t')
+Pcs = read.csv(paste(dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
+
+# Filter out donors that are not in the smf file
+x = sc_data@meta.data$Assignment %in% smf$genotype_id
+if (sum(x) != length(sc_data@meta.data$Assignment)){
+  cells.use = colnames(sc_data[,x])
+  subset_file = subset(sc_data, cells=cells.use)
+  sc_data = subset_file
+}
+
+# Filter out donors that are not in the Pcs file
+Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
+Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data$Assignment]
+x=sc_data@meta.data$Assignment %in% Pcs_donors
+if (sum(x) != length(sc_data@meta.data$Assignment)){
+  cells.use = colnames(sc_data[,x])
+  subset_file = subset(sc_data, cells=cells.use)
+  sc_data = subset_file
+}
 
 expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
 expressing_genes = cbind(rownames(sc_data@assays$data@data),expressing_genes)
