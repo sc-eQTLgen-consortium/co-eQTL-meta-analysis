@@ -34,7 +34,6 @@ def calculate_correlation(x,y,weight):
 def wtd_cor(x,y,weight):
     # Normalise weight
     weight = weight / np.mean(weight)
-    
     return onecor_wtd(x=x,y=y,weight=weight)
 
 def onecor_wtd(x,y,weight):
@@ -49,7 +48,8 @@ def onecor_wtd(x,y,weight):
 def stdz(x, weight):
     # Standardize variable
     x = x - wtd_mean(x, weight)
-    x = x / np.sqrt(wtd_var(x, weight))  
+    x = x / np.sqrt(wtd_var(x, weight))
+
     return x
 
 def wtd_mean(x, weight):

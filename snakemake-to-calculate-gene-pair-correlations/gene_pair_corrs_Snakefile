@@ -38,8 +38,7 @@ wildcard_constraints:
 
 rule all:
     input:  
-        corr = expand(config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-                      meta_analysis = config["meta-analysis"],
+        corr = expand(config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",meta_analysis = config["meta-analysis"],
                       ct = config["cell_type"],
                       n = config["n_genes"],
                       method = config["method"],
@@ -56,11 +55,11 @@ rule createDonorRds:
         config["seurat_dir"] +  "{ct}.Qced.Normalized.SCs.Rds"
     output:
         counts = config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz",
-        weights = expand(config["output_directory"] + config["cohort"] + "/donor_weight/correlation-weight-{donor}-{ct}-top-{n}.tsv.gz",donor=donor_list, allow_missing=True),
-        barcodes = expand(config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True),
-        donor_genes = expand(config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True),
-        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
-        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz"
+        weights = temp(expand(config["output_directory"] + config["cohort"] + "/donor_weight/correlation-weight-{donor}-{ct}-top-{n}.tsv.gz",donor=donor_list, allow_missing=True)),
+        barcodes = temp(expand(config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True)),
+        donor_genes = temp(expand(config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True)),
+        gene_list = temp(config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz"),
+        donor_list = temp(config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz")
     resources:
         mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_donor"]["create_donor_time"]]
@@ -94,7 +93,7 @@ rule calculate_correlations:
         gene_list = config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz",
         barcodes = config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz" 
     output:
-        corr = config["output_directory"] + config["cohort"] + "/{donor}-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        corr = temp(config["output_directory"] + config["cohort"] + "/{donor}-{ct}-top-{n}-{method}-{weight}.tsv.gz")
     resources:
         mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["process_donor"]["process_donor_time"]]
@@ -117,17 +116,16 @@ rule calculate_correlations:
             --gene_list {input.gene_list} \
             --output {output.corr}
         """
-
         
 rule aggregate_final_results:
     input:
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
         corr = expand(config["output_directory"] + config["cohort"] + "/{donor}-{ct}-top-{n}-{method}-{weight}.tsv.gz",donor=donor_list,allow_missing=True)
     output:
-        corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-        std = config["output_directory"] + config["cohort"] + "/combined-std-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-        pval = config["output_directory"] + config["cohort"] + "/combined-pval-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-        zscore = config["output_directory"] + config["cohort"] + "/combined-zscore-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        corr = temp(config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"),
+        std = temp(config["output_directory"] + config["cohort"] + "/combined-std-{ct}-top-{n}-{method}-{weight}.tsv.gz"),
+        pval = temp(config["output_directory"] + config["cohort"] + "/combined-pval-{ct}-top-{n}-{method}-{weight}.tsv.gz"),
+        zscore = temp(config["output_directory"] + config["cohort"] + "/combined-zscore-{ct}-top-{n}-{method}-{weight}.tsv.gz")
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["aggregate_metrics"]["aggregate_metrics_time"]]
@@ -150,23 +148,44 @@ rule aggregate_final_results:
             --input {input.donor_list} {params.out} \
             --output {output.corr} {output.std} {output.pval} {output.zscore}
         """
+        
+rule quality_control:
+    input:
+        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
+        corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+    output:
+        corr = config["output_directory"] + config["cohort"] + "/outliers-removed-combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        outliers = config["output_directory"] + config["cohort"] + "/outliers-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        #qc0 = config["output_directory"] + config["cohort"] + "/plots/qc0-pc1-pc2-{ct}-top-{n}-{method}-{weight}.png",
+        #qc1 = config["output_directory"] + config["cohort"] + "/plots/qc1-pc1-pc2-{ct}-top-{n}-{method}-{weight}.png"
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path"],
+        scripts = config["snakefile_dir"] + "scripts/"
+    shell:
+        """
+        singularity exec --bind {params.top} {params.sif} python {params.scripts}sample_quality_control.py \
+            --input {input.corr} \
+            --output "" "" {output.outliers} {output.corr} \
+            --donor_list {input.donor_list}
+        """
 
 rule create_matrix:
     input: 
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
         gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
-        corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
+        corr = config["output_directory"] + config["cohort"] + "/outliers-removed-combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
         corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
         pval = config["output_directory"] + config["cohort"] + "/matrix-pval-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_matrix"]["create_matrix_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_matrix"]["create_matrix_time"]]
-    threads: config["create_matrix"]["create_matrix_threads"] 
+    threads: config["create_matrix"]["create_matrix_threads"]
     params:
         top = config["top_directory"],
         sif = config["singularity_path"],
-        scripts = config["snakefile_dir"]+"scripts/"
+        scripts = config["snakefile_dir"] + "scripts/"
     shell:
         """ 
         singularity exec --bind {params.top} {params.sif} python {params.scripts}create_matrix.py \
@@ -175,3 +194,4 @@ rule create_matrix:
             --gene_list {input.gene_list} \
             --input {input.corr} \
             --output {output.corr} {output.pval}
+        """
