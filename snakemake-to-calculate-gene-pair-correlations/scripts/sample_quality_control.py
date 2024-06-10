@@ -22,12 +22,16 @@ for arg in vars(args):
 print("")
 
 def create_corr_matrix(df):
-
+    """
+    Takes a DataFrame where columns are samples and rows are observations and returns a sample by sample correlation marix
+    """
     corr_matrix = pd.DataFrame(index=df.columns, columns=df.columns)
+    # Get all possible combinations of samples
     for sample1_sample2 in combinations(df.columns,2):
         x,y = sample1_sample2
         gene_pairs = df[[x,y]].dropna()
     
+        # Get correlation of each sample pair
         if len(gene_pairs) > 3:
             corr,pval = pearsonr(gene_pairs[x],gene_pairs[y])
             corr_matrix.at[x,y] = corr
@@ -43,6 +47,9 @@ def create_corr_matrix(df):
     return corr_matrix
 
 class PCA:
+    """
+    Performs principle component analysis (PCA)
+    """
     def __init__(self, data):
         self.data = data
         self.X = self.initialize_data()
@@ -52,11 +59,13 @@ class PCA:
         self.z_scores = self.calculate_z_scores()
 
     def initialize_data(self):
+        # Remove NA
         self.data.replace('NA', np.nan, inplace=True)
         X = self.data.values
         return X
 
     def eigen_decomposition(self):
+        # Convert input matrix to its eigenvectors and eigenvalues
         self.eigenvalues, self.eigenvectors =np.linalg.eig(self.X)
         order = self.eigenvalues.argsort()[::-1]
         self.eigenvalues = self.eigenvalues[order]
@@ -64,14 +73,17 @@ class PCA:
         return self.eigenvalues, self.eigenvectors
     
     def calculate_explained_variance(self):
+        # Get explained variance
         self.explained_var = (self.eigenvalues / self. eigenvalues.sum())*100
         return self.explained_var
     
     def transform_data(self):
+        # Matrix dot multiplication to transform data
         self.transformed_data = np.dot(self.X, self.eigenvectors)
         return self.transformed_data 
     
     def calculate_z_scores(self):
+        # Get z-scores thresholds for pc1 and pc2
         
         pc1 = self.transformed_data[:, 0]
         pc2 = self.transformed_data[:, 1]
@@ -85,11 +97,12 @@ class PCA:
         return np.column_stack((z_scores_pc1, z_scores_pc2))
     
     def return_outliers(self,threshold=3):
+        # Get sample outliers
         outliers = (np.abs(self.z_scores) > threshold).any(axis=1)
         return self.data.columns[outliers]
 
     def plot_pc1_vs_pc2(self,color,outfile):
-
+        # Plot pc1 vs pv2 and color outliers red
         data = pd.DataFrame({'PC1': self.transformed_data[:, 0], 
             'PC2': self.transformed_data[:, 1] })
 
@@ -178,7 +191,7 @@ print(outlier_df)
 
 print("\nSaving updated matrix")
 df.to_csv(args.output[3],sep="\t",compression="gzip",index=True,na_rep="nan")
+
 print("\nSaving updated donor_list")
-donor_df = pd.DataFrame(df.index, columns=['GeneName'])
-donor_df.to_csv(args.donor_list, sep='\t', index=False, header=False, quoting=None)
-            
+donor_list = donor_list[donor_list["original_ids"].isin(list(outlier_df.index))]
+donor_list.to_csv(args.donor_list, sep='\t', index=False, header=True, quoting=None)
