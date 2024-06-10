@@ -32,10 +32,20 @@ aggregate_metrics:
   aggregate_metrics_threads: 1 ### The number threads that will be used for the aggregate_metrics step
   aggregate_metrics_time: 2 ### The time setting to use
 
+quality_control:
+  quality_control_memory: 16 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  quality_control_threads: 1 ### The number threads that will be used for the aggregate_metrics step
+  quality_control_time: 2 ### The time setting to use
+
 create_matrix:
   create_matrix_memory: 32 ### The amount of memory (GB) used per thread for the create_matrix step
   create_matrix_threads: 1 ### The number threads that will be used for the aggregate_metrics step
   create_matrix_time: 2 ### The time setting to use
+
+aggregate_gwas_genes:
+  aggregate_gwas_genes_memory: 32 ### The amount of memory (GB) used per thread for the create_matrix step
+  aggregate_gwas_genes_threads: 1 ### The number threads that will be used for the aggregate_metrics step
+  aggregate_gwas_genes_time: 2 ### The time setting to use
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################

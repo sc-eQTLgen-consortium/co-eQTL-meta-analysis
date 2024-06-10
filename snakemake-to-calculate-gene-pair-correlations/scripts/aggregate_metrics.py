@@ -27,7 +27,7 @@ original_ids = donor_df['original_ids']
 alt_ids = donor_df['alt_ids']
 del(donor_df)
 
-# Get file handles 
+# Get file handles for each donor
 file_handles = []
 for i in range(len(alt_ids)):
     file = f"{args.input[1]}{args.cohort}/{alt_ids[i]}-{args.celltype}-top-{args.n}-{args.method}-{args.weight}.tsv.gz"
@@ -47,9 +47,11 @@ for outfile in output_files:
     outfile.write("\t")
     outfile.write("\t".join([f"{alt_id}" for alt_id in alt_ids]) + "\n")
 
-
+# Set end of file indicator to False
 all_eof = False
-max_n_lines = int((((args.n * args.n) / 2) - args.n) + 100)  # just doing 100 extra for safety
+
+# Process every line for each input file simultaneously
+max_n_lines = int((((args.n * args.n) / 2) - args.n) + 100)  # Doing 100 extra for safety
 for _ in range(max_n_lines):
     eof_files = 0
     
@@ -88,7 +90,7 @@ for _ in range(max_n_lines):
     if eof_files == len(file_handles):
         all_eof = True
         break
-        
+    # Write corr, std, pval and zscore to output files    
     output_files[0].write(f"{active_gene}\t" + "\t".join(corr_list) + "\n")
     output_files[1].write(f"{active_gene}\t" + "\t".join(std_list) + "\n")
     output_files[2].write(f"{active_gene}\t" + "\t".join(pval_list) + "\n")

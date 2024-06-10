@@ -11,7 +11,6 @@ parser = argparse.ArgumentParser(description="")
 parser.add_argument("--meta_analysis", required=True, type=str, help="Meta-analysis method used to combine correlation over donors")
 parser.add_argument("--donor_list", required=True, type=str, help="Donor list path")
 parser.add_argument("--gene_list", required=True, type=str, help="Gene list path")
-parser.add_argument("--cohort", required=True, type=str, help="Cohort id")
 parser.add_argument("--celltype", required=True, type=str, help="Cell type")
 parser.add_argument("--n", required=True, type=str, help="Number of genes")
 parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
@@ -93,7 +92,7 @@ with gzip.open(args.input[0], 'rt') as f:
             for x in donor_list.index.tolist():
                 print(x)
                 #TODO: change file location when adding to snakemake
-                file = f"donor_gene_list/filtered-genes-{x}-{args.celltype}-top-{args.n}.tsv.gz"
+                file = f"gene_list/filtered-genes-{x}-{args.celltype}-top-{args.n}.tsv.gz"
                 genes = pd.read_csv(file, sep="\t", compression='gzip', header=None).iloc[:, 0].tolist()
 
                 for gene in genes:

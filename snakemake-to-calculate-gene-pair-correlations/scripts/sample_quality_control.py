@@ -178,3 +178,7 @@ print(outlier_df)
 
 print("\nSaving updated matrix")
 df.to_csv(args.output[3],sep="\t",compression="gzip",index=True,na_rep="nan")
+print("\nSaving updated donor_list")
+donor_df = pd.DataFrame(df.index, columns=['GeneName'])
+donor_df.to_csv(args.donor_list, sep='\t', index=False, header=False, quoting=None)
+            

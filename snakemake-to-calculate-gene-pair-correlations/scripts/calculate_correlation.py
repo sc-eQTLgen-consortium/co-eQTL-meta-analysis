@@ -77,35 +77,30 @@ def lm(X, y):
     # Store the sample size (n) and degrees of freedom (df)
     n = X.shape[0]
     df = X.shape[1]
-
-    # The first part of solving for beta is taking the inverse of X
-    # If columns are colinear, produces a pseud-inverse matrix
-    inv_m = inverse(X)
     
-    # Calculate model beta's
+    inv_m = inverse(X)
+
     betas = fit(X=X, y=y, inv_m=inv_m)
     
-    # Get the predicted value of y
     y_hat = predict(X=X, betas=betas)
     
-    # Calculate the residual sum of squares (the difference between y and y_hat ^ 2 summed together)
     rss = calc_rss(y=y, y_hat=y_hat)
     
-    # Calculate the standard error
     std = calc_std(rss=rss, n=n, df=df, inv_m=inv_m)
     
-    # Get the t-value
+    # Calculate t-value
     t_value = betas / std
 
     p_value = calc_p_value(t_value=t_value, n=n)   
     
-    # Calculate z-score 
     zscore = calc_z_score(pval=p_value[1],corr=betas[1])
     
     # Only return x-vector statistics
     return betas[1], std[1], p_value[1], zscore
-    
+
 def inverse(X): 
+    # The first part of solving for beta is taking the inverse of X
+    # If columns are colinear, produces a pseudo-inverse matrix
     X_square = X.T.dot(X)
     try:
         return np.linalg.inv(X_square)
@@ -114,38 +109,38 @@ def inverse(X):
         return np.linalg.pinv(X_square)
 
 def fit(X, y, inv_m=None):
+    # Calculate model beta's
     if inv_m is None:
         inv_m = inverse(X)
     return inv_m.dot(X.T).dot(y)
     
 def predict(X, betas):
+    # Get the predicted value of y
     return np.dot(X, betas)
 
 def calc_rss(y, y_hat):
+    # Calculate the residual sum of squares (the difference between y and y_hat ^ 2 summed together)
     res = calc_residuals(y=y, y_hat=y_hat)
     res_squared = res * res
     return np.sum(res_squared)
 
 def calc_residuals(y, y_hat):
+    # Calculate difference between y and y_hat
     return y - y_hat
 
 def calc_std(rss, n, df, inv_m):
+    # Calculate the standard error
     return np.sqrt(rss / (n - df) * np.diag(inv_m))
 
 def calc_p_value(t_value, n):
-    """
-    last row == stats.t.sf(np.abs(t_value), df=n - 2) * 2 but this
-    is faster somehow.
-
-    https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.t.html
-    https://en.wikipedia.org/wiki/Student%27s_t-distribution (Cumulative distribution function)
-    """
+    # Calculate p-value
     v = n - 2
     p_value = betainc(v / 2, 1 / 2, v / ((t_value * t_value) + v))
     p_value[p_value < 5e-324] = 5e-324
     return p_value
 
 def calc_z_score(pval,corr):
+    # Calculate z-score 
     zscore = np.abs(stats.norm.ppf(pval/2))
     if corr < 0:
         zscore *= -1
@@ -155,7 +150,6 @@ def calc_z_score(pval,corr):
 barcode = set(pd.read_csv(args.cell_barcodes, sep = "\t", compression='gzip',header=None).iloc[:, 0].tolist())
 # Load genes
 gene_list = pd.read_csv(args.gene_list, sep = "\t", compression='gzip',header=None).iloc[:, 0].tolist()
-
 # Load weight
 weight = pd.read_csv(args.weight[1], sep = "\t", compression='gzip',header=0)
 weight_dict = dict(zip(weight.index, weight["weight"]))
@@ -171,6 +165,7 @@ with gzip.open(args.counts, 'rt') as f:
     for line in f:
         values_list = line.split("\t")
         if header == None:
+            # Extract donor-specific expression data 
             mask = [i for i, value in enumerate(values_list) if value in barcode]
             header = [values_list[i] for i in mask]
             continue
@@ -182,10 +177,13 @@ with gzip.open(args.counts, 'rt') as f:
 all_genes = len(genes)
 n_genes = len(gene_list)
 print(f"Number of genes filtered: {all_genes - n_genes}")
+
+# Extract weights
 weight = [1] * n_genes
 if args.weight[0]:
     weight = [weight_dict[barcode] for barcode in header]
 
+# If spearman, rank values
 if args.method == 'spearman':
     ranked_values = []
     for i in range(n_genes):

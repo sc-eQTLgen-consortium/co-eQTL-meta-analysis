@@ -35,6 +35,7 @@ expr_genes <- data.frame(sum_expr = rowSums(sc_data@assays$data@data),gene_name 
 expr_genes <- expr_genes[expr_genes$sum_expr != 0, ]
 expr_genes <- expr_genes[order(expr_genes$sum_expr, decreasing = T),]
 
+# Select either the provided gene list or n top expressed genes
 if(args$genelist == "nan"){
   cat("\nNo gene list provided.") 
   cat("\nUsing",args$n,"most expressed genes (exluding ribosomal and mitochondrial genes)")
@@ -52,7 +53,7 @@ if(args$genelist == "nan"){
 sc_data_filtered <- sc_data[rownames(genes),]
 
 rm(sc_data,expr_genes)
-
+# Select donors
 cat("\n\nUsing provided donor list")
 donor_list <- read.table(args$donors, header=F)$V1
 donor_count <- as.data.frame(table(sc_data_filtered$Assignment))
@@ -66,7 +67,7 @@ cat("\nDonor data saved to:",args$donorpath)
 
 rm(donor_count)
 
-# Store filtered genes
+# Filter low expressed genes per donor
 gene_filter_list = list()
 
 for(donor in donor_list){
