@@ -15,6 +15,9 @@ sum_stats_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortiu
 refpanel_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/1kGP_high_coverage/1kGP_high_coverage_Illumina" # pascalx refpanel file path
 annotation_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/human_b37/genes_Ensembl94.txt # pascalx annotation file path
 depict2_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/depict2/Downstreamer-2.2-SNAPSHOT/Downstreamer.jar # path to depict 2
+geneCorrelations: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/permutationGeneCor/geneCorForceNormalchr_
+human_b37: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer//human_b37/genes_Ensembl94_protein_coding.txt
+covariates: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/medianGwasSignal.txt
 
 ##############################################################################################################
 ##### The following arguments are common parameters that may need to be changed depending on the dataset #####
@@ -62,6 +65,10 @@ reformat_eigenVec:
   reformat_eigenVec_threads: 1 ### The number threads that will be used for the aggregate_metrics step
   reformat_eigenVec_time: 2 ### The time setting to use
 
+gene_prioritisation:
+  gene_prioritisationc_memory: 16 ### The amount of memory (GB) used per thread for the create_matrix step
+  gene_prioritisation_threads: 1 ### The number threads that will be used for the aggregate_metrics step
+  gene_prioritisation_time: 2 ### The time setting to use
 
 ##########################################################################
 ####### The following arguments are for information about your study #####

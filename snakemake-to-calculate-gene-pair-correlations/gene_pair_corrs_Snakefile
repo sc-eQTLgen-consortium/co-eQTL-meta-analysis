@@ -38,7 +38,8 @@ wildcard_constraints:
 
 rule all:
     input:  
-        corr = expand(config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",meta_analysis = config["meta-analysis"],
+        corr = expand(config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+                      meta_analysis = config["meta-analysis"],
                       ct = config["cell_type"],
                       n = config["n_genes"],
                       method = config["method"],
@@ -209,7 +210,7 @@ rule aggregate_gwas_genes:
         refpanel = config ["refpanel_path"]
         annotation = config["annotation_path"]
     output:
-        aggregated_genes = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt", gwas = config["gwas"]
+        aggregated_genes = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt"
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_gwas_genes"]["aggregate_gwas_genes_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["aggregate_gwas_genes"]["aggregate_gwas_genes_time"]]
@@ -284,4 +285,39 @@ rule reformat_eigenVec:
         -o {params.out_dir}/ \
         -tgn 
         """
-        
+rule gene_prioritisation:
+    input:
+        gwas = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt",
+        geneCorrelations = config["geneCorrelations"],
+        genes = config["human_b37"],
+        covariates = config["covariates"]
+        converted_eigVec = config["output_directory"] + config["cohort"] + "/EigVec-"+ {meta_analysis}-{ct}-top-{n}-{method}-{weight}.datg"
+    output:
+        config["output_directory"] + config["cohort"] + "/{gwas}_covCor_enrichments.xlsx", gwas = config["gwas"]
+    resources:
+        mem_per_thread_gb = lambda wildcards, attempt: attempt * config["gene_prioritisation"]["gene_prioritisation_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["gene_prioritisation_eigenVec"]["gene_prioritisation_time"]]
+    threads: config["gene_prioritisation"]["gene_prioritisation_threads"]   
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path_downstreamer"],
+        scripts = config["snakefile_dir"] + "scripts/"
+        memory = 50,
+        depict2 = config["depict2_path"],
+        eigvec = config["output_directory"]+config["cohort"]+"/EigVec-"+config["meta-analysis"]+"-"+config["cell_type"]+"-top-"+config["n_genes"]+"-"+config["method"]+ "weighted" if config["weight"] else "unweighted"
+        output = config["output_directory"] + config["cohort"] + "/" + config["gwas"] + "_keygenes_covCor"
+    shell:
+        """
+        java -Djava.util.concurrent.ForkJoinPool.common.parallelism=16 -Xmx{params.memory} -Xms{params.memory} -jar {params.depict2} \
+        --mode ENRICH \
+        --gwas {input.gwas} \
+        --geneCorrelations {input.geneCorrelations} \
+        --output {params.output} \
+        --genes {input.genes} \
+        --expressionEigenVectors {wildcards.ct}={eigvec} \
+        --covariates {input.covariates} \
+        --eh \
+        -t 8 \
+        --forceNormalGenePvalues \
+        --jblas
+        """
