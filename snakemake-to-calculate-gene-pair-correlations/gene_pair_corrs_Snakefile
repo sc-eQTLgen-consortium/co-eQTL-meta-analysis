@@ -235,4 +235,53 @@ rule aggregate_gwas_genes:
             --window {params.window}
         """
         
+rule eigenDecompose_matrix:
+    input:
+        corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
+        annotation = config["snakefile_dir"] + "input/LimixAnnotationFile.txt"
+    output:
+        eigenVec: config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt",
+        eigenVal: config["output_directory"] + config["cohort"] +"/EigVal-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt",
+        #exp_var: config["output_directory"] + config["cohort"] +"/{ct}-subset-eigenVec-explained-variance.png"
+    resources:
+        mem_per_thread_gb = lambda wildcards, attempt: attempt * config["eigendecompose"]["eigendecompose_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["eigendecompose"]["eigendecompose_time"]]
+    threads: config["eigendecompose"]["eigendecompose_threads"]
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path_downstreamer"],
+        scripts = config["snakefile_dir"] + "scripts/",
+    shell:
+        """
+        singularity exec --bind {params.top} {params.sif} python {params.scripts}eigendecomposeCorr.py \
+            --input {input.corr} {input.annotation} \
+            --output "" {output.eigenVec} {output.eigenVal}
+        """
+        
+rule reformat_eigenVec:
+    input:
+        eigenVec = config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt"
+    output:
+        config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.datg",
+        config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.cols.txt.gz",
+        config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.rows.txt.gz"
+    resources:
+        mem_per_thread_gb = lambda wildcards, attempt: attempt * config["reformat_eigenVec"]["reformat_eigenVec_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["reformat_eigenVec"]["reformat_eigenVec_time"]]
+    threads: config["reformat_eigenVec"]["reformat_eigenVec_threads"]
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path_downstreamer"],
+        scripts = config["snakefile_dir"] + "scripts/",
+        depict2 = config["depict2_path"]
+        memory = "30G"
+        cores = 1
+    shell:
+        """
+        java -Xmx{params.memory} -XX:ParallelGCThreads={params.cores} -jar {params.depict2} \
+        -m CONVERT_TXT \
+        -g {input.eigenVec} \
+        -o {params.out_dir}/ \
+        -tgn 
+        """
         
