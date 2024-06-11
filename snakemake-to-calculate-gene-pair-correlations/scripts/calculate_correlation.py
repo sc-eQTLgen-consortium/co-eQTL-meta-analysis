@@ -9,7 +9,7 @@ from scipy import stats
 from scipy.special import betainc
 
 parser = argparse.ArgumentParser(description="")
-parser.add_argument("--counts", required=True, type=str, help="Normalised counts file path")
+parser.add_argument("--counts", required=True, type=str, help="Normalized counts file path")
 parser.add_argument("--method", required=True, type=str, help="Correlation method")
 parser.add_argument("--weight", required=True, nargs = "+", type=str, help="Whether to calculate weighted or unweighted correlation (True/False), if true provide filepath to weights")
 parser.add_argument("--cell_barcodes", required=True, type=str, help="Donor names and corresponding indices")

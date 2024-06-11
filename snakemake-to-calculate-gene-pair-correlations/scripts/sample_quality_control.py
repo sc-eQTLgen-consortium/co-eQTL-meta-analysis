@@ -14,6 +14,8 @@ parser = argparse.ArgumentParser(description="")
 parser.add_argument("--input", required=True, type=str, help="Sample by gene pair correlation matrix")
 parser.add_argument("--output", required=True, nargs = "+", type=str, help="Output sample by gene pair correlation matrix")
 parser.add_argument("--donor_list", required=True, type=str, help="Donor list path")
+parser.add_argument("--donor_list_updated", required=True, type=str, help="Updated donor list path")
+
 args = parser.parse_args()
 
 print("Options in effect:")
@@ -196,4 +198,4 @@ df.to_csv(args.output[3],sep="\t",compression="gzip",index=True,na_rep="nan")
 
 print("\nSaving updated donor_list")
 donor_list = donor_list[donor_list["original_ids"].isin(list(outlier_df.index))]
-donor_list.to_csv(args.donor_list, sep='\t', index=False, header=True, quoting=None)
+donor_list.to_csv(args.donor_list_updated, sep='\t', index=False, header=True, quoting=None)

@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description="")
 parser.add_argument("--meta_analysis", required=True, type=str, help="Meta-analysis method used to combine correlation over donors")
 parser.add_argument("--donor_list", required=True, type=str, help="Donor list path")
 parser.add_argument("--gene_list", required=True, type=str, help="Gene list path")
+parser.add_argument("--gene_list_updated", required=True, type=str, help="Updated gene list path")
 parser.add_argument("--celltype", required=True, type=str, help="Cell type")
 parser.add_argument("--n", required=True, type=str, help="Number of genes")
 parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
@@ -104,7 +105,7 @@ with gzip.open(args.input[0], 'rt') as f:
             gene_list = gene_count_df["Gene"].tolist()
             n = len(gene_list)
             gene_df = pd.DataFrame(gene_list, columns=['GeneName'])
-            gene_df.to_csv(args.gene_list, sep='\t', index=False, header=False, quoting=None)
+            gene_df.to_csv(args.gene_list_updated, sep='\t', index=False, header=False, quoting=None)
             
             # initialise matrices
             m_corr = np.empty((n, n), dtype=np.float64)

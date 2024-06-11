@@ -154,6 +154,7 @@ rule quality_control:
         donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
+        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-{method}-{weight}-donor-list-updated.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/outliers-removed-combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
         outliers = config["output_directory"] + config["cohort"] + "/outliers-{ct}-top-{n}-{method}-{weight}.tsv.gz"
         #qc0 = config["output_directory"] + config["cohort"] + "/plots/qc0-pc1-pc2-{ct}-top-{n}-{method}-{weight}.png",
@@ -167,15 +168,17 @@ rule quality_control:
         singularity exec --bind {params.top} {params.sif} python {params.scripts}sample_quality_control.py \
             --input {input.corr} \
             --output "" "" {output.outliers} {output.corr} \
-            --donor_list {input.donor_list}
+            --donor_list {input.donor_list} \
+            --donor_list_updated {output.donor_list}
         """
 
 rule create_matrix:
     input: 
-        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz",
+        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-{method}-{weight}-donor-list-updated.tsv.gz",
         gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/outliers-removed-combined-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     output:
+        gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}-gene-list-updated.tsv.gz",
         corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
         pval = config["output_directory"] + config["cohort"] + "/matrix-pval-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz"
     resources:
@@ -193,6 +196,7 @@ rule create_matrix:
             --meta_analysis {wildcards.meta_analysis} \
             --donor_list {input.donor_list} \
             --gene_list {input.gene_list} \
+            --gene_list_updated {output.gene_list} \
             --celltype {wildcards.ct} \
             --n {wildcards.n} \
             --input {input.corr} \
