@@ -14,7 +14,7 @@ parser.add_argument("--gene_list", required=True, type=str, help="Gene list path
 parser.add_argument("--celltype", required=True, type=str, help="Cell type")
 parser.add_argument("--n", required=True, type=str, help="Number of genes")
 parser.add_argument("--input", required=True, nargs="+", type=str, help="Input correlation file")
-parser.add_argument("--output", required=True, nargs="+", type=str, help="Aggregated output file")
+parser.add_argument("--output", required=True, nargs="+", type=str, help="output directory, output correlation matrix filename and output pvalue matrix filename")
 args = parser.parse_args()
 
 print("Options in effect:")
@@ -23,7 +23,7 @@ for arg in vars(args):
 print("")
     
 def fishers_z_transformation(corr,N):
-    
+    # Set data type and remove nan
     N = np.array(N, dtype=float)
     corr,N = remove_nan(corr,N)
     
@@ -33,16 +33,16 @@ def fishers_z_transformation(corr,N):
     return get_fishers_z_metrics(corr,N)
 
 def get_fishers_z_metrics(corr,N):
-    
+    # Calculate metrics
     Y = calc_effect_size(corr)
     V = calc_variance_within(N)
     W = calc_weight(V)
-
+    # Calculate metric sums
     sum_W = np.sum(W)
     sum_WY = np.sum(W * Y)
     sum_WY2 = np.sum(W * Y * Y)
     sum_W2 = np.sum(W * W)
-
+    # Fisher's summary and corresponding summary statistics
     M = sum_WY / sum_W
     var = 1 / sum_W
     se = np.sqrt(var)
@@ -92,7 +92,7 @@ with gzip.open(args.input[0], 'rt') as f:
             for x in donor_list.index.tolist():
                 print(x)
                 #TODO: change file location when adding to snakemake
-                file = f"gene_list/filtered-genes-{x}-{args.celltype}-top-{args.n}.tsv.gz"
+                file = f"{args.output[0]}/donor_gene_list/filtered-genes-{x}-{args.celltype}-top-{args.n}.tsv.gz"
                 genes = pd.read_csv(file, sep="\t", compression='gzip', header=None).iloc[:, 0].tolist()
 
                 for gene in genes:
@@ -168,5 +168,5 @@ while np.isnan(m_corr).any():
  
     genes.pop(top_nan)
     
-pd.DataFrame(m_corr, index=genes, columns=genes).replace("", np.nan).to_csv(args.output[0], sep="\t", header=True, index=True, compression='gzip', na_rep="nan")
-pd.DataFrame(m_pval, index=genes, columns=genes).replace("", np.nan).to_csv(args.output[1], sep="\t", header=True, index=True, compression='gzip', na_rep="nan")     
+pd.DataFrame(m_corr, index=genes, columns=genes).replace("", np.nan).to_csv(args.output[1], sep="\t", header=True, index=True, compression='gzip', na_rep="nan")
+pd.DataFrame(m_pval, index=genes, columns=genes).replace("", np.nan).to_csv(args.output[2], sep="\t", header=True, index=True, compression='gzip', na_rep="nan")     

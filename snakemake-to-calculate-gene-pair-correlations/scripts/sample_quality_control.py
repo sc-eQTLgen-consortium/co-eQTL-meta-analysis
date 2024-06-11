@@ -176,18 +176,20 @@ for sample in outlier_dict.keys():
     if sample in df.columns:
         df.drop(columns=sample, inplace=True)
         
+outlier_df = pd.DataFrame.from_dict(outlier_dict, orient='index', columns=['Sample Status'])
+outlier_df.to_csv(args.output[2],sep="\t",compression="gzip",index=True)
+print("\nThe following samples were removed from the matrix:")
+print(outlier_df)
+        
 # Repeat process to check if more outliers would be detected
 corr_matrix = create_corr_matrix(df)
     
 print("\nRepeating PCA to check if outliers were removed")
 corr_matrix = corr_matrix.apply(pd.to_numeric)
+if corr_matrix.empty:
+    raise ValueError("All samples have been removed after outlier filtering; correlation matrix is empty.")
 #PCA(corr_matrix).plot_pc1_vs_pc2(color="#808080",outfile=args.output[1])
 outliers = PCA(corr_matrix).return_outliers(threshold=3)
-
-outlier_df = pd.DataFrame.from_dict(outlier_dict, orient='index', columns=['Sample Status'])
-outlier_df.to_csv(args.output[2],sep="\t",compression="gzip",index=True)
-print("\nThe following samples were removed from the matrix:")
-print(outlier_df)
 
 print("\nSaving updated matrix")
 df.to_csv(args.output[3],sep="\t",compression="gzip",index=True,na_rep="nan")
