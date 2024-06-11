@@ -203,10 +203,36 @@ rule create_matrix:
             --output {params.out} {output.corr} {output.pval}
         """
         
-# rule aggregate_gwas_genes:
-#     input:
-#         # Add GWAS to config!!!
-#         gwas = config["snakefile_dir"] +  "input/" + config["sumstats"]
-#     output:
+rule aggregate_gwas_genes:
+    input:
+        sum_stats = config["sum_stats_path"]
+        refpanel = config ["refpanel_path"]
+        annotation = config["annotation_path"]
+    output:
+        aggregated_genes = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt", gwas = config["gwas"]
+    resources:
+        mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_gwas_genes"]["aggregate_gwas_genes_memory"],
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["aggregate_gwas_genes"]["aggregate_gwas_genes_time"]]
+    threads: config["aggregate_gwas_genes"]["aggregate_gwas_genes_threads"]
+    params:
+        top = config["top_directory"],
+        sif = config["singularity_path_downstreamer"],
+        scripts = config["snakefile_dir"] + "scripts/",
+        threads = config["threads"]
+        rscol = config["rcol"]
+        pcol = config["pcol"]
+        window = config["window"]
+    shell:
+        """
+        singularity exec -B {params.top} {params.sif} python {params.scripts}runRealGWAS.py \
+            --refpanel {input.refpanel}
+            --gwas {input.sum_stats}
+            --annotation {input.annotation}
+            --threads {params.threads}
+            --outfile {output.aggregated_genes}
+            --rscol {params.rscol}
+            --pcol {params.pcol} \
+            --window {params.window}
+        """
         
         

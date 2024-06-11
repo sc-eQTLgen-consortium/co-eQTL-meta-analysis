@@ -7,9 +7,13 @@
 top_directory: /groups/umcg-biogen/tmp02/ # a location above everything else
 output_directory: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/output/ # this is where the final output and the intermediate files will be saved
 singularity_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/wp3_extended.sif # location of singularity image with all installed software
+singularity_path_downstreamer: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/pascalx_downstreamer.sif # location of singularity image used for downstreamer
 snakefile_dir: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/ # location of this file and the snakefile
 seurat_dir: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-04-11-WorkGroup3eQTLAndDEA/2023-04-12-Mathys2019/input/L1/ # location of seurat input file
 donor_list_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/2023-04-12-Mathys2019_EX_donor_list.tsv # path to donor list of interest
+sum_stats_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/summary_statistics/schizophrenia_ripke2014_harm_jan.snppval.txt.gz" # path to gwas summary statistics
+refpanel_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/1kGP_high_coverage/1kGP_high_coverage_Illumina" # pascalx refpanel file path
+annotation_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/Anoek-CalcCorrMatrix/input/Downstreamer/human_b37/genes_Ensembl94.txt # pascalx annotation file path
 
 ##############################################################################################################
 ##### The following arguments are common parameters that may need to be changed depending on the dataset #####
@@ -46,12 +50,14 @@ aggregate_gwas_genes:
   aggregate_gwas_genes_memory: 32 ### The amount of memory (GB) used per thread for the create_matrix step
   aggregate_gwas_genes_threads: 1 ### The number threads that will be used for the aggregate_metrics step
   aggregate_gwas_genes_time: 2 ### The time setting to use
+
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
 cohort: 2023-04-12-Mathys2019 # ID of cohort, just as it is written in the wg3 file path
 cell_type: MIC # chosen cell type
+gwas: schizophrenia_ripke2014
 
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
@@ -63,3 +69,7 @@ method: 'pearson' # Correlation method
 weight: True # Whether or not weighted correlation should be performed. Either 'weighted' or 'unweighted'
 metadata: False # Whether to extract expression metadata. Either 'True' or 'False'
 meta-analysis: 'fishersz' # Meta-analysis method used to combine correlation over donors. Either 'fishersz' or 'mean'
+threads: 20 # Threads pascalx
+rscol: 0 # gwas summary statistics gene id column number
+pcol: 1 # gwas summary statistics pval column number 
+window: 25000 # Window used by pascalx

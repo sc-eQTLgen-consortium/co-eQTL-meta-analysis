@@ -147,6 +147,8 @@ with gzip.open(args.input[0], 'rt') as f:
 f.close()
 
 genes = list(positions.keys())
+print(positions)
+print(m_corr)
 
 while np.isnan(m_corr).any():
 
@@ -166,7 +168,7 @@ while np.isnan(m_corr).any():
 
     m_pval = np.delete(m_pval, top_nan, 0)
     m_pval = np.delete(m_pval, top_nan, 1)
- 
+
     genes.pop(top_nan)
     
 pd.DataFrame(m_corr, index=genes, columns=genes).replace("", np.nan).to_csv(args.output[1], sep="\t", header=True, index=True, compression='gzip', na_rep="nan")
