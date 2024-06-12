@@ -45,12 +45,12 @@ rule createDonorRds:
     input: 
         config["seurat_dir"] +  "{ct}.Qced.Normalized.SCs.Rds"
     output:
-        counts = config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz",
-        weights = expand(config["output_directory"] + config["cohort"] + "/donor_weight/correlation-weight-{donor}-{ct}-top-{n}.tsv.gz",donor=donor_list, allow_missing=True),
-        barcodes = expand(config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True),
+        counts = temp(config["output_directory"] + config["cohort"] + "/normalized-counts-{ct}-top-{n}.tsv.gz"),
+        weights = temp(expand(config["output_directory"] + config["cohort"] + "/donor_weight/correlation-weight-{donor}-{ct}-top-{n}.tsv.gz",donor=donor_list, allow_missing=True)),
+        barcodes = temp(expand(config["output_directory"] + config["cohort"] + "/donor_barcodes/barcodes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True)),
         donor_genes = expand(config["output_directory"] + config["cohort"] + "/donor_gene_list/filtered-genes-{donor}-{ct}-top-{n}.tsv.gz", donor=donor_list, allow_missing=True),
         gene_list = config["output_directory"] + config["cohort"] + "/gene_list/{ct}-top-{n}-gene-list.tsv.gz",
-        donor_list = config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz"
+        donor_list = temp(config["output_directory"] + config["cohort"] + "/donor_list/{ct}-top-{n}-donor-list.tsv.gz")
     resources:
         mem_per_thread_gb =  lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
         time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["create_donor"]["create_donor_time"]]
@@ -214,7 +214,7 @@ rule aggregate_gwas_genes:
         input = config["output_directory"] + "input/Downstreamer/"
     shell:
         """
-        singularity exec -B {params.top} {params.sif} python {params.scripts}runRealGWAS.py \
+        singularity exec --bind {params.top} {params.sif} python3 {params.scripts}runRealGWAS.py \
             --refpanel {params.input}1kGP_high_coverage/1kGP_high_coverage_Illumina \
             --gwas {input.sum_stats}
             --annotation {input.annotation}

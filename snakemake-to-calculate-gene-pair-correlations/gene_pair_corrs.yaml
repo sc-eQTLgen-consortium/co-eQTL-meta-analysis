@@ -73,7 +73,7 @@ gene_prioritisation:
 ##########################################################################
 
 cohort: 2023-04-12-Mathys2019 # ID of cohort, just as it is written in the wg3 file path
-cell_type: MIC # chosen cell type
+cell_type: EX # chosen cell type
 gwas: schizophrenia_ripke2014
 
 ##############################################################################################
