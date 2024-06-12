@@ -38,18 +38,8 @@ wildcard_constraints:
 
 rule all:
     input:  
-        corr = expand(config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-                      meta_analysis = config["meta-analysis"],
-                      ct = config["cell_type"],
-                      n = config["n_genes"],
-                      method = config["method"],
-                      weight = weight),
-        pval = expand(config["output_directory"] + config["cohort"] + "/matrix-pval-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-                      meta_analysis = config["meta-analysis"],
-                      ct = config["cell_type"],
-                      n = config["n_genes"],
-                      method = config["method"],
-                      weight = weight)
+        prioritized_genes = expand(config["output_directory"] + config["cohort"] + "/{gwas}_covCor_enrichments.xlsx",
+        gwas = config["gwas"])
 
 rule createDonorRds:
     input: 
@@ -137,7 +127,6 @@ rule aggregate_final_results:
         scripts = config["snakefile_dir"]+"scripts/",
         out = config["output_directory"],
         cohort = config["cohort"],
-        out_dir = config["output_directory"]
     shell:
         """
         singularity exec --bind {params.top} {params.sif} python {params.scripts}aggregate_metrics.py \
@@ -206,8 +195,7 @@ rule create_matrix:
         
 rule aggregate_gwas_genes:
     input:
-        sum_stats = config["sum_stats_path"]
-        refpanel = config ["refpanel_path"]
+        sum_stats = config["sum_stats_path"],
         annotation = config["annotation_path"]
     output:
         aggregated_genes = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt"
@@ -219,14 +207,15 @@ rule aggregate_gwas_genes:
         top = config["top_directory"],
         sif = config["singularity_path_downstreamer"],
         scripts = config["snakefile_dir"] + "scripts/",
-        threads = config["threads"]
-        rscol = config["rcol"]
-        pcol = config["pcol"]
-        window = config["window"]
+        threads = config["threads"],
+        rscol = config["rscol"],
+        pcol = config["pcol"],
+        window = config["window"],
+        input = config["output_directory"] + "input/Downstreamer/"
     shell:
         """
         singularity exec -B {params.top} {params.sif} python {params.scripts}runRealGWAS.py \
-            --refpanel {input.refpanel}
+            --refpanel {params.input}1kGP_high_coverage/1kGP_high_coverage_Illumina \
             --gwas {input.sum_stats}
             --annotation {input.annotation}
             --threads {params.threads}
@@ -239,10 +228,10 @@ rule aggregate_gwas_genes:
 rule eigenDecompose_matrix:
     input:
         corr = config["output_directory"] + config["cohort"] + "/matrix-corr-{meta_analysis}-corr-{ct}-top-{n}-{method}-{weight}.tsv.gz",
-        annotation = config["snakefile_dir"] + "input/LimixAnnotationFile.txt"
+        annotation = config["snakefile_dir"] + "input/Downstreamer/LimixAnnotationFile.txt"
     output:
-        eigenVec: config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt",
-        eigenVal: config["output_directory"] + config["cohort"] +"/EigVal-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt",
+        eigenVec = config["output_directory"] + config["cohort"] + "/EigVec-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt",
+        eigenVal = config["output_directory"] + config["cohort"] +"/EigVal-{meta_analysis}-{ct}-top-{n}-{method}-{weight}.txt",
         #exp_var: config["output_directory"] + config["cohort"] +"/{ct}-subset-eigenVec-explained-variance.png"
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["eigendecompose"]["eigendecompose_memory"],
@@ -274,8 +263,9 @@ rule reformat_eigenVec:
         top = config["top_directory"],
         sif = config["singularity_path_downstreamer"],
         scripts = config["snakefile_dir"] + "scripts/",
-        depict2 = config["depict2_path"]
-        memory = "30G"
+        depict2 = config["depict2_path"],
+        out_dir = config["output_directory"],
+        memory = "30G",
         cores = 1
     shell:
         """
@@ -287,34 +277,43 @@ rule reformat_eigenVec:
         """
 rule gene_prioritisation:
     input:
-        gwas = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt",
-        geneCorrelations = config["geneCorrelations"],
+        gwas = config["output_directory"] + config["cohort"] + "/pascalX/{gwas}.txt", 
         genes = config["human_b37"],
-        covariates = config["covariates"]
-        converted_eigVec = config["output_directory"] + config["cohort"] + "/EigVec-"+ {meta_analysis}-{ct}-top-{n}-{method}-{weight}.datg"
+        covariates = config["covariates"],
+        converted_eigVec = expand(config["output_directory"] + config["cohort"] + "/EigVec-"+ "{meta_analysis}-{ct}-top-{n}-{method}-{weight}.datg",
+                      meta_analysis = config["meta-analysis"],
+                      ct = config["cell_type"],
+                      n = config["n_genes"],
+                      method = config["method"],
+                      weight = weight)
     output:
-        config["output_directory"] + config["cohort"] + "/{gwas}_covCor_enrichments.xlsx", gwas = config["gwas"]
+        prioritized_genes = config["output_directory"] + config["cohort"] + "/{gwas}_covCor_enrichments.xlsx" 
     resources:
         mem_per_thread_gb = lambda wildcards, attempt: attempt * config["gene_prioritisation"]["gene_prioritisation_memory"],
-        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["gene_prioritisation_eigenVec"]["gene_prioritisation_time"]]
+        time = lambda wildcards, attempt: config["cluster_time"][(attempt - 1) + config["gene_prioritisation"]["gene_prioritisation_time"]]
     threads: config["gene_prioritisation"]["gene_prioritisation_threads"]   
     params:
         top = config["top_directory"],
         sif = config["singularity_path_downstreamer"],
-        scripts = config["snakefile_dir"] + "scripts/"
+        scripts = config["snakefile_dir"] + "scripts/",
         memory = 50,
         depict2 = config["depict2_path"],
-        eigvec = config["output_directory"]+config["cohort"]+"/EigVec-"+config["meta-analysis"]+"-"+config["cell_type"]+"-top-"+config["n_genes"]+"-"+config["method"]+ "weighted" if config["weight"] else "unweighted"
-        output = config["output_directory"] + config["cohort"] + "/" + config["gwas"] + "_keygenes_covCor"
+        output = config["output_directory"] + config["cohort"], 
+        input = config["output_directory"] + "input/Downstreamer/",
+        ct = config["cell_type"],
+        meta_analysis = config["meta-analysis"],
+        n = config["n_genes"],
+        method = config["method"],
+        weight = "weighted"if config["weight"] else "unweighted"
     shell:
         """
         java -Djava.util.concurrent.ForkJoinPool.common.parallelism=16 -Xmx{params.memory} -Xms{params.memory} -jar {params.depict2} \
         --mode ENRICH \
         --gwas {input.gwas} \
-        --geneCorrelations {input.geneCorrelations} \
-        --output {params.output} \
+        --geneCorrelations {params.input}permutationGeneCor/geneCorForceNormalchr_ \
+        --output {params.output}/{wildcards.gwas}_keygenes_covCor \
         --genes {input.genes} \
-        --expressionEigenVectors {wildcards.ct}={eigvec} \
+        --expressionEigenVectors {params.ct}={params.output}/EigVec-{params.meta_analysis}-{params.ct}-top-{params.n}-{params.method}-{params.weight} \
         --covariates {input.covariates} \
         --eh \
         -t 8 \
