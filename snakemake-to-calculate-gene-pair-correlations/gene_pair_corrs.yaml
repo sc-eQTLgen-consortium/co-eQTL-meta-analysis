@@ -81,11 +81,11 @@ gwas: schizophrenia_ripke2014
 ##############################################################################################
 
 gene_list_path: nan # path to gene list of interest.  
-n_genes: 36539 # number of genes to perform correlation analysis on
+n_genes: 1000 # number of genes to perform correlation analysis on
 method: 'pearson' # Correlation method
 weight: True # Whether or not weighted correlation should be performed. Either 'weighted' or 'unweighted'
 metadata: False # Whether to extract expression metadata. Either 'True' or 'False'
-meta-analysis: 'fishersz' # Meta-analysis method used to combine correlation over donors. Either 'fishersz' or 'mean'
+meta-analysis: ['mean','fishersz'] # Meta-analysis method used to combine correlation over donors. Either 'fishersz' or 'mean'
 threads: 20 # Threads pascalx
 rscol: 0 # gwas summary statistics gene id column number
 pcol: 1 # gwas summary statistics pval column number 

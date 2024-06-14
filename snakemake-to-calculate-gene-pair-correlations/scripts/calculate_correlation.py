@@ -193,11 +193,11 @@ if args.method == 'spearman':
 fileout = gzip.open(args.output, "wt")
 
 # Calculate correlation
-for i in range(0,n_genes):
+for i in range(0,all_genes):
     x = values[i]
     genei = genes[i]
     
-    for j in range(i+1,n_genes):
+    for j in range(i+1,all_genes):
         y = values[j]
         genej = genes[j]
         
