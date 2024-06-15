@@ -133,3 +133,6 @@ Downstreamer prioritizes key genes using GWAS summary statistics. This is done b
 | -t                        	| Maximum number of calculation threads                                                                                 	| 8                                                            	|
 | --forceNormalGenePvalues  	| Force normal gene p-values before pathway enrichment                                                                  	|                                                              	|
 | --jblas                   	|                                                                                                                       	|                                                              	|
+
+*Author: Anoek Kooijmans*
+*Date: June 17, 2024*

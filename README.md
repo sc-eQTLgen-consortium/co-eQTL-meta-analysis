@@ -20,3 +20,6 @@ The **gene_pair_corrs.yaml** configuration file is used by the pipeline to speci
 | Seaborn       | 0.13.2    |
 | Seurat        | 4.3.0.1   |
 | statsmodels   | 0.14.2    |
+
+*Author: Anoek Kooijmans*
+*Date: June 17, 2024*
