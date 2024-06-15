@@ -208,6 +208,7 @@ rule aggregate_gwas_genes:
         sif = config["singularity_path_downstreamer"],
         scripts = config["snakefile_dir"] + "scripts/",
         threads = config["threads"],
+        refpanel = config["output_directory"] + "input/Downstreamer/1kGP_high_coverage/1kGP_high_coverage_Illumina",
         rscol = config["rscol"],
         pcol = config["pcol"],
         window = config["window"],
@@ -215,14 +216,14 @@ rule aggregate_gwas_genes:
     shell:
         """
         singularity exec --bind {params.top} {params.sif} python3 {params.scripts}runRealGWAS.py \
-            --refpanel {params.input}1kGP_high_coverage/1kGP_high_coverage_Illumina \
-            --gwas {input.sum_stats}
-            --annotation {input.annotation}
-            --threads {params.threads}
-            --outfile {output.aggregated_genes}
-            --rscol {params.rscol}
+            --refpanel {params.refpanel} \
+            --gwas {input.sum_stats} \
+            --annotation {input.annotation} \
+            --threads {params.threads} \
+            --outfile {output.aggregated_genes} \
+            --rscol {params.rscol} \
             --pcol {params.pcol} \
-            --window {params.window}
+            --window {params.window} 
         """
         
 rule eigenDecompose_matrix:
@@ -239,7 +240,7 @@ rule eigenDecompose_matrix:
     threads: config["eigendecompose"]["eigendecompose_threads"]
     params:
         top = config["top_directory"],
-        sif = config["singularity_path_downstreamer"],
+        sif = config["singularity_path"],
         scripts = config["snakefile_dir"] + "scripts/",
     shell:
         """

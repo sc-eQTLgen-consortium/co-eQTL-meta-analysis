@@ -3,9 +3,6 @@
 #!/usr/bin/env Rscript
 suppressPackageStartupMessages(library("optparse"))
 suppressPackageStartupMessages(library("Seurat"))
-suppressPackageStartupMessages(library("yaml"))
-suppressPackageStartupMessages(library("stringr"))
-suppressPackageStartupMessages(library("weights"))
 
 option_list <- list(
   make_option("--celltype", type = "character", help = "Cell type"),
@@ -105,6 +102,12 @@ for(donor in donor_list){
 rm(donor_rds,cell_barcodes,n_counts,raw_counts,raw_counts_df,filtered_genes,weights)
 genes_to_keep <- unique(unlist(gene_filter_list))
 sc_data_filtered <- sc_data_filtered[genes_to_keep,]
+
+# Get all barcodes
+cell_barcodes <- colnames(sc_data_filtered)  
+barcodesOut = paste0(args$output,args$cohort,"/barcodes-",args$celltype,"-top-",args$n,".tsv.gz")
+write.table(cell_barcodes, gzfile(barcodesOut),sep="\t",row.names = FALSE, col.names=FALSE, quote = FALSE)
+
 cat("\nSaving gene list")
 write.table(genes_to_keep, file = gzfile(args$genepath), sep = "\t", col.names = FALSE, quote = FALSE, row.names = FALSE)
 cat(paste("\nGene list saved to:", args$genepath))

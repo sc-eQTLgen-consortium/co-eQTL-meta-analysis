@@ -89,4 +89,4 @@ meta-analysis: ['mean','fishersz'] # Meta-analysis method used to combine correl
 threads: 20 # Threads pascalx
 rscol: 0 # gwas summary statistics gene id column number
 pcol: 1 # gwas summary statistics pval column number 
-window: 25000 # Window used by pascalx
+window: 25000 # Window used in pascalX
