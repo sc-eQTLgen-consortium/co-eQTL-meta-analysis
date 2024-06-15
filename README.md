@@ -21,5 +21,8 @@ The **gene_pair_corrs.yaml** configuration file is used by the pipeline to speci
 | Seurat        | 4.3.0.1   |
 | statsmodels   | 0.14.2    |
 
-*Author: Anoek Kooijmans*
-*Date: June 17, 2024*
+*Author:* Anoek Kooijmans
+
+*Date: 13-06-2024*
+
+**License: GNU GPL v3**
