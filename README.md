@@ -1,5 +1,7 @@
 # co-eQTL-meta-analysis
 
+Caution: Pipeline is not yet ready for public use
+
 Scripts usage in this pipeline:
 Step one is to generate files to allow snakemake to calculate all of the parallel jobs it will have to run.
 This step uses the script: donor_ids.R
