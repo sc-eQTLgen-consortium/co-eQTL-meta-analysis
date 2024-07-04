@@ -13,27 +13,30 @@ scripts_dir = snake_dir+"scripts/"
 wg3_path = config["wg3_path"]
 cohort = config["cohort"]
 wg3_dir = f"{wg3_path}/{cohort}/input/L1/"
-wg3_dir = wg3_dir.replace(" ","")
+#wg3_dir = wg3_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
 smf = f"{wg3_path}/{cohort}/input/smf.txt"
-smf = smf.replace(" ","")
+#smf = smf.replace(" ","")
 
+chromosomes = list(range(1,23))
 cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
 gene_list_dict = {}
+# Create a dictionary with cell type as key and path to gene list for that cell type as value
 for file in gene_list:
     for cell_type in cell_types:
         if f"{cohort}_{cell_type}" in file:
             gene_list_dict[cell_type] = file
             break
 
+# Check there is a gene list provided for every cell type
 if type(cell_types) is list and len(cell_types) != len(gene_list):
     raise Exception("There should be a gene list input for every cell type.")
-chromosomes = list(range(1,23))
 
-donor_file_path = [f"{snake_dir}/donor_data/{cohort}-{i}-donor-list.tsv" for i in cell_types]
+donor_file_path = [f"{snake_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv" for cell_type in cell_types]
 #donor_file_path = donor_file_path.replace(" ","")
 print(f"Pipeline is being run for {cell_types} cells.")
 
+# Make sure pipeline is not run for empty gene lists
 if type(gene_list) == list:
     line = gzip.open(gene_list[0], 'rt').readline().strip()
 else:
@@ -41,6 +44,7 @@ else:
 if not line:
     raise Exception("No genes in gene list file.")
 
+# Run first set of rules if donor data exists, otherwise create donor data with second set of rules
 if all([os.path.exists(file) for file in donor_file_path]):
     donors,donors_list = {},{}
     for cell_type in cell_types:
@@ -48,7 +52,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
         donors[cell_type] = pd.read_csv(tmp_donor_file_path, sep='\t')
         donors_list[cell_type] = [i for i in donors[cell_type]['original_labels']] 
     metrics = ['corr','pval','zscore']
-    min_samples = 20
+    min_samples = 20 # Number of samples for which a gene pair must have correlations calculated for (NA values produced with low gene expression)
     combination,all_donors_cell_type = {'donor':[], 'cell_type':[], 'gene_list':{}},{}
     for cell_type in cell_types:
         all_donors_cell_type[cell_type] = []
@@ -59,11 +63,13 @@ if all([os.path.exists(file) for file in donor_file_path]):
         for donor in donors_list[cell_type]:
             combination['donor'].append(donor)
             combination['cell_type'].append(cell_type)
-        combination[f'gene_list'][cell_type] = genes_file
+        combination[f'gene_list'][cell_type] = genes_file # required to match gene list to a cell type (update: can be replaced by gene_list dictionary above)
 
+    # Required for creatDonorFiles rule. All donors regardless of cell type are added to each cell type, files will subsequently be touched and deleted if not requested.
     for cell_type in all_donors_cell_type:
         all_donors_cell_type[cell_type].extend(np.unique([i for i in combination['donor']]))
 
+    # To choose how far the pipeline runs uncomment preferred output in rule all, have the rest commented out (as files are set as temporary this would also need to be changed)
     rule all:
         input:
             #donor_counts = expand(out_dir + cohort + "/normalized-counts-{donor}-{cell_types}.mtx", zip, donor=combination['donor'], cell_types=combination['cell_type'], allow_missing=True),
@@ -140,8 +146,6 @@ if all([os.path.exists(file) for file in donor_file_path]):
             out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted-chr-{chromosome}.tsv.gz"
         output:
             final_out = out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz",
-            #temp1 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}"),
-            #temp2 = temp(out_dir + cohort+"/output-tmp-bin-transpose-{cohort}-{cell_types}-{chromosome}"),
             temp3 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}.dat"),
             temp4 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}.rows.txt"),
             temp5 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}.cols.txt"),
@@ -173,7 +177,6 @@ if all([os.path.exists(file) for file in donor_file_path]):
 
 else:
     print("Donor list file is being generated for subsequent runs of the pipeline.")
-    print(f"Pipeline is being run for {cell_types} cells.")
 
     rule all:
         input:
