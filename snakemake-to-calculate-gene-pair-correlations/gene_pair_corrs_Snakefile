@@ -8,7 +8,6 @@ import gzip
 out_dir = config["output_directory"]
 top_dir = config["top_directory"]
 simg_dir = config["singularity_path"]
-transpose_dir = config["transpose_tool_path"]
 snake_dir = config["snakefile_path"]
 scripts_dir = snake_dir+"scripts/"
 wg3_path = config["wg3_path"]
