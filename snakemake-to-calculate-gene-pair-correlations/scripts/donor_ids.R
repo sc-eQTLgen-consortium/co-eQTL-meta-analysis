@@ -28,9 +28,9 @@ Pcs = read.csv(paste(dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''),sep='
 # Filter out donors that are not in the smf file
 x = sc_data@meta.data$Assignment %in% smf$genotype_id
 if (sum(x) != length(sc_data@meta.data$Assignment)){
-	          cells.use = colnames(sc_data[,x])
+  cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
-      sc_data = subset_file
+  sc_data = subset_file
 }
 
 # Filter out donors that are not in Pcs file
