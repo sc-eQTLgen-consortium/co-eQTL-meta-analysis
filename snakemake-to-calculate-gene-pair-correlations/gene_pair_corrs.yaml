@@ -1,0 +1,45 @@
+# config for calculating gene pair correlations
+
+######################################################################################
+####### The following arguments are for indicating file locations on your system #####
+######################################################################################
+
+top_directory: /groups/umcg-franke-scrna/tmp03/
+output_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/output/
+singularity_path: /groups/umcg-franke-scrna/tmp03/software/wp3_extended.sif
+snakefile_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/
+wg3_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/
+
+##########################################################################
+####### The following arguments are for information about your study #####
+##########################################################################
+
+cohort: wg3_wijst2018
+cell_type: CD4_T
+
+################################################################################################################
+####### The following arguments are common parameters that may need to be changed depending on the dataset #####
+################################################################################################################
+
+donor_list:
+  donor_list_memory: 12 ### The amount of memory (GB) used per thread for the make_donor_lists step
+
+create_donor:
+  create_donor_memory: 12 ### The amount of memory (GB) used per thread for the create_donor step
+
+process_donor:
+  process_donor_memory: 12 ### The amount of memory (GB) used per thread for the process_donor step
+
+aggregate_metrics:
+  aggregate_metrics_memory: 24 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+
+transpose_matrix:
+  transpose_matrix_memory: 8 ### The amount of memory (GB) used for the transpose_matrix step
+  
+##############################################################################################
+####### The following arguments are situational. You don't have to fill anything in here #####
+##############################################################################################
+
+#gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
+gene_list_path: 
+

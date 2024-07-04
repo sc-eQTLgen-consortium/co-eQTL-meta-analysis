@@ -1,0 +1,186 @@
+configfile: "./gene_pair_corrs.yaml"
+
+import pandas as pd
+import numpy as np
+import os
+import gzip
+
+out_dir = config["output_directory"]
+top_dir = config["top_directory"]
+simg_dir = config["singularity_path"]
+transpose_dir = config["transpose_tool_path"]
+snake_dir = config["snakefile_path"]
+scripts_dir = snake_dir+"scripts/"
+wg3_path = config["wg3_path"]
+cohort = config["cohort"]
+wg3_dir = f"{wg3_path}/{cohort}/input/L1/"
+wg3_dir = wg3_dir.replace(" ","")
+smf = f"{wg3_path}/{cohort}/input/smf.txt"
+smf = smf.replace(" ","")
+
+cell_types = config["cell_type"]
+gene_list = config["gene_list_path"]
+if type(cell_types) is list and len(cell_types) != len(gene_list):
+    raise Exception("There should be a gene list input for every cell type.")
+chromosomes = list(range(1,23))
+
+donor_file_path = [f"{snake_dir}/donor_data/{cohort}-{i}-donor-list.tsv" for i in cell_types]
+#donor_file_path = donor_file_path.replace(" ","")
+print(f"Pipeline is being run for {cell_types} cells.")
+
+if type(gene_list) == list:
+    line = gzip.open(gene_list[0], 'rt').readline().strip()
+else:
+    line = gzip.open(gene_list, 'rt').readline().strip()
+if not line:
+    raise Exception("No genes in gene list file.")
+
+if all([os.path.exists(file) for file in donor_file_path]):
+    donors,donors_list = {},{}
+    for cell_type in cell_types:
+        tmp_donor_file_path = f"{snake_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv"
+        donors[cell_type] = pd.read_csv(tmp_donor_file_path, sep='\t')
+        donors_list[cell_type] = [i for i in donors[cell_type]['original_labels']] 
+    metrics = ['corr','pval','zscore']
+    min_samples = 20
+    combination,all_donors_cell_type = {'donor':[], 'cell_type':[], 'gene_list':{}},{}
+    for cell_type in cell_types:
+        all_donors_cell_type[cell_type] = []
+        for filename in gene_list:
+            if f"{cohort}_{cell_type}" in filename:
+                genes_file = filename
+                break
+        for donor in donors_list[cell_type]:
+            combination['donor'].append(donor)
+            combination['cell_type'].append(cell_type)
+        combination[f'gene_list'][cell_type] = genes_file
+
+    for cell_type in all_donors_cell_type:
+        all_donors_cell_type[cell_type].extend(np.unique([i for i in combination['donor']]))
+
+    rule all:
+        input:
+            #donor_counts = expand(out_dir + cohort + "/normalized-counts-{donor}-{cell_types}.mtx", zip, donor=combination['donor'], cell_types=combination['cell_type'], allow_missing=True),
+            #corr = expand(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted.tsv.gz", zip, donor=combination["donor"], cell_types=combination["cell_type"]),
+            #aggregated_corrs = expand(out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted-chr-{chromosome}.tsv.gz", cohort=cohort, cell_types=cell_types, chromosome=chromosomes),
+            transposed_matrix = expand(out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz", cohort=cohort, cell_types=cell_types, chromosome=chromosomes)
+
+    rule createDonorFiles:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"]
+        input:
+            "/groups/umcg-franke-scrna/tmp01/projects/sc-eqtlgen-consortium-pipeline/Depracated/wg3/.dan/calculate_correlation_metrics//donor_data/wg3_Franke_split_v2-{cell_types}-donor-list.tsv"
+        output:
+            counts = temp(expand(out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx", donor=combination['donor'], allow_missing=True)),
+            weights = temp(expand(out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True)),
+            gene_list = temp(expand(out_dir + cohort + "/donor_gene_list/filtered-genes-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True))
+        params:
+            gene_list = lambda wildcards: combination["gene_list"][wildcards.cell_types],
+            all_donors_list = lambda wildcards: ','.join(all_donors_cell_type[wildcards.cell_types]),
+            ct = lambda wildcards: f"{wildcards.cell_types}"
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py {params.all_donors_list} {out_dir}{cohort} {params.ct}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {wg3_dir} {out_dir} {params.gene_list} {smf}
+            """
+
+    rule calculate_correlations:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"]
+        input:
+            counts = out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx",
+            weights = out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz",
+            gene_list = out_dir + cohort + "/donor_gene_list/filtered-genes-{donor}-{cell_types}.tsv.gz"
+        output:
+            corr = temp(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted.tsv.gz")
+        params:
+            gene_list = lambda wildcards: combination["gene_list"][f"{wildcards.cell_types}"]
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}calculate_correlation.py \
+            --counts {input.counts} \
+            --method pearson \
+            --weight True {input.weights}\
+            --gene_list_donor {input.gene_list} \
+            --gene_list {params.gene_list} \
+            --output {output.corr}
+            """
+
+    rule aggregate_final_results:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"]
+        input:
+            lambda wildcards: expand(out_dir+cohort+"/{donor}-{cell_types}-pearson-weighted.tsv.gz", donor=donors_list[wildcards.cell_types], allow_missing=True)
+        output:
+            temp(out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted-chr-{chromosome}.tsv.gz")
+        params:
+            list_of_donors = lambda wildcards: ','.join(donors_list[wildcards.cell_types]).replace(" ",""),
+            out_files = out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted",
+            chromosome = lambda wildcards: f"{wildcards.chromosome}",
+            cell_type = lambda wildcards: f"{wildcards.cell_types}"
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py {params.list_of_donors} {params.cell_type} {params.out_files} {out_dir}{cohort} {wg3_path}{cohort} {params.chromosome}
+            """
+
+    rule transpose_matrix:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["transpose_matrix"]["transpose_matrix_memory"]
+        input:
+            out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted-chr-{chromosome}.tsv.gz"
+        output:
+            final_out = out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz",
+            #temp1 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}"),
+            #temp2 = temp(out_dir + cohort+"/output-tmp-bin-transpose-{cohort}-{cell_types}-{chromosome}"),
+            temp3 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}.dat"),
+            temp4 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}.rows.txt"),
+            temp5 = temp(out_dir + cohort+"/output-tmp-bin-{cohort}-{cell_types}-{chromosome}.cols.txt"),
+            temp6 = temp(out_dir + cohort+"/output-tmp-bin-transpose-{cohort}-{cell_types}-{chromosome}.dat"),
+            temp7 = temp(out_dir + cohort+"/output-tmp-bin-transpose-{cohort}-{cell_types}-{chromosome}.rows.txt"),
+            temp8 = temp(out_dir + cohort+"/output-tmp-bin-transpose-{cohort}-{cell_types}-{chromosome}.cols.txt")
+        params:
+            output_path = out_dir + cohort,
+            cohort = lambda wildcards: f"{wildcards.cohort}",
+            cell_types = lambda wildcards: f"{wildcards.cell_types}",
+            chromosome = lambda wildcards: f"{wildcards.chromosome}"
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+              txttobin \
+              {input} \
+              {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome}
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+              transpose \
+              {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome} \
+              {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
+              10000
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+              bintotxt \
+              {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
+              {output.final_out}
+            """
+
+
+else:
+    print("Donor list file is being generated for subsequent runs of the pipeline.")
+    print(f"Pipeline is being run for {cell_types} cells.")
+
+    rule all:
+        input:
+            expand(snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv", cell_types=cell_types)
+
+    rule makeDonorLists:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_list"]["donor_list_memory"]
+        output:
+            snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
+        params:
+            donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
+            donor_rds_out_path = (f"{scripts_dir}donor_ids.R").replace(" ",""),
+            gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_out_path} {wildcards.cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {gene_list} {smf}
+            """
+
+
