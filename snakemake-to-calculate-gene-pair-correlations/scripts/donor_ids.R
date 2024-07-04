@@ -38,9 +38,9 @@ Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
 Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data$Assignment]
 x=sc_data@meta.data$Assignment %in% Pcs_donors
 if (sum(x) != length(sc_data@meta.data$Assignment)){
-	          cells.use = colnames(sc_data[,x])
+  cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
-      sc_data = subset_file
+  sc_data = subset_file
 }
 
 
