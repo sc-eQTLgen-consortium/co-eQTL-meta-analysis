@@ -19,6 +19,13 @@ smf = smf.replace(" ","")
 
 cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
+gene_list_dict = {}
+for file in gene_list:
+    for cell_type in cell_types:
+        if f"{cohort}_{cell_type}" in file:
+            gene_list_dict[cell_type] = file
+            break
+
 if type(cell_types) is list and len(cell_types) != len(gene_list):
     raise Exception("There should be a gene list input for every cell type.")
 chromosomes = list(range(1,23))
@@ -180,11 +187,12 @@ else:
             snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
         params:
             donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
-            donor_rds_out_path = (f"{scripts_dir}donor_ids.R").replace(" ",""),
+            donor_rds_script = (f"{scripts_dir}donor_ids.R").replace(" ",""),
             gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
+            gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_out_path} {wildcards.cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {gene_list} {smf}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf}
             """
 
 
