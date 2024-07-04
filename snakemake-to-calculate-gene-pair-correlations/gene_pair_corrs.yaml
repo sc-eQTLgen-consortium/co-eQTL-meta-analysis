@@ -15,7 +15,7 @@ wg3_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipelin
 ##########################################################################
 
 cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
-cell_type: # chosen cell type
+cell_type: # cell type(s) to calculate correlations for
     - B
     - CD8_T
     - CD4_T
