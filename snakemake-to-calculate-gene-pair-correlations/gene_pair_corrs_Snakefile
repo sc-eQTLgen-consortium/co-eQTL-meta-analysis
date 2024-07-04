@@ -76,7 +76,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
             time = config["create_donor"]["create_donor_time"]
         input:
-            "/groups/umcg-franke-scrna/tmp01/projects/sc-eqtlgen-consortium-pipeline/Depracated/wg3/.dan/calculate_correlation_metrics//donor_data/wg3_Franke_split_v2-{cell_types}-donor-list.tsv"
+            snake_dir + "/donor_data/" + cohort + "-{cell_types}-donor-list.tsv"
         output:
             counts = temp(expand(out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx", donor=combination['donor'], allow_missing=True)),
             weights = temp(expand(out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True)),
