@@ -4,18 +4,18 @@
 ####### The following arguments are for indicating file locations on your system #####
 ######################################################################################
 
-top_directory: /groups/umcg-franke-scrna/tmp03/
-output_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/output/
-singularity_path: /groups/umcg-franke-scrna/tmp03/software/wp3_extended.sif
-snakefile_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/
-wg3_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/
+top_directory: /groups/umcg-franke-scrna/tmp03/ # a location above everything else
+output_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
+singularity_path: /groups/umcg-franke-scrna/tmp03/software/wp3_extended.sif # location of singularity image with all installed software
+snakefile_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/ # location of this file and the snakefile
+wg3_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/ # location of ouput files from wg3 of sc-eQTLGen pipeline
 
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: wg3_wijst2018
-cell_type: 
+cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
+cell_type: # chosen cell type
     - B
     - CD8_T
     - CD4_T
