@@ -35,7 +35,7 @@ create_donor:
   create_donor_time: 05:59:59 ### Amount of time to request for each job
 
 process_donor:
-  process_donor_memory: 12 ### The amount of memory (GB) used per thread for the process_donor step
+  process_donor_memory: 12 ### The amount of memory (GB) used per thread for the calculate_correlations step
   process_donor_time: 05:59:59 ### Amount of time to request for each job
 
 aggregate_metrics:
