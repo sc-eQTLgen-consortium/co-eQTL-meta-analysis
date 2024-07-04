@@ -28,18 +28,23 @@ cell_type: # cell type(s) to calculate correlations for
 
 donor_list:
   donor_list_memory: 12 ### The amount of memory (GB) used per thread for the make_donor_lists step
+  donor_list_time: 01:59:59 ### Amount of time to request for each job
 
 create_donor:
   create_donor_memory: 12 ### The amount of memory (GB) used per thread for the create_donor step
+  create_donor_time: 05:59:59 ### Amount of time to request for each job
 
 process_donor:
   process_donor_memory: 12 ### The amount of memory (GB) used per thread for the process_donor step
+  process_donor_time: 05:59:59 ### Amount of time to request for each job
 
 aggregate_metrics:
   aggregate_metrics_memory: 24 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  aggregate_metrics_time: 23:59:59 ### Amount of time to request for each job
 
 transpose_matrix:
-  transpose_matrix_memory: 8 ### The amount of memory (GB) used for the transpose_matrix step
+  transpose_matrix_memory: 24 ### The amount of memory (GB) used for the transpose_matrix step
+  transpose_matrix_time: 01:59:59 ### Amount of time to request for each job
   
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
