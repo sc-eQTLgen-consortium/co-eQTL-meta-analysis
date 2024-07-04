@@ -68,7 +68,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
     rule createDonorFiles:
         resources:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
-            time = config["create_donor"]["create_donor_time"]]
+            time = config["create_donor"]["create_donor_time"]
         input:
             "/groups/umcg-franke-scrna/tmp01/projects/sc-eqtlgen-consortium-pipeline/Depracated/wg3/.dan/calculate_correlation_metrics//donor_data/wg3_Franke_split_v2-{cell_types}-donor-list.tsv"
         output:
@@ -88,7 +88,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
     rule calculate_correlations:
         resources:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"],
-            time = config["process_donor"]["process_donor_time"]]
+            time = config["process_donor"]["process_donor_time"]
         input:
             counts = out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx",
             weights = out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz",
@@ -111,7 +111,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
     rule aggregate_final_results:
         resources:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_metrics"]["aggregate_metrics_memory"],
-            time = config["aggregate_metrics"]["aggregate_metrics_time"]]
+            time = config["aggregate_metrics"]["aggregate_metrics_time"]
         input:
             lambda wildcards: expand(out_dir+cohort+"/{donor}-{cell_types}-pearson-weighted.tsv.gz", donor=donors_list[wildcards.cell_types], allow_missing=True)
         output:
@@ -129,7 +129,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
     rule transpose_matrix:
         resources:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["transpose_matrix"]["transpose_matrix_memory"],
-            time = config["transpose_matrix"]["transpose_matrix_time"]]
+            time = config["transpose_matrix"]["transpose_matrix_time"]
         input:
             out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted-chr-{chromosome}.tsv.gz"
         output:
@@ -176,7 +176,7 @@ else:
     rule makeDonorLists:
         resources:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_list"]["donor_list_memory"],
-            time = config["donor_list"]["donor_list_time"]]
+            time = config["donor_list"]["donor_list_time"]
         output:
             snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
         params:
