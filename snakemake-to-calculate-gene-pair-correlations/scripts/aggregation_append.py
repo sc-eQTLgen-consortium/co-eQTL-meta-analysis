@@ -43,6 +43,8 @@ outdir = f"{output}-chr-{chromosome}.tsv.gz"
 handleout = gzip.open(outdir, "wt")
 
 for ind_ID in list_of_donors:
+  sample = pd.read_csv(f"{top_path}/{ind_ID}-{celltype}-pearson-weighted.tsv.gz",sep='\t')
+  gene_pairs = [i for i in sample.gene_pair.values]
   if first_run:
     indexes = set([i for i in range(len(gene_pairs)) if gene_pairs[i].split('_')[0] in chr_genes or gene_pairs[i].split('_')[1] in chr_genes])
     header = [sample.gene_pair.iloc[i] for i in range(len(sample.gene_pair)) if i in indexes]
@@ -51,8 +53,6 @@ for ind_ID in list_of_donors:
     for gene_pair in header:
       handleout.write(f"\t{gene_pair}")
 
-  sample = pd.read_csv(f"{top_path}/{ind_ID}-{celltype}-pearson-weighted.tsv.gz",sep='\t')
-  gene_pairs = [i for i in sample.gene_pair.values]
   corr_values = [sample.correlation.iloc[i] for i in range(len(sample.correlation)) if i in indexes]
   header = [sample.gene_pair.iloc[i] for i in range(len(sample.gene_pair)) if i in indexes]
 
