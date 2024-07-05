@@ -40,11 +40,7 @@ if (sum(x) != length(sc_data@meta.data$Assignment)){
 }
 
 # Filter out donors that are not in the Pcs file
-if (length(Pcs$X) != 0){
-  Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
-} else {
-  Pcs_donors = str_split(rownames(Pcs),';',simplify=T)[,1]
-}
+Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
 Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data$Assignment]
 x=sc_data@meta.data$Assignment %in% Pcs_donors
 if (sum(x) != length(sc_data@meta.data$Assignment)){
