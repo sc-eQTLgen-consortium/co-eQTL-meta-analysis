@@ -93,7 +93,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             ct = lambda wildcards: f"{wildcards.cell_types}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py {params.all_donors_list} {out_dir}{cohort} {params.ct}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py "{params.all_donors_list}" {out_dir}{cohort} {params.ct}
             singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {wg3_dir} {out_dir} {params.gene_list} {smf}
             """
 
@@ -135,7 +135,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             cell_type = lambda wildcards: f"{wildcards.cell_types}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py {params.list_of_donors} {params.cell_type} {params.out_files} {out_dir}{cohort} {wg3_path}{cohort} {params.chromosome}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {wg3_path}{cohort} {params.chromosome}
             """
 
     rule transpose_matrix:
