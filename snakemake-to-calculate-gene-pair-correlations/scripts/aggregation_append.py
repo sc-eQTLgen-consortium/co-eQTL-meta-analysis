@@ -21,7 +21,7 @@ celltype = sys.argv[2]
 output = sys.argv[3]
 top_path = sys.argv[4]
 wg3_path = sys.argv[5]
-chromosome = int(sys.argv[6])
+chromosome = str(sys.argv[6])
 
 print(f"First 10 donors of list: {list_of_donors[0:10]}")
 print(f"Cell Type: {celltype}")
@@ -37,7 +37,7 @@ anno_input = f"{wg3_path}/input/LimixAnnotationFile.txt"
 print("Loading chromosome-gene annotation file.")
 anno_file = pd.read_csv(anno_input,sep='\t')
 first_run = True
-chr_genes = set([i for i in anno_file.feature_id[anno_file.chromosome==chromosome]])
+chr_genes = set([i for i in anno_file.feature_id[anno_file.chromosome.astype(str)==chromosome]])
 print(f"Writing file for chromosome {chromosome}.")
 outdir = f"{output}-chr-{chromosome}.tsv.gz"
 handleout = gzip.open(outdir, "wt")
