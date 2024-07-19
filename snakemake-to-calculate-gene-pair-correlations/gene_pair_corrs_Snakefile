@@ -159,16 +159,16 @@ if all([os.path.exists(file) for file in donor_file_path]):
             chromosome = lambda wildcards: f"{wildcards.chromosome}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
               txttobin \
               {input} \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome}
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
               transpose \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               10000
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
               bintotxt \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {output.final_out}
