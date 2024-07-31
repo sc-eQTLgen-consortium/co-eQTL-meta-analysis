@@ -3,10 +3,13 @@ args = commandArgs(trailingOnly=TRUE)
 
 cell_type = args[1]
 cohort_id = args[2]
-dir_with_seurat = args[3]
+seurat_object_path = args[3]
 donor_rds_dir = args[4]
 genes_to_use = args[5]
 smf = args[6]
+qtl_input_path = [7]
+seurat_assignment_column = [8]
+
 
 library(Seurat)
 library(matrixStats)
@@ -16,24 +19,24 @@ library(Matrix)
 
 print(paste("cell type:",cell_type))
 print(paste("cohort id:",cohort_id))
-print(paste("seurat file: ",dir_with_seurat,cell_type,".Qced.Normalized.SCs.Rds",sep=''))
+print(paste("seurat file: ",seurat_object_path, sep = ''))
 print(paste("output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
 print(paste("Sample mapping file: ",smf,sep=''))
-print(paste("Pcs file: ",dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''))
+print(paste("Pcs file: ",qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''))
 print(paste("Using gene list: ", genes_to_use, sep=''))
 
 # selection of genes 
 
 print("Loading big rds file")
-sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
+sc_data <- readRDS(seurat_object_path)
 
 print("Filtering RDS file with smf and Pcs files")
 smf = read.csv(smf,sep='\t')
-Pcs = read.csv(paste(dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
+Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
 
 # Filter out donors that are not in the smf file
-x = sc_data@meta.data$Assignment %in% smf$genotype_id
-if (sum(x) != length(sc_data@meta.data$Assignment)){
+x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
+if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
@@ -41,9 +44,9 @@ if (sum(x) != length(sc_data@meta.data$Assignment)){
 
 # Filter out donors that are not in the Pcs file
 Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
-Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data$Assignment]
-x=sc_data@meta.data$Assignment %in% Pcs_donors
-if (sum(x) != length(sc_data@meta.data$Assignment)){
+Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
+x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
+if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
@@ -55,13 +58,13 @@ genes_to_use = read.table(genes_to_use, header=F)[,1]
 sc_data_filtered <- sc_data[genes_to_use,]
 rm(sc_data)
 
-donortab  <- as.data.frame(table(sc_data_filtered$Assignment))
+donortab  <- as.data.frame(table(sc_data_filtered[[seurat_assignment_column]]))
 donor_list <- donortab[donortab$Freq >10,]$Var1
 
 # Filter low expressed genes per donor
 for(donor in donor_list){
   cat("\nProcessing donor:", donor)
-  donor_rds <- sc_data_filtered[,sc_data_filtered$Assignment == donor ]
+  donor_rds <- sc_data_filtered[,sc_data_filtered[[seurat_assignment_column]] == donor ]
   #cell_barcodes <- colnames(donor_rds)
   #barcodesOut = paste0(donor_rds_dir,cohort_id,"/donor_barcodes/barcodes-",donor,"-",cell_type,".tsv.gz")
   #write.table(cell_barcodes, file=gzfile(barcodesOut),sep="\t",row.names = FALSE, col.names=FALSE, quote = FALSE) 

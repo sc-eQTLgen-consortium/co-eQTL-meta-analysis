@@ -9,13 +9,16 @@ out_dir = config["output_directory"]
 top_dir = config["top_directory"]
 simg_dir = config["singularity_path"]
 snake_dir = config["snakefile_path"]
-scripts_dir = snake_dir+"scripts/"
-wg3_path = config["wg3_path"]
+scripts_dir = config["scripts_directory"]
+input_directory = config["input_directory"]
 cohort = config["cohort"]
-wg3_dir = f"{wg3_path}/{cohort}/input/L1/"
-#wg3_dir = wg3_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
-smf = f"{wg3_path}/{cohort}/input/smf.txt"
+qtl_celltype_dir = f"{input_directory}/{cohort}/{qtl_celltype_subdirectory}"
+#qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
+smf = f"{input_directory}/{cohort}/{relative_smf_path}"
 #smf = smf.replace(" ","")
+seurat_celltype_prepend = config['seurat_object_prepend']
+seurat_celltype_append = config['seurat_object_append']
+seurat_assignment_column = config['seurat_assignment_column']
 
 chromosomes = list(range(1,23))
 cell_types = config["cell_type"]
@@ -94,7 +97,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
         shell:
             """
             singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py "{params.all_donors_list}" {out_dir}{cohort} {params.ct}
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {wg3_dir} {out_dir} {params.gene_list} {smf}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {out_dir} {params.gene_list} {smf} {qtl_celltype_dir} {seurat_assignment_column}
             """
 
     rule calculate_correlations:
@@ -135,7 +138,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             cell_type = lambda wildcards: f"{wildcards.cell_types}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {wg3_path}{cohort} {params.chromosome}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {input_directory}{cohort} {params.chromosome}
             """
 
     rule transpose_matrix:
@@ -195,7 +198,7 @@ else:
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
             """
 
 

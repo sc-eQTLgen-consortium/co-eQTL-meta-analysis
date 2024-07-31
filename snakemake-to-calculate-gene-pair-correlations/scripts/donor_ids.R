@@ -6,15 +6,16 @@ args = commandArgs(trailingOnly=TRUE)
 
 cell_type = args[1]
 cohort_id = args[2]
-dir_with_seurat = args[3]
+seurat_object_path = args[3]
 donor_rds_dir = args[4]
 gene_list_out = args[5]
 alt_gene_list = args[6]
 smf = args[7]
+qtl_input_path = [8]
 
 print(paste0("cell_type: ",cell_type))
 print(paste0("cohort: ",cohort_id))
-print(paste0("seurat directory: ",dir_with_seurat))
+print(paste0("seurat object: ",seurat_object_path))
 print(paste0("output directory: ",donor_rds_dir))
 print(paste0("standard_gene_list: ",gene_list_out))
 print(paste0("alternative_gene_list: ",alt_gene_list))
@@ -25,13 +26,13 @@ library(stringr)
 
 output_dir <- donor_rds_dir
 
-sc_data <- readRDS(paste0(dir_with_seurat,paste(cell_type,'.Qced.Normalized.SCs.Rds',sep='')))
+sc_data <- readRDS(seurat_object_path)
 
 print("seurat object loaded, continuing with analysis")
 
 print("Filtering RDS file with smf and Pcs files")
 smf = read.csv(smf,sep='\t')
-Pcs = read.csv(paste(dir_with_seurat,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
+Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
 
 # Filter out donors that are not in the smf file
 x = sc_data@meta.data$Assignment %in% smf$genotype_id
