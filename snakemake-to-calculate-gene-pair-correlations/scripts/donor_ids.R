@@ -12,6 +12,7 @@ gene_list_out = args[5]
 alt_gene_list = args[6]
 smf = args[7]
 qtl_input_path = [8]
+seurat_assignment_column = [9]
 
 print(paste0("cell_type: ",cell_type))
 print(paste0("cohort: ",cohort_id))
@@ -35,8 +36,8 @@ smf = read.csv(smf,sep='\t')
 Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
 
 # Filter out donors that are not in the smf file
-x = sc_data@meta.data$Assignment %in% smf$genotype_id
-if (sum(x) != length(sc_data@meta.data$Assignment)){
+x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
+if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
@@ -45,20 +46,20 @@ if (sum(x) != length(sc_data@meta.data$Assignment)){
 # Filter out donors that are not in Pcs file
 Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
 
-Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data$Assignment]
-x=sc_data@meta.data$Assignment %in% Pcs_donors
-if (sum(x) != length(sc_data@meta.data$Assignment)){
+Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
+x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
+if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
 }
 
 
-donortab  <- as.data.frame(table(sc_data$Assignment))
+donortab  <- as.data.frame(table(sc_data[[seurat_assignment_column]]))
 donor_list <- list(donortab[donortab$Freq >10,]$Var1)
 names(donor_list)=c('original_labels')
 donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
-donor <- unique(sc_data$Assignment)[2]
+donor <- unique(sc_data[[seurat_assignment_column]])[2]
 
 print("donors filtered.")
 
@@ -76,5 +77,5 @@ genes <- expressing_genes[1:3000,]
 
 write.table(rownames(genes), paste(gene_list_out,cohort_id,'-',cell_type,'-genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
 write.table(donor_list, paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-list.tsv'),sep='\t', row.names = F, quote = F)
-write.table(as.data.frame(table(sc_data$Assignment)), paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-counts.tsv'),sep='\t', row.names = F, quote = F)
+write.table(as.data.frame(table(sc_data[[seurat_assignment_column]])), paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-counts.tsv'),sep='\t', row.names = F, quote = F)
 
