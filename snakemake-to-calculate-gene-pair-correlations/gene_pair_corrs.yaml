@@ -52,8 +52,8 @@ transpose_matrix:
 
 #gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
 gene_list_path: 
-    - file_wg3_wijst2018_B.tsv
-    - file_wg3_wijst2018_CD4_T.tsv
-    - file_wg3_wijst2018_CD8_T.tsv
-    - file_wg3_wijst2018_Mono.tsv
-    - file_wg3_wijst2018_NK.tsv
+    - /path/to/file_wg3_wijst2018_B.tsv
+    - /path/to/file_wg3_wijst2018_CD4_T.tsv
+    - /path/to/file_wg3_wijst2018_CD8_T.tsv
+    - /path/to/file_wg3_wijst2018_Mono.tsv
+    - /path/to/file_wg3_wijst2018_NK.tsv
