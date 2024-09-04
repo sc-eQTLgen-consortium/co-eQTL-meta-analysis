@@ -149,6 +149,7 @@ def calc_z_score(pval,corr):
 
 print("Loading genes")
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
+gene_list_set = set(gene_list)
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
 genes.sort()
 print("Loading weights")
@@ -175,17 +176,17 @@ fileout.write("gene_pair\tcorrelation\n")
 print("Calculating correlation")
 for i in range(0,all_genes):
     genei = genes[i]
-    if genei in gene_list:
+    if genei in gene_list_set:
         gene_index = gene_list.index(genei)
         x = values[gene_index]
     
     for j in range(i+1,all_genes):
         genej = genes[j]
-        if genej in gene_list:
+        if genej in gene_list_set:
             gene_index = gene_list.index(genej)
             y = values[gene_index]
 
-        if genei not in gene_list or genej not in gene_list:
+        if genei not in gene_list_set or genej not in gene_list_set:
             fileout.write(f"{genei}_{genej}\t{np.nan}\n")
             continue
 
