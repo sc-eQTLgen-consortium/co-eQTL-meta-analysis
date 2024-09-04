@@ -1,5 +1,5 @@
 """
-Calculates correlation per donor 
+Calculates correlation per donor for the provided gene pair list
 """
 import numpy as np
 import pandas as pd 
@@ -8,6 +8,11 @@ import gzip
 from scipy import stats
 from scipy.special import betainc
 from scipy.io import mmread
+import cProfile
+import pstats
+
+profiler = cProfile.Profile()
+profiler.enable()
 
 parser = argparse.ArgumentParser(description="")
 parser.add_argument("--counts", required=True, type=str, help="Normalized counts file path")
@@ -50,7 +55,6 @@ def stdz(x, weight):
     # Standardize variable
     x = x - wtd_mean(x, weight)
     x = x / np.sqrt(wtd_var(x, weight))
-
     return x
 
 def wtd_mean(x, weight):
@@ -78,9 +82,7 @@ def lm(X, y):
     # Store the sample size (n) and degrees of freedom (df)
     n = X.shape[0]
     df = X.shape[1]
-    
     inv_m = inverse(X)
-
     betas = fit(X=X, y=y, inv_m=inv_m)
     
     #y_hat = predict(X=X, betas=betas)
@@ -106,7 +108,7 @@ def inverse(X):
     try:
         return np.linalg.inv(X_square)
     except np.linalg.LinAlgError:
-        print("Warning: using pseudo-inverse")
+        #print("Warning: using pseudo-inverse")
         return np.linalg.pinv(X_square)
 
 def fit(X, y, inv_m=None):
@@ -147,49 +149,60 @@ def calc_z_score(pval,corr):
         zscore *= -1
     return zscore
 
-print("Loading genes")
-gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
-genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
-genes.sort()
+print("Loading gene lists")
+genes_for_donor = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist() # genes per donor
+genes_for_donor_map = {gene: index for index, gene in enumerate(genes_for_donor)} # index for each gene
+genes_for_donor = set(genes_for_donor)
+
 print("Loading weights")
-weight = pd.read_csv(args.weight[1], sep = "\t",header=0)
-weight = [i for i in weight.weight]
+weight_per_cell = pd.read_csv(args.weight[1], sep = "\t",header=0)
+weight_per_cell = [i for i in weight_per_cell.weight]
 
 print("Loading normalised count matrix")
-norm_counts = mmread(args.counts)
-values = norm_counts.toarray()
+sparseData = mmread(args.counts)
+count_matrix = sparseData.toarray() # has the same gene order as genes_for_donor
+del sparseData
 
-all_genes = len(genes)
-n_genes = len(gene_list)
-print(f"Number of genes filtered: {all_genes - n_genes} out of {all_genes} genes")
-
-# If spearman, rank values
-if args.method == 'spearman':
+if args.method == 'spearman': # If method is spearman rank counts
     ranked_values = []
-    for i in range(n_genes):
-        ranked_values.append(list(stats.rankdata(values[i])))
-    values = ranked_values
-    
-fileout = gzip.open(args.output, "wt", 4)
-fileout.write("gene_pair\tcorrelation\n")
-print("Calculating correlation")
-for i in range(0,all_genes):
-    genei = genes[i]
-    if genei in gene_list:
-        gene_index = gene_list.index(genei)
-        x = values[gene_index]
-    
-    for j in range(i+1,all_genes):
-        genej = genes[j]
-        if genej in gene_list:
-            gene_index = gene_list.index(genej)
-            y = values[gene_index]
+    for i in range(len(genes_for_donor)):
+        ranked_values.append(list(stats.rankdata(count_matrix[i])))
+    count_matrix = ranked_values
 
-        if genei not in gene_list or genej not in gene_list:
-            fileout.write(f"{genei}_{genej}\t{np.nan}\n")
-            continue
+# Open fileOut
+fileOut = gzip.open(args.output, "wt", 4)
 
-        corr = calculate_correlation(x,y,weight)
-        fileout.write(f"{genei}_{genej}\t{corr}\n")
+print("Calculating correlations")
+# List to store gene_pairs and corr
+corr_list = []
+gene_pair_list = []
 
+#fileIn = gzip.open(args.gene_list,"rt")
+fileIn = gzip.open(args.gene_list,"rt")
+for line in fileIn:
+    values = line.strip().split("_")
+    genei = values[0]
+    genej = values[1]
 
+    if genei in genes_for_donor and genej in genes_for_donor:
+        idx = genes_for_donor_map.get(genei)
+        x = count_matrix[idx]
+
+        idy = genes_for_donor_map.get(genej)
+        y = count_matrix[idy]
+
+        corr = calculate_correlation(x,y,weight_per_cell)
+        corr_list.append(corr)
+        gene_pair_list.append(f"{genei}_{genej}")
+
+    else:
+        corr_list.append(np.nan)
+        gene_pair_list.append(f"{genei}_{genej}")
+
+fileOut.write("\t".join(gene_pair_list))
+fileOut.write("\n")
+corr_list = [str(corr) for corr in corr_list]
+fileOut.write("\t".join(corr_list))
+
+fileIn.close()
+fileOut.close()
