@@ -38,29 +38,46 @@ print("Loading chromosome-gene annotation file.")
 anno_file = pd.read_csv(anno_input,sep='\t')
 first_run = True
 chr_genes = set([i for i in anno_file.feature_id[anno_file.chromosome.astype(str)==chromosome]])
-print(f"Writing file for chromosome {chromosome}.")
 outdir = f"{output}-chr-{chromosome}.tsv.gz"
 handleout = gzip.open(outdir, "wt")
 
+del anno_file
+
+gene_pair = []
+corr = []
+
+# Load in correlation file per line
 for ind_ID in list_of_donors:
-  sample = pd.read_csv(f"{top_path}/{ind_ID}-{celltype}-pearson-weighted.tsv.gz",sep='\t')
-  gene_pairs = [i for i in sample.gene_pair.values]
-  if first_run:
-    indexes = set([i for i in range(len(gene_pairs)) if gene_pairs[i].split('_')[0] in chr_genes or gene_pairs[i].split('_')[1] in chr_genes])
-    header = [sample.gene_pair.iloc[i] for i in range(len(sample.gene_pair)) if i in indexes]
-    first_header = header
-    first_run = False
-    for gene_pair in header:
-      handleout.write(f"\t{gene_pair}")
+    print(f"Processing {ind_ID}")
+    file = f"{top_path}/{ind_ID}-{celltype}-pearson-weighted.tsv.gz"
+    gene_pair = []
+    corr = []
+    counter = 0
 
-  corr_values = [sample.correlation.iloc[i] for i in range(len(sample.correlation)) if i in indexes]
-  header = [sample.gene_pair.iloc[i] for i in range(len(sample.gene_pair)) if i in indexes]
+    with gzip.open(file, "rt") as f:
+        header = None
+        for line in f:
+            counter += 1
+            if header == None:
+                header = line
+            else:
+                values = line.strip().split("\t")
+                gene1, gene2 = values[0].split('_')
+                if gene1 in chr_genes:
+                    gene_pair.append(values[0])
+                    corr.append(values[1])
+            if counter % 1000000 == 0:
+                print(f"{counter} gene pairs processed", end="\r")
+    if first_run:
+        first_header = gene_pair
+        handleout.write("\t" + "\t".join(gene_pair))
+        handleout.write(f"\n{ind_ID}")
+        handleout.write("\t" + "\t".join(corr))
+        first_run = False
 
-  if not header == first_header:
-    raise Exception("Error: gene pairs are not in the same order across files")
+    else:
+        if not first_header == first_header:
+            raise Exception("Error: gene pairs are not in the same order across files")
 
-  handleout.write(f"\n{ind_ID}")
-  for value in corr_values:
-    handleout.write(f"\t{value}")
-
-
+        handleout.write(f"\n{ind_ID}")
+        handleout.write("\t" + "\t".join(corr))
