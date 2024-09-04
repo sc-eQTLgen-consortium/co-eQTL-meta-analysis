@@ -63,7 +63,7 @@ for ind_ID in list_of_donors:
             else:
                 values = line.strip().split("\t")
                 gene1, gene2 = values[0].split('_')
-                if gene1 in chr_genes:
+                if gene1 in chr_genes or gene2 in chr_genes:
                     gene_pair.append(values[0])
                     corr.append(values[1])
             if counter % 1000000 == 0:
