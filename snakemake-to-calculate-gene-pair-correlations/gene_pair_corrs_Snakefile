@@ -18,6 +18,8 @@ smf = f"{wg3_path}/{cohort}/input/smf.txt"
 #smf = smf.replace(" ","")
 
 chromosomes = list(range(1,23))
+n_chunks = list(range(1,config["n_chunks"]+1))
+
 cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
 gene_list_dict = {}
@@ -69,24 +71,33 @@ if all([os.path.exists(file) for file in donor_file_path]):
     for cell_type in all_donors_cell_type:
         all_donors_cell_type[cell_type].extend(np.unique([i for i in combination['donor']]))
 
+    # create_plots is set to true color dictionary is created 
+    colors = config["color"]
+    if len(cell_types) != len(colors):
+        raise ValueError("The number of cell types must match the number of colors.")
+    color_dict = {cell_type: color for cell_type, color in zip(cell_types, colors)}
     # To choose how far the pipeline runs uncomment preferred output in rule all, have the rest commented out (as files are set as temporary this would also need to be changed)
     rule all:
         input:
             #donor_counts = expand(out_dir + cohort + "/normalized-counts-{donor}-{cell_types}.mtx", zip, donor=combination['donor'], cell_types=combination['cell_type'], allow_missing=True),
-            #corr = expand(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted.tsv.gz", zip, donor=combination["donor"], cell_types=combination["cell_type"]),
+            #split = expand(out_dir + cohort + "/gene-pairs-tmp-{n}-{cell_types}.tsv.gz",n = n_chunks,cell_types=cell_types,allow_missing=True)
+            #split_corr = expand(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted-{n}.tsv.gz", zip, donor=combination["donor"], cell_types=combination["cell_type"], n = n_chunks,allow_missing=True)
+            #corr = expand(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted.tsv.gz", zip, donor=combination["donor"], cell_types=combination["cell_type"], allow_missing=True)
             #aggregated_corrs = expand(out_dir + cohort + "/{cohort}-combined-{cell_types}-pearson-weighted-chr-{chromosome}.tsv.gz", cohort=cohort, cell_types=cell_types, chromosome=chromosomes),
-            transposed_matrix = expand(out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz", cohort=cohort, cell_types=cell_types, chromosome=chromosomes)
+            #transposed_matrix = expand(out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz", cohort=cohort, cell_types=cell_types, chromosome=chromosomes)
+            outliers = expand(out_dir + cohort + "/{cohort}-{cell_types}-outliers.tsv.gz",cohort=cohort, cell_types=cell_types)
+            #outliers_removed_corr = expand(out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-outliers-removed.tsv.gz",cohort=cohort, cell_types=cell_types)
 
     rule createDonorFiles:
         resources:
-            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],#
             time = config["create_donor"]["create_donor_time"]
         input:
-            snake_dir + "/donor_data/" + cohort + "-{cell_types}-donor-list.tsv"
+            snake_dir + "donor_data/" + cohort + "-{cell_types}-donor-list.tsv"
         output:
             counts = temp(expand(out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx", donor=combination['donor'], allow_missing=True)),
             weights = temp(expand(out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True)),
-            gene_list = temp(expand(out_dir + cohort + "/donor_gene_list/filtered-genes-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True))
+            gene_list = expand(out_dir + cohort + "/donor_gene_list/filtered-genes-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True)
         params:
             gene_list = lambda wildcards: combination["gene_list"][wildcards.cell_types],
             all_donors_list = lambda wildcards: ','.join(all_donors_cell_type[wildcards.cell_types]),
@@ -97,16 +108,42 @@ if all([os.path.exists(file) for file in donor_file_path]):
             singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {wg3_dir} {out_dir} {params.gene_list} {smf}
             """
 
+    rule split_correlation:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["split_correlation"]["split_correlation_memory"],
+            time = config["split_correlation"]["split_correlation_time"]
+        input:
+            snake_dir + "input/" + cohort + "_{cell_types}.tsv.gz"
+        output:
+            temp(expand(out_dir + cohort + "/gene-pairs-{cell_types}-{n}.tsv.gz",n=n_chunks,allow_missing=True))
+        params:
+            gene_list = lambda wildcards: combination["gene_list"][f"{wildcards.cell_types}"],
+            n_chunks = config["n_chunks"],
+            cohort = config["cohort"],
+            cell_type = lambda wildcards: f"{wildcards.cell_types}",
+            out_dir = out_dir + cohort + "/"
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}split_correlation.py \
+            --n_chunks {params.n_chunks} \
+            --gene_list  {params.gene_list} \
+            --cohort {params.cohort} \
+            --cell_type {params.cell_type} \
+            --out_dir {params.out_dir}
+            """
+    
     rule calculate_correlations:
         resources:
-            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["process_donor"]["process_donor_memory"],
-            time = config["process_donor"]["process_donor_time"]
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["calculate_correlations"]["calculate_correlations_memory"],
+            time = config["calculate_correlations"]["calculate_correlations_time"]
         input:
             counts = out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx",
             weights = out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz",
-            gene_list = out_dir + cohort + "/donor_gene_list/filtered-genes-{donor}-{cell_types}.tsv.gz"
+            gene_list = out_dir + cohort + "/donor_gene_list/filtered-genes-{donor}-{cell_types}.tsv.gz",
+            chunk = out_dir + cohort + "/gene-pairs-{cell_types}-{n}.tsv.gz"
+            
         output:
-            corr = temp(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted.tsv.gz")
+            temp(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted-{n}.tsv.gz")
         params:
             gene_list = lambda wildcards: combination["gene_list"][f"{wildcards.cell_types}"]
         shell:
@@ -116,9 +153,32 @@ if all([os.path.exists(file) for file in donor_file_path]):
             --method pearson \
             --weight True {input.weights}\
             --gene_list_donor {input.gene_list} \
-            --gene_list {params.gene_list} \
-            --output {output.corr}
+            --gene_list {input.chunk} \
+            --output {output}
             """
+
+    rule aggregate_correlation:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["aggregate_correlation"]["aggregate_correlation_memory"],
+            time = config["aggregate_correlation"]["aggregate_correlation_time"]
+        input:
+            chunks = expand(out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted-{n}.tsv.gz",n=n_chunks,allow_missing=True)
+        output:
+            corr = out_dir + cohort + "/{donor}-{cell_types}-pearson-weighted.tsv.gz"
+        params:
+            donor = lambda wildcards: f"{wildcards.donor}",
+            n_chunks = config["n_chunks"],
+            cell_type =  lambda wildcards: f"{wildcards.cell_types}",
+            outdir = out_dir + cohort
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregate_correlation.py \
+            --n_chunks {params.n_chunks} \
+            --donor {params.donor} \
+            --cell_type {params.cell_type} \
+            --output {output.corr} \
+            --outdir {params.outdir}
+           """
 
     rule aggregate_final_results:
         resources:
@@ -159,21 +219,63 @@ if all([os.path.exists(file) for file in donor_file_path]):
             chromosome = lambda wildcards: f"{wildcards.chromosome}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
               txttobin \
               {input} \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome}
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
               transpose \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               10000
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx16g -Xms8g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
               bintotxt \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {output.final_out}
             """
-
+    
+    rule donor_qc:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_plots"]["donor_plots_memory"],
+            time = config["donor_plots"]["donor_plots_time"]
+        input:
+            corr = expand(out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz",chromosome=chromosomes,allow_missing=True),
+            donor_list = snake_dir + "/donor_data/" + cohort + "-{cell_types}-donor-counts.tsv"
+        output:
+            out_dir + cohort + "/{cohort}-{cell_types}-outliers.tsv.gz"
+        params:
+            color = lambda wildcards: f'"{color_dict[wildcards.cell_types]}"',
+            simg_dir = config["alt_sif"],
+            cell_type = lambda wildcards: f"{wildcards.cell_types}"
+        shell:
+            """
+            singularity exec --bind {top_dir} {params.simg_dir} python3 {scripts_dir}donor_qc.py \
+                --outdir {out_dir} \
+                --donor_counts {input.donor_list} \
+                --color {params.color} \
+                --cohort {cohort} \
+                --celltype {params.cell_type} \
+                --output {output}
+            """
+    
+    rule remove_outliers:
+        resources:
+            mem_per_thread_gb = lambda wildcards, attempt: attempt * config["remove_outliers"]["remove_outliers_memory"],
+            time = config["remove_outliers"]["remove_outliers_time"]
+        input:
+            corr = expand(out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-chr-{chromosome}-final.tsv.gz",chromosome=chromosomes,allow_missing=True),
+            outliers = out_dir + cohort + "/{cohort}-{cell_types}-outliers.tsv.gz"
+        output:
+            corr = out_dir + cohort + "/{cohort}-{cell_types}-pearson-weighted-outliers-removed.tsv.gz"
+        shell:
+            """
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}remove_outliers.py \
+                --outliers {input.outliers} \
+                --outdir {out_dir} \
+                --cohort {cohort} \
+                --celltype {wildcards.cell_types} \
+                --output {output}
+            """
 
 else:
     print("Donor list file is being generated for subsequent runs of the pipeline.")
@@ -197,5 +299,3 @@ else:
             """
             singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf}
             """
-
-
