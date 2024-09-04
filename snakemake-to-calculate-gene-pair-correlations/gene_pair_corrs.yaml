@@ -4,23 +4,24 @@
 ####### The following arguments are for indicating file locations on your system #####
 ######################################################################################
 
-top_directory: /groups/umcg-franke-scrna/tmp03/ # a location above everything else
-output_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
-singularity_path: /groups/umcg-franke-scrna/tmp03/software/wp3_extended_v2.sif # location of singularity image with all installed software
-snakefile_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/ # location of this file and the snakefile
-wg3_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/ # location of ouput files from wg3 of sc-eQTLGen pipeline
+top_directory: /groups/umcg-biogen/tmp02/ # a location above everything else
+output_directory: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/CalcCorrMatrix/output/ # this is where the final output and the intermediate files will be saved
+singularity_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/CalcCorrMatrix/wp3_extended.sif # location of singularity image with all installed software
+snakefile_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/CalcCorrMatrix/ # location of this file and the snakefile
+wg3_path: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/CalcCorrMatrix/input/2023-04-11-WorkGroup3eQTLAndDEA/ # location of ouput files from wg3 of sc-eQTLGen pipeline
+alt_sif: /groups/umcg-biogen/tmp02/output/2022-09-01-scMetaBrainConsortium/2023-11-22-Workgroup4-GeneNetworks/CalcCorrMatrix/pascalx_downstreamer.sif
 
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
+cohort: 2023-04-12-Mathys2019 # ID of cohort, just as it is written in the wg3 file path
+#    - RocheAD2022
+#Bryois2022
+
 cell_type: # cell type(s) to calculate correlations for
-    - B
-    - CD8_T
-    - CD4_T
-    - Mono
-    - NK
+#    - MIC
+    - EX
 
 ################################################################################################################
 ####### The following arguments are common parameters that may need to be changed depending on the dataset #####
@@ -28,32 +29,63 @@ cell_type: # cell type(s) to calculate correlations for
 
 donor_list:
   donor_list_memory: 12 ### The amount of memory (GB) used per thread for the make_donor_lists step
-  donor_list_time: '01:59:59' ### Amount of time to request for each job
+  donor_list_time: '00:59:59' ### Amount of time to request for each job
 
 create_donor:
   create_donor_memory: 12 ### The amount of memory (GB) used per thread for the create_donor step
-  create_donor_time: '05:59:59' ### Amount of time to request for each job
+  create_donor_time: '00:59:59' ### Amount of time to request for each job
 
 process_donor:
   process_donor_memory: 12 ### The amount of memory (GB) used per thread for the calculate_correlations step
-  process_donor_time: '05:59:59' ### Amount of time to request for each job
+  process_donor_time: '00:59:59' ### Amount of time to request for each job
+
+split_correlation:
+  split_correlation_memory: 12
+  split_correlation_time: 00:59:59
+
+calculate_correlations:
+  calculate_correlations_memory: 12 ### The amount of memory (GB) used per thread for the calculate_correlations step
+  calculate_correlations_time: '11:59:59' ### Amount of time to request for each job
+
+aggregate_correlation:
+  aggregate_correlation_memory: 12
+  aggregate_correlation_time: 00:59:59
 
 aggregate_metrics:
-  aggregate_metrics_memory: 24 ### The amount of memory (GB) used per thread for the aggregate_metrics step
-  aggregate_metrics_time: '23:59:59' ### Amount of time to request for each job
+  aggregate_metrics_memory: 64 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  aggregate_metrics_time: '05:59:59' ### Amount of time to request for each job
 
 transpose_matrix:
   transpose_matrix_memory: 24 ### The amount of memory (GB) used for the transpose_matrix step
   transpose_matrix_time: '01:59:59' ### Amount of time to request for each job
+
+donor_plots:
+  donor_plots_memory: 24 ### The amount of memory (GB) used for the transpose_matrix step
+  donor_plots_time: '01:59:59' ### Amount of time to request for each job
+
+sample_qc:
+  sample_qc_memory: 24 ### The amount of memory (GB) used for the transpose_matrix step
+  sample_qc_time: '01:59:59' ### Amount of time to request for each job
   
+remove_outliers:
+  remove_outliers_memory: 12 ### The amount of memory (GB) used for the transpose_matrix step
+  remove_outliers_time: '00:59:59' ### Amount of time to request for each job
+
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
 ##############################################################################################
 
 #gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
 gene_list_path: 
-    - /path/to/file_wg3_wijst2018_B.tsv
-    - /path/to/file_wg3_wijst2018_CD4_T.tsv
-    - /path/to/file_wg3_wijst2018_CD8_T.tsv
-    - /path/to/file_wg3_wijst2018_Mono.tsv
-    - /path/to/file_wg3_wijst2018_NK.tsv
+#    - input/2023-04-12-Mathys2019_MIC.tsv.gz
+    - input/2023-04-12-Mathys2019_EX.tsv.gz
+#    - input/Bryois2022_EX.tsv.gz
+#    - input/RocheAD2022_EX.tsv.gz
+# Whether to include the pca or visualisation steps when running the pipeline
+create_plots: False
+
+color: # colors to use for visualisation of each cell type (in same order as cell types)
+#    - "#E69F00"
+    - "#56B4E9"
+
+n_chunks: 25 # Splits correlation into n chunks
