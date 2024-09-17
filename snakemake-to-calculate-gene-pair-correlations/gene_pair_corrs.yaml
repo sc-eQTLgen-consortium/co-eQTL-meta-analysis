@@ -10,7 +10,7 @@ singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif #
 snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/ # location of this file and the snakefile
 scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of ouput files from wg3 of sc-eQTLGen pipeline
-qtl_celltype_subdirectory: ./
+qtl_celltype_subdirectory: 
 relative_smf_path: input/smf.txt
 seurat_object_prepend: lpmcv2.20230808.
 seurat_object_append: .rds
