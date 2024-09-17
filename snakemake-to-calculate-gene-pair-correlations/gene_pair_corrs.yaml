@@ -4,29 +4,26 @@
 ####### The following arguments are for indicating file locations on your system #####
 ######################################################################################
 
-top_directory: /groups/umcg-franke-scrna/tmp03/ # a location above everything else
-output_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
-singularity_path: /groups/umcg-franke-scrna/tmp03/software/wp3_extended_v2.sif # location of singularity image with all installed software
-snakefile_path: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/ # location of this file and the snakefile
-scripts_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/DATASET/calculate_correlation_metrics/scripts/
-input_directory: /groups/umcg-franke-scrna/tmp03/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/ # location of ouput files from wg3 of sc-eQTLGen pipeline
-qtl_celltype_subdirectory: input/L1/
+top_directory: /groups/umcg-franke-scrna/tmp04/ # a location above everything else
+output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
+singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif # location of singularity image with all installed software
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/ # location of this file and the snakefile
+scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/scripts/
+input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of ouput files from wg3 of sc-eQTLGen pipeline
+qtl_celltype_subdirectory: 
 relative_smf_path: input/smf.txt
-seurat_object_prepend: 
-seurat_object_append: .Qced.Normalized.SCs.Rds
-seurat_assignment_column: Assignment
+seurat_object_prepend: lpmcv2.20230808.
+seurat_object_append: .rds
+seurat_assignment_column: donor_final
 
 ##########################################################################
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
+cohort: lpmcv2.20230808.cell_type_medhigh # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-    - B
-    - CD8_T
-    - CD4_T
-    - Mono
-    - NK
+    - Mature_secretory_enterocytes
+    - Dendritic_cells
 
 ################################################################################################################
 ####### The following arguments are common parameters that may need to be changed depending on the dataset #####
