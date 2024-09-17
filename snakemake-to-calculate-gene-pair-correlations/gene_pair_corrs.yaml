@@ -8,7 +8,7 @@ top_directory: /groups/umcg-franke-scrna/tmp04/ # a location above everything el
 output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
 singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif # location of singularity image with all installed software
 snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/ # location of this file and the snakefile
-scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/scripts/
+scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of ouput files from wg3 of sc-eQTLGen pipeline
 qtl_celltype_subdirectory: 
 relative_smf_path: input/smf.txt
@@ -22,7 +22,7 @@ seurat_assignment_column: donor_final
 
 cohort: lpmcv2.20230808.cell_type_medhigh # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-    - Mature_secretory_enterocytes
+    - Mature_absorptive_enterocytes
     - Dendritic_cells
 
 ################################################################################################################
@@ -55,8 +55,6 @@ transpose_matrix:
 
 #gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
 gene_list_path: 
-    - file_wg3_wijst2018_B.tsv
-    - file_wg3_wijst2018_CD4_T.tsv
-    - file_wg3_wijst2018_CD8_T.tsv
-    - file_wg3_wijst2018_Mono.tsv
-    - file_wg3_wijst2018_NK.tsv
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt
+
