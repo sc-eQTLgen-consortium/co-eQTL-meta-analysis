@@ -7,7 +7,7 @@
 top_directory: /groups/umcg-franke-scrna/tmp04/ # a location above everything else
 output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
 singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif # location of singularity image with all installed software
-snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/ # location of this file and the snakefile
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/ # location of this file and the snakefile
 scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of ouput files from wg3 of sc-eQTLGen pipeline
 qtl_celltype_subdirectory: 
