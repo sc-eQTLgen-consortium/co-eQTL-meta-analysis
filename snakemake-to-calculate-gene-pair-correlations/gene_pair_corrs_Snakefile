@@ -13,6 +13,7 @@ scripts_dir = config["scripts_directory"]
 input_directory = config["input_directory"]
 cohort = config["cohort"]
 qtl_celltype_subdirectory = config["qtl_celltype_subdirectory"]
+relative_smf_path = config["relative_smf_path"]
 qtl_celltype_dir = f"{input_directory}/{cohort}/{qtl_celltype_subdirectory}"
 #qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
 smf = f"{input_directory}/{cohort}/{relative_smf_path}"
