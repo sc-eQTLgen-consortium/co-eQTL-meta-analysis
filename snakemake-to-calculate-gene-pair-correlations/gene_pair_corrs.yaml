@@ -55,6 +55,6 @@ transpose_matrix:
 
 #gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
 gene_list_path: 
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt.gz
 
