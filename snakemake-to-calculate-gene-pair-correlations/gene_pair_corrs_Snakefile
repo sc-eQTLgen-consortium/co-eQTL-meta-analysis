@@ -40,6 +40,7 @@ if type(cell_types) is list and len(cell_types) != len(gene_list):
 donor_file_path = [f"{snake_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv" for cell_type in cell_types]
 #donor_file_path = donor_file_path.replace(" ","")
 print(f"Pipeline is being run for {cell_types} cells.")
+print(f"gene list {gene_list}")
 print(f"gene lists are {gene_list_dict}.")
 
 # Make sure pipeline is not run for empty gene lists
