@@ -9,18 +9,20 @@ cohort_id = args[2]
 seurat_object_path = args[3]
 donor_rds_dir = args[4]
 gene_list_out = args[5]
-alt_gene_list = args[6]
+alt_gene_list = args[6] # THIS DOES NOT SEEM TO BE USED!
 smf = args[7]
 qtl_input_path = args[8]
 seurat_assignment_column = args[9]
 
-print(paste0("cell_type: ",cell_type))
-print(paste0("cohort: ",cohort_id))
-print(paste0("seurat object: ",seurat_object_path))
-print(paste0("output directory: ",donor_rds_dir))
-print(paste0("standard_gene_list: ",gene_list_out))
-print(paste0("alternative_gene_list: ",alt_gene_list))
-print(paste0("sample mapping file: ",smf))
+print(paste0("param1: cell_type: ",cell_type))
+print(paste0("param2: cohort: ",cohort_id))
+print(paste0("param3: seurat object: ",seurat_object_path))
+print(paste0("param4: output directory: ",donor_rds_dir))
+print(paste0("param5: standard_gene_list: ",gene_list_out))
+print(paste0("param6: alternative_gene_list: ",alt_gene_list))  # THIS DOES NOT SEEM TO BE USED!
+print(paste0("param7: sample mapping file: ",smf))
+print(paste0("param8: wg3 QTL inputs: ",qtl_input_path))
+print(paste0("param9: sample assignment Seurat column: ",seurat_assignment_column))
 
 library(Seurat)
 library(stringr)
