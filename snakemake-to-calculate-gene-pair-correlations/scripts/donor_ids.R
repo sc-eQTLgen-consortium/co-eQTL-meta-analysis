@@ -20,7 +20,7 @@ print(paste0("donor_ids.R run with", "\n",
 "param3: seurat object: ",seurat_object_path, "\n",
 "param4: output directory: ",donor_rds_dir, "\n",
 "param5: standard_gene_list: ",gene_list_out, "\n",
-"param6: alternative_gene_list: ",alt_gene_list, "\n"  # THIS DOES NOT SEEM TO BE USED!,
+"param6: alternative_gene_list: ",alt_gene_list, "\n",  # THIS DOES NOT SEEM TO BE USED!,
 "param7: sample mapping file: ",smf, "\n",
 "param8: wg3 QTL inputs: ",qtl_input_path, "\n",
 "param9: sample assignment Seurat column: ",seurat_assignment_column))
