@@ -29,13 +29,13 @@ gene_list_dict = {}
 # Create a dictionary with cell type as key and path to gene list for that cell type as value
 for i in range(0,len(cell_types), 1):
     cell_type = cell_types[i]
-    # if only one list is given, we'll use the same one each time
+    # if a list with only one item is given, we'll use the same one each time
     if len(gene_list) == 1:
         gene_list_dict[cell_type] = gene_list[0]
-    # if there are multiple, we'll use the indices
+    # if there are multiple, we'll use the indices of the cell type, to get the list at the same index
     elif len(gene_list) > 1:
         gene_list_dict[cell_type] = gene_list[i]
-    # if there are no gene lists, we'll put na there
+    # if there are no items in the gene list, we'll put na there
     elif len(gene_list) == 0:
         gene_list_dict[cell_type] = 'nan'
 
@@ -46,7 +46,6 @@ if type(cell_types) is list and len(cell_types) != len(gene_list):
 donor_file_path = [f"{snake_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv" for cell_type in cell_types]
 #donor_file_path = donor_file_path.replace(" ","")
 print(f"Pipeline is being run for {cell_types} cells.")
-print(f"gene list {gene_list}")
 print(f"gene lists are {gene_list_dict}.")
 
 # Make sure pipeline is not run for empty gene lists
@@ -206,10 +205,11 @@ else:
             donor_rds_script = (f"{scripts_dir}donor_ids.R").replace(" ",""),
             gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
+            rds_loc = (f"{qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append}").replace(" ",""),
         shell:
             """
             echo {params.gene_list_ct}
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {rds_loc} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
             """
 
 
