@@ -69,18 +69,24 @@ print("donors filtered.")
 expressing_genes <- NULL
 
 if ('data' %in% names(sc_data)) {
-  if (class(dc[['data']])[1] == 'Assay5') {
+  print('using data slot/layer')
+  if (class(sc_data[['data']])[1] == 'Assay5') {
+    print('using Seurat v5 style \'layer\'')
     expressing_genes <- as.data.frame(rowSums(sc_data@layers$data@data))
     expressing_genes <- cbind(rownames(sc_data@layers$data@data), expressing_genes)
   } else {
+    print('using Seurat v3/4 style \'assay\'')
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
     expressing_genes <- cbind(rownames(sc_data@assays$data@data), expressing_genes)
   }
 } else if ('RNA' %in% names(sc_data)) {
-  if (class(dc[['RNA']])[1] == 'Assay5') {
+  print('using data slot/layer')
+  if (class(sc_data[['RNA']])[1] == 'Assay5') {
+    print('using Seurat v5 style \'layer\'')
     expressing_genes <- as.data.frame(rowSums(sc_data@layers$RNA@data))
     expressing_genes <- cbind(rownames(sc_data@layers$RNA@data), expressing_genes)
   } else {
+    print('using Seurat v3/4 style \'assay\'')
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$RNA@data))
     expressing_genes <- cbind(rownames(sc_data@assays$RNA@data), expressing_genes)
   }
