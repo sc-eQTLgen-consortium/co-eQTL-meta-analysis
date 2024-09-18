@@ -4,19 +4,45 @@
 ####### The following arguments are for indicating file locations on your system #####
 ######################################################################################
 
-top_directory: /groups/umcg-franke-scrna/tmp04/ # a location above everything else
-output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/ # this is where the final output and the intermediate files will be saved
-singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif # location of singularity image with all installed software
-snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/ # location of this file and the snakefile
+# directory that should be bound in singularity, all files should be a subdirectory of this one
+top_directory: /groups/umcg-franke-scrna/tmp04/
+# output directory of all the files, this is where the final output and the intermediate files will be saved
+output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/
+# the location of the singularity image with all installed software
+singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif
+# the working directory for snakemake, location of this file and the snakefile
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
+# the location of the scripts that are used, would usually be the scripts directory of the repository
 scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
+# the directory that contains the RDS files 
 input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of rds files
+# the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
 qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/ # location of the wg3-style QTL input
+# the subdirectory if applicable for the WG3-style eQTL input
 qtl_celltype_subdirectory: /
+# the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
 relative_smf_path: smf.txt
+# prepend of name of RDS files
 seurat_object_prepend: lpmcv2.20230808.
+# append of the RDS files
 seurat_object_append: .rds
+
+
+########################################################################################################
+####### The following arguments are for settings that might differ, depending on the preprocessing #####
+########################################################################################################
+
+# name of the column in the RDS Seurat object, that denotes the sample assignment
 seurat_assignment_column: donor_final
+
+
+###############################################################################################
+####### The following arguments are for settings that might differ, depending preferences #####
+###############################################################################################
+
+# weighting method for the correlations, can be expression, zeroes or none
 weighting_method: expression
+
 
 ##########################################################################
 ####### The following arguments are for information about your study #####
@@ -55,7 +81,7 @@ transpose_matrix:
 ####### The following arguments are situational. You don't have to fill anything in here #####
 ##############################################################################################
 
-#gene_list_path: nan # path to gene list of interest. If not including a specific set of genes this should be set to: nan 
+# gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 gene_list_path: 
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt.gz

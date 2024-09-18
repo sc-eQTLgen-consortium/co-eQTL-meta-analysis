@@ -5,7 +5,7 @@ cell_type = args[1]
 cohort_id = args[2]
 seurat_object_path = args[3]
 donor_rds_dir = args[4]
-genes_to_use = args[5]
+genes_to_use_loc = args[5]
 smf = args[6]
 qtl_input_path = args[7]
 seurat_assignment_column = args[8]
@@ -17,16 +17,18 @@ library(weights)
 library(stringr)
 library(Matrix)
 
-print(paste("cell type:",cell_type))
-print(paste("cohort id:",cohort_id))
-print(paste("seurat file: ",seurat_object_path, sep = ''))
-print(paste("output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
-print(paste("Sample mapping file: ",smf,sep=''))
-print(paste("Pcs file: ",qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''))
-print(paste("Using gene list: ", genes_to_use, sep=''))
+print(paste("param1: cell type:",cell_type))
+print(paste("param2: cohort id:",cohort_id))
+print(paste("param3: seurat file: ",seurat_object_path, sep = ''))
+print(paste("param4: output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
+print(paste("param5: Using gene list: ", genes_to_use_loc, sep=''))
+print(paste("param6: Sample mapping file: ", smf, sep=''))
+print(paste("param7: wg3 QTL inputs: ", qtl_input_path, sep=''))
+print(paste("param8: sample assignment Seurat column: ", seurat_assignment_column, sep=''))
+print(paste("param9: weighting method: ", weight_method, sep=''))
+print(paste("inferred PCs file: ",qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''))
 
-# selection of genes 
-
+# selection of genes
 print("Loading big rds file")
 sc_data <- readRDS(seurat_object_path)
 
@@ -52,10 +54,21 @@ if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   sc_data = subset_file
 }
 
-cat("\nUsing provided gene list")
-genes_to_use = read.table(genes_to_use, header=F)[,1]
-
-sc_data_filtered <- sc_data[genes_to_use,]
+# use gene list if supplied
+genes_to_use <- NULL
+if (!is.na(genes_to_use_loc) & 
+ !is.null(genes_to_use_loc) & 
+ genes_to_use_loc != '' & 
+ genes_to_use_loc != 'nan' & 
+ genes_to_use_loc != 'None') {
+ cat("\nUsing provided gene list")
+  genes_to_use = read.table(genes_to_use_loc, header=F)[,1]
+  sc_data_filtered <- sc_data[genes_to_use,]
+}
+else {
+  cat("\nno gene list provided (or nan/None), using all genes")
+  sc_data_filtered <- sc_data
+}
 rm(sc_data)
 
 donortab  <- as.data.frame(table(sc_data_filtered[[seurat_assignment_column]]))
