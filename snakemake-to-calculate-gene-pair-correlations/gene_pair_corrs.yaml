@@ -15,6 +15,7 @@ relative_smf_path: smf.txt
 seurat_object_prepend: lpmcv2.20230808.
 seurat_object_append: .rds
 seurat_assignment_column: donor_final
+weighting_method: expression
 
 ##########################################################################
 ####### The following arguments are for information about your study #####

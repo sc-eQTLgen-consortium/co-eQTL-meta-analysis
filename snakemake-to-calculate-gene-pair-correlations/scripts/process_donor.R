@@ -7,9 +7,9 @@ seurat_object_path = args[3]
 donor_rds_dir = args[4]
 genes_to_use = args[5]
 smf = args[6]
-qtl_input_path = [7]
-seurat_assignment_column = [8]
-
+qtl_input_path = args[7]
+seurat_assignment_column = args[8]
+weight_method = args[9]
 
 library(Seurat)
 library(matrixStats)
@@ -86,7 +86,17 @@ for(donor in donor_list){
 
   # Extract weights per donor
   raw_counts <- raw_counts[rownames(raw_counts) %in% filtered_genes, ]
-  weights <- data.frame(weight = colSums(raw_counts != 0))
+  weights <- NULL
+  # do weighting depending on the method
+  if (weight_method == 'expression') {
+    weights <- data.frame(weight = colSums(raw_counts))
+  }
+  else if(weight_method == 'zeroes') {
+    weights <- data.frame(weight = colSums(raw_counts != 0))
+  }
+  else {
+    stop(paste('invalid weighting method, valid options are \'expression\' and \'zeroes\''))
+  }
   weightOutput <- paste0(donor_rds_dir,cohort_id,"/donor_weight/correlation-weight-",donor,"-",cell_type,".tsv.gz")
   write.table(weights, gzfile(weightOutput),sep="\t",row.names = TRUE, quote = FALSE)
 

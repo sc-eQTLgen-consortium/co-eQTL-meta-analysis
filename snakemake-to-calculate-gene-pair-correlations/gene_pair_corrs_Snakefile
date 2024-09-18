@@ -21,6 +21,8 @@ smf = f"{input_directory}/{relative_smf_path}"
 seurat_celltype_prepend = config['seurat_object_prepend']
 seurat_celltype_append = config['seurat_object_append']
 seurat_assignment_column = config['seurat_assignment_column']
+# weighting method for the correlations
+weighting_method = config['weighting_method']
 
 chromosomes = list(range(1,23))
 cell_types = config["cell_type"]
@@ -106,7 +108,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
         shell:
             """
             singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py "{params.all_donors_list}" {out_dir}{cohort} {params.ct}
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {out_dir} {params.gene_list} {smf} {qtl_celltype_dir} {seurat_assignment_column}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {out_dir} {params.gene_list} {smf} {qtl_celltype_dir} {seurat_assignment_column} {weighting_method}
             """
 
     rule calculate_correlations:
