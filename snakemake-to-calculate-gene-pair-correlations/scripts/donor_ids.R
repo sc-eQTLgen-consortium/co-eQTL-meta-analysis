@@ -62,7 +62,7 @@ donortab  <- as.data.frame(table(sc_data[[seurat_assignment_column]]))
 donor_list <- list(donortab[donortab$Freq >10,]$Var1)
 names(donor_list)=c('original_labels')
 donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
-donor <- unique(sc_data[[seurat_assignment_column]])[2]
+#donor <- unique(sc_data[[seurat_assignment_column]])[2]
 
 print("donors filtered.")
 
