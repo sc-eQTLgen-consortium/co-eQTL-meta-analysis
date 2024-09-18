@@ -207,7 +207,6 @@ else:
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            echo {params.gene_list_ct}
             singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
             """
 

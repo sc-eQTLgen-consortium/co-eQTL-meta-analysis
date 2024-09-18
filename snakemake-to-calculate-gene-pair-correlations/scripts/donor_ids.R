@@ -11,8 +11,8 @@ donor_rds_dir = args[4]
 gene_list_out = args[5]
 alt_gene_list = args[6]
 smf = args[7]
-qtl_input_path = [8]
-seurat_assignment_column = [9]
+qtl_input_path = args[8]
+seurat_assignment_column = args[9]
 
 print(paste0("cell_type: ",cell_type))
 print(paste0("cohort: ",cohort_id))
