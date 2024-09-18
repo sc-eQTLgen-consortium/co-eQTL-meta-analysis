@@ -5,28 +5,50 @@ import numpy as np
 import os
 import gzip
 
-out_dir = config["output_directory"]
+# directory that should be bound in singularity, all files should be a subdirectory of this one
 top_dir = config["top_directory"]
+# output directory of all the files
+out_dir = config["output_directory"]
+# the location of the singularity image
 simg_dir = config["singularity_path"]
+# the working directory for snakemake
 snake_dir = config["snakefile_path"]
+# the location of the scripts that are used, would usually be the scripts directory of the repository
 scripts_dir = config["scripts_directory"]
+# the directory that contains the RDS files 
 input_directory = config["input_directory"]
+# the name of the cohort being used, this will be added to the name of some output files
 cohort = config["cohort"]
+# the directory containing the WG3-style eQTL input such as the qtlInput and PCs files
+qtl_celltype_directory = config['qtl_celltype_directory']
+# the subdirectory if applicable for the WG3-style eQTL input
 qtl_celltype_subdirectory = config["qtl_celltype_subdirectory"]
+# the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
 relative_smf_path = config["relative_smf_path"]
+# prepend of name of RDS files
+seurat_celltype_prepend = config['seurat_object_prepend']
+# append of the RDS files
+seurat_celltype_append = config['seurat_object_append']
+# name of the column in the RDS Seurat object, that denotes the sample assignment
+seurat_assignment_column = config['seurat_assignment_column']
+# weighting method for the correlations, can be expression, zeroes or none
+weighting_method = config['weighting_method']
+# cell types to create correlation matrices for
+cell_types = config["cell_type"]
+# gene lists to only calculate correlations for (instead of doing all genes)
+gene_list = config["gene_list_path"]
+
+# paste together the location of the QTL files
 qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
 #qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
+# get the location of the .smf file
 smf = f"{qtl_celltype_dir}/{relative_smf_path}"
 #smf = smf.replace(" ","")
-seurat_celltype_prepend = config['seurat_object_prepend']
-seurat_celltype_append = config['seurat_object_append']
-seurat_assignment_column = config['seurat_assignment_column']
-# weighting method for the correlations
-weighting_method = config['weighting_method']
 
+# the chromosomes to consider
 chromosomes = list(range(1,23))
-cell_types = config["cell_type"]
-gene_list = config["gene_list_path"]
+
+# initialize dictionary with gene lists per cell type
 gene_list_dict = {}
 # Create a dictionary with cell type as key and path to gene list for that cell type as value
 for i in range(0,len(cell_types), 1):
