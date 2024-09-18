@@ -68,25 +68,24 @@ print("donors filtered.")
 
 expressing_genes <- NULL
 
-if ('layers' %in% names(sc_data)) {
-  # seurat v5
-  print('using Seurat v5 style \'layers\'')
-  expressing_genes <- as.data.frame(rowSums(sc_data@layers$RNA@data))
-  expressing_genes <- cbind(rownames(sc_data@layers$RNA@data), expressing_genes)
-} else if ('assays' %in% names(sc_data)) {
-  # seurat v3/4
-  print('using Seurat v3/4 style \'assays\'')
-  if ('data' %in% names(sc_data@assays)) {
+if ('data' %in% names(sc_data)) {
+  if (class(dc[['data']])[1] == 'Assay5') {
+    expressing_genes <- as.data.frame(rowSums(sc_data@layers$data@data))
+    expressing_genes <- cbind(rownames(sc_data@layers$data@data), expressing_genes)
+  } else {
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
     expressing_genes <- cbind(rownames(sc_data@assays$data@data), expressing_genes)
-  } else if('RNA' %in% names(sc_data@assays)) {
+  }
+} else if ('RNA' %in% names(sc_data)) {
+  if (class(dc[['RNA']])[1] == 'Assay5') {
+    expressing_genes <- as.data.frame(rowSums(sc_data@layers$RNA@data))
+    expressing_genes <- cbind(rownames(sc_data@layers$RNA@data), expressing_genes)
+  } else {
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$RNA@data))
     expressing_genes <- cbind(rownames(sc_data@assays$RNA@data), expressing_genes)
-  } else {
-    stop(paste('assays does not contain \'data\' or \'RNA\' assay. seurat_object@assays should contain seurat_object@assays$data or seurat_object@assays$RNA'))
   }
 } else {
-  stop(paste('seurat object contains neither \'layers\' nor \'assays\' attributes'))
+  stop(paste('seurat object contains neither \'data\' nor \'RNA\' attributes'))
 }
 print("data frame loaded")
 
