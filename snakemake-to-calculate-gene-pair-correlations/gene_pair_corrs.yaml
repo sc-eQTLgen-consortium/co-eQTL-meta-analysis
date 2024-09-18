@@ -31,7 +31,7 @@ cell_type: # cell type(s) to calculate correlations for
 ################################################################################################################
 
 donor_list:
-  donor_list_memory: 12 ### The amount of memory (GB) used per thread for the make_donor_lists step
+  donor_list_memory: 64 ### The amount of memory (GB) used per thread for the make_donor_lists step
   donor_list_time: '01:59:59' ### Amount of time to request for each job
 
 create_donor:
