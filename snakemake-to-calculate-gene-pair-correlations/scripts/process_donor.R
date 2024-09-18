@@ -17,16 +17,17 @@ library(weights)
 library(stringr)
 library(Matrix)
 
-print(paste("param1: cell type:",cell_type))
-print(paste("param2: cohort id:",cohort_id))
-print(paste("param3: seurat file: ",seurat_object_path, sep = ''))
-print(paste("param4: output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/',sep=''))
-print(paste("param5: Using gene list: ", genes_to_use_loc, sep=''))
-print(paste("param6: Sample mapping file: ", smf, sep=''))
-print(paste("param7: wg3 QTL inputs: ", qtl_input_path, sep=''))
-print(paste("param8: sample assignment Seurat column: ", seurat_assignment_column, sep=''))
-print(paste("param9: weighting method: ", weight_method, sep=''))
-print(paste("inferred PCs file: ",qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''))
+print(paste("param1: cell type:",cell_type, "\n", 
+"param2: cohort id: ",cohort_id, "\n", 
+"param3: seurat file: ",seurat_object_path, "\n", 
+"param4: output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/', "\n", 
+"param5: Using gene list: ", genes_to_use_loc, "\n", 
+"param6: Sample mapping file: ", smf, "\n", 
+"param7: wg3 QTL inputs: ", qtl_input_path, "\n", 
+"param8: sample assignment Seurat column: ", seurat_assignment_column, "\n", 
+"param9: weighting method: ", weight_method, "\n", 
+"inferred PCs file: ", qtl_input_path,cell_type,".qtlInput.Pcs.txt", "\n", 
+sep=''))
 
 # selection of genes
 print("Loading big rds file")

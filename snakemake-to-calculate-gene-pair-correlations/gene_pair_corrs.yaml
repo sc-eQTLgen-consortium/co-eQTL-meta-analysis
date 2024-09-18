@@ -33,7 +33,7 @@ seurat_object_append: .rds
 ########################################################################################################
 
 # name of the column in the RDS Seurat object, that denotes the sample assignment
-seurat_assignment_column: donor_final
+seurat_assignment_column: soup_final_sample_assignment
 
 
 ###############################################################################################
