@@ -23,7 +23,7 @@ cat(paste0("donor_ids.R run with", "\n",
 "param6: alternative_gene_list: ",alt_gene_list, "\n",  # THIS DOES NOT SEEM TO BE USED!,
 "param7: sample mapping file: ",smf, "\n",
 "param8: wg3 QTL inputs: ",qtl_input_path, "\n",
-"param9: sample assignment Seurat column: ",seurat_assignment_column))
+"param9: sample assignment Seurat column: ",seurat_assignment_column, '\n'))
 
 library(Seurat)
 library(stringr)
@@ -67,28 +67,25 @@ donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$origina
 print("donors filtered.")
 
 expressing_genes <- NULL
-# seurat v5
+
 if ('layers' %in% names(sc_data)) {
+  # seurat v5
   print('using Seurat v5 style \'layers\'')
   expressing_genes <- as.data.frame(rowSums(sc_data@layers$RNA@data))
   expressing_genes <- cbind(rownames(sc_data@layers$RNA@data), expressing_genes)
-}
-# seurat v3/4
-else if ('assays' %in% names(sc_data)) {
+} else if ('assays' %in% names(sc_data)) {
+  # seurat v3/4
   print('using Seurat v3/4 style \'assays\'')
   if ('data' %in% names(sc_data@assays)) {
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
     expressing_genes <- cbind(rownames(sc_data@assays$data@data), expressing_genes)
-  }
-  else if('RNA' %in% names(sc_data@assays)) {
+  } else if('RNA' %in% names(sc_data@assays)) {
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$RNA@data))
     expressing_genes <- cbind(rownames(sc_data@assays$RNA@data), expressing_genes)
-  }
-  else {
+  } else {
     stop(paste('assays does not contain \'data\' or \'RNA\' assay. seurat_object@assays should contain seurat_object@assays$data or seurat_object@assays$RNA'))
   }
-}
-else {
+} else {
   stop(paste('seurat object contains neither \'layers\' nor \'assays\' attributes'))
 }
 print("data frame loaded")
