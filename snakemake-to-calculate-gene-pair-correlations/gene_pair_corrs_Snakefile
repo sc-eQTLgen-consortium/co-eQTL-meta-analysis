@@ -27,11 +27,17 @@ cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
 gene_list_dict = {}
 # Create a dictionary with cell type as key and path to gene list for that cell type as value
-for file in gene_list:
-    for cell_type in cell_types:
-        if f"{cell_type}" in file:
-            gene_list_dict[cell_type] = file
-            break
+for i in range(0,len(cell_types), 1):
+    cell_type = cell_types[i]
+    # if only one list is given, we'll use the same one each time
+    if len(gene_list) == 1:
+        gene_list_dict[cell_type] = gene_list[0]
+    # if there are multiple, we'll use the indices
+    elif len(gene_list) > 1:
+        gene_list_dict[cell_type] = gene_list[i]
+    # if there are no gene lists, we'll put na there
+    elif len(gene_list) == 0:
+        gene_list_dict[cell_type] = 'nan'
 
 # Check there is a gene list provided for every cell type
 if type(cell_types) is list and len(cell_types) != len(gene_list):
