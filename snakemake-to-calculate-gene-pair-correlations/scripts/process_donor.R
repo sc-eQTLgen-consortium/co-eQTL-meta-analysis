@@ -17,7 +17,7 @@ library(weights)
 library(stringr)
 library(Matrix)
 
-print(paste("param1: cell type:",cell_type, "\n", 
+cat(paste("param1: cell type:",cell_type, "\n", 
 "param2: cohort id: ",cohort_id, "\n", 
 "param3: seurat file: ",seurat_object_path, "\n", 
 "param4: output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/', "\n", 
