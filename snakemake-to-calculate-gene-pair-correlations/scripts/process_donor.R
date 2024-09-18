@@ -89,13 +89,20 @@ for(donor in donor_list){
   weights <- NULL
   # do weighting depending on the method
   if (weight_method == 'expression') {
+    # this is based on the total expression
     weights <- data.frame(weight = colSums(raw_counts))
   }
   else if(weight_method == 'zeroes') {
+    # this is based on the number of non-zero counts
     weights <- data.frame(weight = colSums(raw_counts != 0))
   }
+  else if(weight_method == 'none') {
+    # this just dummies everything to 1, so it will not weight at all
+    weights <- data.frame(weight = rep(1, times = ncol(raw_counts)))
+  }
   else {
-    stop(paste('invalid weighting method, valid options are \'expression\' and \'zeroes\''))
+    # if we don't have a valid weighting method, we'll crash
+    stop(paste('invalid weighting method, valid options are \'expression\', \'zeroes\', or \'none\', you supplied', weight_method))
   }
   weightOutput <- paste0(donor_rds_dir,cohort_id,"/donor_weight/correlation-weight-",donor,"-",cell_type,".tsv.gz")
   write.table(weights, gzfile(weightOutput),sep="\t",row.names = TRUE, quote = FALSE)

@@ -14,9 +14,9 @@ input_directory = config["input_directory"]
 cohort = config["cohort"]
 qtl_celltype_subdirectory = config["qtl_celltype_subdirectory"]
 relative_smf_path = config["relative_smf_path"]
-qtl_celltype_dir = f"{input_directory}/{qtl_celltype_subdirectory}"
+qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
 #qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
-smf = f"{input_directory}/{relative_smf_path}"
+smf = f"{qtl_celltype_dir}/{relative_smf_path}"
 #smf = smf.replace(" ","")
 seurat_celltype_prepend = config['seurat_object_prepend']
 seurat_celltype_append = config['seurat_object_append']
@@ -209,7 +209,7 @@ else:
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
             """
 
 
