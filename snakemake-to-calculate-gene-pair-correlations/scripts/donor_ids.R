@@ -67,26 +67,37 @@ donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$origina
 print("donors filtered.")
 
 expressing_genes <- NULL
-
 if ('data' %in% names(sc_data)) {
+  # use either the data slot that was created in WG3
   print('using data slot/layer')
-  if (class(sc_data[['data']])[1] == 'Assay5') {
+  if ('layers' %in% slotNames(sc_data[['data']])) {
     print('using Seurat v5 style \'layer\'')
-    expressing_genes <- as.data.frame(rowSums(sc_data@layers$data@data))
-    expressing_genes <- cbind(rownames(sc_data@layers$data@data), expressing_genes)
+    expressing_genes <- as.data.frame(rowSums(sc_data@layers$data@layers$data))
+    # get the dataframe of feature names
+    feature_names_df <- data.frame(sc_data@assays$data@features)
+    # get the feature names for this layer
+    feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
+    # add as a column to the expressed genes
+    expressing_genes <- cbind(feature_names, expressing_genes)
   } else {
-    print('using Seurat v3/4 style \'assay\'')
+    print('using Seurat v3/4 style \'slot\'')
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$data@data))
     expressing_genes <- cbind(rownames(sc_data@assays$data@data), expressing_genes)
   }
 } else if ('RNA' %in% names(sc_data)) {
+  # or the regular RNA slot used in Seurat
   print('using data slot/layer')
-  if (class(sc_data[['RNA']])[1] == 'Assay5') {
+  if ('layers' %in% slotNames(sc_data[['RNA']])) {
     print('using Seurat v5 style \'layer\'')
-    expressing_genes <- as.data.frame(rowSums(sc_data@layers$RNA@data))
-    expressing_genes <- cbind(rownames(sc_data@layers$RNA@data), expressing_genes)
+    expressing_genes <- as.data.frame(rowSums(sc_data@assays$RNA@layers$data))
+    # get the dataframe of feature names
+    feature_names_df <- data.frame(sc_data@assays$RNA@features)
+    # get the feature names for this layer
+    feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
+    # add as a column to the expressed genes
+    expressing_genes <- cbind(feature_names, expressing_genes)
   } else {
-    print('using Seurat v3/4 style \'assay\'')
+    print('using Seurat v3/4 style \'slot\'')
     expressing_genes <- as.data.frame(rowSums(sc_data@assays$RNA@data))
     expressing_genes <- cbind(rownames(sc_data@assays$RNA@data), expressing_genes)
   }
