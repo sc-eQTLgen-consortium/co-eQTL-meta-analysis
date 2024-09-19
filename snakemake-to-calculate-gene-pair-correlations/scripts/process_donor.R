@@ -90,9 +90,9 @@ for(donor in donor_list){
   raw_counts <- NULL
   if ('layers' %in% slotNames(donor_rds[['RNA']])) {
     print('using Seurat v5 style \'layer\'')
-    raw_counts <- donor_rds@layers$RNA@layers$counts
+    raw_counts <- donor_rds@assays$RNA@layers$counts
     # get the dataframe of feature names
-    feature_names_df <- data.frame(donor_rds@layers$RNA@features)
+    feature_names_df <- data.frame(donor_rds@assays$RNA@features)
     # get the feature names for this layer
     feature_names <- rownames(feature_names_df[feature_names_df$counts == T, ])
     # set as the rownames
@@ -142,9 +142,9 @@ for(donor in donor_list){
     print('using data slot/layer')
     if ('layers' %in% slotNames(donor_rds[['data']])) {
       print('using Seurat v5 style \'layer\'')
-      norm_sparse <- donor_rds@layers$data@layers$data
+      norm_sparse <- donor_rds@assays$data@layers$data
       # get the dataframe of feature names
-      feature_names_df <- data.frame(donor_rds@layers$data@features)
+      feature_names_df <- data.frame(donor_rds@assays$data@features)
       # get the feature names for this layer
       feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
       # set as the rownames
@@ -158,9 +158,9 @@ for(donor in donor_list){
     print('using data slot/layer')
     if ('layers' %in% slotNames(donor_rds[['data']])) {
       print('using Seurat v5 style \'layer\'')
-      norm_sparse <- donor_rds@layers$RNA@layers$data
+      norm_sparse <- donor_rds@assays$RNA@layers$data
       # get the dataframe of feature names
-      feature_names_df <- data.frame(donor_rds@layers$RNA@features)
+      feature_names_df <- data.frame(donor_rds@assays$RNA@features)
       # get the feature names for this layer
       feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
       # set as the rownames
