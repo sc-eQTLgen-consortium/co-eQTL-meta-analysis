@@ -87,7 +87,21 @@ for(donor in donor_list){
   #write.table(cell_barcodes, file=gzfile(barcodesOut),sep="\t",row.names = FALSE, col.names=FALSE, quote = FALSE) 
   
   # Gene filtering
-  raw_counts <- as.data.frame(as.matrix(donor_rds@assays$RNA@counts))
+  raw_counts <- NULL
+  if ('layers' %in% slotNames(donor_rds[['RNA']])) {
+    print('using Seurat v5 style \'layer\'')
+    raw_counts <- donor_rds@layers$RNA@layers$counts
+    # get the dataframe of feature names
+    feature_names_df <- data.frame(donor_rds@layers$RNA@features)
+    # get the feature names for this layer
+    feature_names <- rownames(feature_names_df[feature_names_df$counts == T, ])
+    # set as the rownames
+    rownames(raw_counts) <- feature_names
+  } else {
+    print('using Seurat v3/4 style \'slot\'')
+    raw_counts <- as.data.frame(as.matrix(donor_rds@assays$RNA@counts))
+  }
+  
 
   raw_counts_df <- as.data.frame(rowSums(raw_counts != 0))
   raw_counts_df$gene_name <- rownames(raw_counts_df)
@@ -130,7 +144,7 @@ for(donor in donor_list){
       print('using Seurat v5 style \'layer\'')
       norm_sparse <- donor_rds@layers$data@layers$data
       # get the dataframe of feature names
-      feature_names_df <- data.frame(donor_rds@assays$data@features)
+      feature_names_df <- data.frame(donor_rds@layers$data@features)
       # get the feature names for this layer
       feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
       # set as the rownames
@@ -146,7 +160,7 @@ for(donor in donor_list){
       print('using Seurat v5 style \'layer\'')
       norm_sparse <- donor_rds@layers$RNA@layers$data
       # get the dataframe of feature names
-      feature_names_df <- data.frame(donor_rds@assays$RNA@features)
+      feature_names_df <- data.frame(donor_rds@layers$RNA@features)
       # get the feature names for this layer
       feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
       # set as the rownames
