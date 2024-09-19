@@ -150,6 +150,7 @@ def calc_z_score(pval,corr):
 print("Loading genes")
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
+print(genes)
 genes.sort()
 print("Loading weights")
 weight = pd.read_csv(args.weight[1], sep = "\t",header=0)
