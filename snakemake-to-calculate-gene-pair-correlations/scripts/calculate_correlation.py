@@ -152,6 +152,7 @@ gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
 # make sure these are all strings
 genes = [str(element) for element in genes]
+# sort the genes, because we sorted the counts by genes in the process_donor.R step
 genes.sort()
 print("Loading weights")
 weight = pd.read_csv(args.weight[1], sep = "\t",header=0)
