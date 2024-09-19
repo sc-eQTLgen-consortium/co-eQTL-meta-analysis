@@ -223,7 +223,7 @@ else:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_list"]["donor_list_memory"],
             time = config["donor_list"]["donor_list_time"]
         output:
-            snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
+            out_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
         params:
             donor_data_path = (f"{out_dir}/donor_data/").replace(" ",""),
             donor_rds_script = (f"{scripts_dir}donor_ids.R").replace(" ",""),
