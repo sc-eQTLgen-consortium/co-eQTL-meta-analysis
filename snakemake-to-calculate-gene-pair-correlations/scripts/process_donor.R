@@ -122,7 +122,42 @@ for(donor in donor_list){
   write.table(weights, gzfile(weightOutput),sep="\t",row.names = TRUE, quote = FALSE)
 
   # Save norm counts
-  norm_sparse <- donor_rds@assays$data@data
+  norm_sparse <- NULL
+  if ('data' %in% names(donor_rds)) {
+    # use either the data slot that was created in WG3
+    print('using data slot/layer')
+    if ('layers' %in% slotNames(donor_rds[['data']])) {
+      print('using Seurat v5 style \'layer\'')
+      norm_sparse <- donor_rds@layers$data@layers$data
+      # get the dataframe of feature names
+      feature_names_df <- data.frame(donor_rds@assays$data@features)
+      # get the feature names for this layer
+      feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
+      # set as the rownames
+      rownames(norm_sparse) <- feature_names
+    } else {
+      print('using Seurat v3/4 style \'slot\'')
+      norm_sparse <- donor_rds@assays$data@data
+    }
+  } else if ('RNA' %in% names(donor_rds)) {
+   # use either the data slot that was created in WG3
+    print('using data slot/layer')
+    if ('layers' %in% slotNames(donor_rds[['data']])) {
+      print('using Seurat v5 style \'layer\'')
+      norm_sparse <- donor_rds@layers$RNA@layers$data
+      # get the dataframe of feature names
+      feature_names_df <- data.frame(donor_rds@assays$RNA@features)
+      # get the feature names for this layer
+      feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
+      # set as the rownames
+      rownames(norm_sparse) <- feature_names
+    } else {
+      print('using Seurat v3/4 style \'slot\'')
+      norm_sparse <- donor_rds@assays$RNA@data
+    }
+  } else {
+  stop(paste('seurat object contains neither \'data\' nor \'RNA\' attributes'))
+  }
   norm_sparse=norm_sparse[str_order(rownames(norm_sparse)),]
   countOutput <- paste0(donor_rds_dir,cohort_id,"/counts/normalized-counts-",donor,"-",cell_type,".mtx")
   writeMM(norm_sparse, file=countOutput)
