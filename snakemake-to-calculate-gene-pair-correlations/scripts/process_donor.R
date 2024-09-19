@@ -155,8 +155,8 @@ for(donor in donor_list){
     }
   } else if ('RNA' %in% names(donor_rds)) {
    # use either the data slot that was created in WG3
-    print('using data slot/layer')
-    if ('layers' %in% slotNames(donor_rds[['data']])) {
+    print('using RNA slot/layer')
+    if ('layers' %in% slotNames(donor_rds[['RNA']])) {
       print('using Seurat v5 style \'layer\'')
       norm_sparse <- donor_rds@assays$RNA@layers$data
       # get the dataframe of feature names
