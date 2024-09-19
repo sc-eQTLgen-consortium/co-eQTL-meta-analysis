@@ -62,16 +62,15 @@ if (!is.na(genes_to_use_loc) &
  genes_to_use_loc != '' & 
  genes_to_use_loc != 'nan' & 
  genes_to_use_loc != 'None') {
- cat("\nUsing provided gene list")
+ cat("\nUsing provided gene list\n")
   genes_to_use = read.table(genes_to_use_loc, header=F)[,1]
   # check if there are any genes overlapping
   if (length(intersect(genes_to_use, rownames(sc_data))) == 0) {
     stop(paste('no genes overlap between the gene list', genes_to_use_loc, 'and the object', seurat_object_path))
   }
   sc_data_filtered <- sc_data[genes_to_use,]
-}
-else {
-  cat("\nno gene list provided (or nan/None), using all genes")
+} else {
+  cat("\nno gene list provided (or nan/None), using all genes\n")
   sc_data_filtered <- sc_data
 }
 rm(sc_data)
@@ -109,16 +108,13 @@ for(donor in donor_list){
   if (weight_method == 'expression') {
     # this is based on the total expression
     weights <- data.frame(weight = colSums(raw_counts))
-  }
-  else if(weight_method == 'zeroes') {
+  } else if(weight_method == 'zeroes') {
     # this is based on the number of non-zero counts
     weights <- data.frame(weight = colSums(raw_counts != 0))
-  }
-  else if(weight_method == 'none') {
+  } else if(weight_method == 'none') {
     # this just dummies everything to 1, so it will not weight at all
     weights <- data.frame(weight = rep(1, times = ncol(raw_counts)))
-  }
-  else {
+  } else {
     # if we don't have a valid weighting method, we'll crash
     stop(paste('invalid weighting method, valid options are \'expression\', \'zeroes\', or \'none\', you supplied', weight_method))
   }
