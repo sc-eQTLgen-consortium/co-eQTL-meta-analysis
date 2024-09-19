@@ -64,6 +64,10 @@ if (!is.na(genes_to_use_loc) &
  genes_to_use_loc != 'None') {
  cat("\nUsing provided gene list")
   genes_to_use = read.table(genes_to_use_loc, header=F)[,1]
+  # check if there are any genes overlapping
+  if (length(intersect(genes_to_use, rownames(sc_data))) == 0) {
+    stop(paste('no genes overlap between the gene list', genes_to_use_loc, 'and the object', seurat_object_path))
+  }
   sc_data_filtered <- sc_data[genes_to_use,]
 }
 else {
