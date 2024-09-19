@@ -216,7 +216,7 @@ else:
 
     rule all:
         input:
-            expand(snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv", cell_types=cell_types)
+            expand(out_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv", cell_types=cell_types)
 
     rule makeDonorLists:
         resources:
