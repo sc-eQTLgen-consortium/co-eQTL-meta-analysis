@@ -134,7 +134,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             mkdir -p {out_dir}{cohort}/donor_weight/
             mkdir -p {out_dir}{cohort}/donor_gene_list/
             singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py "{params.all_donors_list}" {out_dir}{cohort} {params.ct}
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {qtl_celltype_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {out_dir} {params.gene_list} {smf} {qtl_celltype_dir} {seurat_assignment_column} {weighting_method}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {out_dir} {params.gene_list} {smf} {qtl_celltype_dir} {seurat_assignment_column} {weighting_method}
             """
 
     rule calculate_correlations:
