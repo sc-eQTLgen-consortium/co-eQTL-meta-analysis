@@ -75,7 +75,7 @@ if (!is.na(genes_to_use_loc) &
 }
 rm(sc_data)
 
-donortab  <- as.data.frame(table(sc_data_filtered[[seurat_assignment_column]]))
+donortab  <- as.data.frame(table(sc_data_filtered@meta.data[[seurat_assignment_column]]))
 donor_list <- donortab[donortab$Freq >10,]$Var1
 
 # Filter low expressed genes per donor
