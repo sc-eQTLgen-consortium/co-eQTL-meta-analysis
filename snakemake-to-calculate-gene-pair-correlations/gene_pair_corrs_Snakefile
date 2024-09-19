@@ -231,8 +231,8 @@ else:
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            mkdir -p {donor_data_path}
-            mkdir -p {gene_lists_out_path}
+            mkdir -p {params.donor_data_path}
+            mkdir -p {params.gene_lists_out_path}
             singularity exec \
                 --bind {top_dir} \
                 {simg_dir} Rscript \
