@@ -151,7 +151,7 @@ print("Loading genes")
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
 # make sure these are all strings
-genes = genes.astype(str)
+genes = str(element) for element in genes
 genes.sort()
 print("Loading weights")
 weight = pd.read_csv(args.weight[1], sep = "\t",header=0)
