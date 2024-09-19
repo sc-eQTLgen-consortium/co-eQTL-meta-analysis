@@ -58,7 +58,7 @@ if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
 }
 
 
-donortab  <- as.data.frame(table(sc_data[[seurat_assignment_column]]))
+donortab  <- as.data.frame(table(sc_data@meta.data[[seurat_assignment_column]]))
 donor_list <- list(donortab[donortab$Freq >10,]$Var1)
 names(donor_list)=c('original_labels')
 donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
@@ -114,7 +114,7 @@ expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasi
 print("Selecting top expressed genes")
 genes <- expressing_genes[1:3000,]
 
-write.table(rownames(genes), paste(gene_list_out,cohort_id,'-',cell_type,'-genes.tsv',sep=''), sep='\t',row.names=F,quote=F)
+write.table(genes[['gene_names']], paste(gene_list_out,cohort_id,'-',cell_type,'-genes.tsv',sep=''), sep='\t',row.names=F,quote=F, col.names = F)
 write.table(donor_list, paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-list.tsv'),sep='\t', row.names = F, quote = F)
 write.table(as.data.frame(table(sc_data[[seurat_assignment_column]])), paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-counts.tsv'),sep='\t', row.names = F, quote = F)
 
