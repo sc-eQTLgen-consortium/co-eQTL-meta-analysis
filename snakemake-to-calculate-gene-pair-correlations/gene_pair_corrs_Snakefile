@@ -99,7 +99,8 @@ if all([os.path.exists(file) for file in donor_file_path]):
         for donor in donors_list[cell_type]:
             combination['donor'].append(donor)
             combination['cell_type'].append(cell_type)
-        combination[f'gene_list'][cell_type] = genes_file # required to match gene list to a cell type (update: can be replaced by gene_list dictionary above)
+        #combination[f'gene_list'][cell_type] = genes_file # required to match gene list to a cell type (update: can be replaced by gene_list dictionary above)
+    combination['gene_list'] = gene_list_dict
 
     # Required for creatDonorFiles rule. All donors regardless of cell type are added to each cell type, files will subsequently be touched and deleted if not requested.
     for cell_type in all_donors_cell_type:
