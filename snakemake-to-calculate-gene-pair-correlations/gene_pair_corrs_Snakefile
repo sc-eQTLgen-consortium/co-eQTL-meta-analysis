@@ -225,13 +225,13 @@ else:
         output:
             snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
         params:
-            donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
+            donor_data_path = (f"{out_dir}/donor_data/").replace(" ",""),
             donor_rds_script = (f"{scripts_dir}donor_ids.R").replace(" ",""),
-            gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
+            gene_lists_out_path = (f"{out_dir}/gene_lists/").replace(" ",""),
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {out_dir}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
+            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf} {qtl_celltype_dir} {seurat_assignment_column}
             """
 
 
