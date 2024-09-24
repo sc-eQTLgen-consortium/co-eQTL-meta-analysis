@@ -136,6 +136,8 @@ for(donor in donor_list){
     # if we don't have a valid weighting method, we'll crash
     stop(paste('invalid weighting method, valid options are \'expression\', \'zeroes\', or \'none\', you supplied', weight_method))
   }
+  # set rownames correctly
+  rownames(weights) <- rownames(raw_counts)
   weightOutput <- paste0(donor_rds_dir,cohort_id,"/donor_weight/correlation-weight-",donor,"-",cell_type,".tsv.gz")
   write.table(weights, gzfile(weightOutput),sep="\t",row.names = TRUE, quote = FALSE)
 
