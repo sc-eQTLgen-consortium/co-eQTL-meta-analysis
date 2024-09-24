@@ -91,6 +91,10 @@ for(donor in donor_list){
   if ('layers' %in% slotNames(donor_rds[['RNA']])) {
     print('using Seurat v5 style \'layer\'')
     raw_counts <- donor_rds@assays$RNA@layers$counts
+    # check if there are no dimensions
+    if (is.null(dim(raw_counts))) {
+      Matrix(t(data.frame(x = raw_counts)), sparse = T)
+    }
     # get the dataframe of feature names
     feature_names_df <- data.frame(donor_rds@assays$RNA@features)
     # get the feature names for this layer
@@ -143,6 +147,10 @@ for(donor in donor_list){
     if ('layers' %in% slotNames(donor_rds[['data']])) {
       print('using Seurat v5 style \'layer\'')
       norm_sparse <- donor_rds@assays$data@layers$data
+      # check if there are no dimensions
+      if (is.null(dim(norm_sparse))) {
+         Matrix(t(data.frame(x = norm_sparse)), sparse = T)
+      }
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$data@features)
       # get the feature names for this layer
@@ -158,8 +166,11 @@ for(donor in donor_list){
     print('using RNA slot/layer')
     if ('layers' %in% slotNames(donor_rds[['RNA']])) {
       print('using Seurat v5 style \'layer\'')
-      print(donor_rds@assays$RNA@layers$data)
       norm_sparse <- donor_rds@assays$RNA@layers$data
+      # check if there are no dimensions
+      if (is.null(dim(norm_sparse))) {
+         Matrix(t(data.frame(x = norm_sparse)), sparse = T)
+      }
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$RNA@features)
       # get the feature names for this layer
