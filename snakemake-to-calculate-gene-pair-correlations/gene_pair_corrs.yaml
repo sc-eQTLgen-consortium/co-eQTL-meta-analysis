@@ -20,6 +20,8 @@ input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/se
 qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/ # location of the wg3-style QTL input
 # the subdirectory if applicable for the WG3-style eQTL input
 qtl_celltype_subdirectory: /
+# the location of the limixannotation file
+limix_annotation_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/annotations/LimixAnnotationFile.txt
 # the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
 relative_smf_path: smf.txt
 # prepend of name of RDS files

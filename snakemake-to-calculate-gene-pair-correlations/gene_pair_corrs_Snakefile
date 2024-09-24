@@ -37,6 +37,8 @@ weighting_method = config['weighting_method']
 cell_types = config["cell_type"]
 # gene lists to only calculate correlations for (instead of doing all genes)
 gene_list = config["gene_list_path"]
+# the location of the limixannotation file
+limix_annotation_loc = config["limix_annotation_loc"]
 
 # paste together the location of the QTL files
 qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
@@ -175,7 +177,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             cell_type = lambda wildcards: f"{wildcards.cell_types}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {input_directory}{cohort} {params.chromosome}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {limix_annotation_loc} {params.chromosome}
             """
 
     rule transpose_matrix:
