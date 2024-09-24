@@ -148,15 +148,24 @@ def calc_z_score(pval,corr):
         zscore *= -1
     return zscore
 
+def check_gz_nonempty(file_loc):
+    # check if a file is empty
+    with gzip.open(file_loc, 'rb') as f:
+        # try to open the file
+        try:
+            file_contents = f.read(1)
+            return len(file_contents) > 0
+        except:
+            return False
+
 print("Loading genes")
-print(os.path.getsize(args.gene_list_donor))
-if os.path.getsize(args.gene_list_donor) == 0:
+if check_gz_nonempty(args.gene_list_donor) is False:
     print(' '.join([args.gene_list_donor, 'contains no genes, skipped']))
     sys.exit()
 
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
 
-if os.path.getsize(args.gene_list) == 0:
+if check_gz_nonempty(args.gene_list) is False:
     print(' '.join([args.gene_list, 'contains no genes, skipped']))
     sys.exit()
 
