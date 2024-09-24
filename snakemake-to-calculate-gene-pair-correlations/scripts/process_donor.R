@@ -93,7 +93,7 @@ for(donor in donor_list){
     raw_counts <- donor_rds@assays$RNA@layers$counts
     # check if there are no dimensions
     if (is.null(dim(raw_counts))) {
-      Matrix(t(data.frame(x = raw_counts)), sparse = T)
+      raw_counts <- Matrix(t(data.frame(x = raw_counts)), sparse = T)
     }
     # get the dataframe of feature names
     feature_names_df <- data.frame(donor_rds@assays$RNA@features)
@@ -149,7 +149,7 @@ for(donor in donor_list){
       norm_sparse <- donor_rds@assays$data@layers$data
       # check if there are no dimensions
       if (is.null(dim(norm_sparse))) {
-         Matrix(t(data.frame(x = norm_sparse)), sparse = T)
+         norm_sparse <- Matrix(t(data.frame(x = norm_sparse)), sparse = T)
       }
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$data@features)
@@ -169,7 +169,7 @@ for(donor in donor_list){
       norm_sparse <- donor_rds@assays$RNA@layers$data
       # check if there are no dimensions
       if (is.null(dim(norm_sparse))) {
-         Matrix(t(data.frame(x = norm_sparse)), sparse = T)
+         norm_sparse <- Matrix(t(data.frame(x = norm_sparse)), sparse = T)
       }
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$RNA@features)
