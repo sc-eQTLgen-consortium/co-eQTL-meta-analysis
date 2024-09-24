@@ -1,21 +1,72 @@
 #!/usr/bin/env Rscript
-args = commandArgs(trailingOnly=TRUE)
+############################################################################################################################
+# Authors: Marc-Jan Bonder, Dan Kaptijn, Roy Oelen
+# Name: process_donor.R
+# Function: get donor-specific mtx files, filtered feature lists and weights for each donor
+############################################################################################################################
 
-cell_type = args[1]
-cohort_id = args[2]
-seurat_object_path = args[3]
-donor_rds_dir = args[4]
-genes_to_use_loc = args[5]
-smf = args[6]
-qtl_input_path = args[7]
-seurat_assignment_column = args[8]
-weight_method = args[9]
+####################
+# libraries        #
+####################
 
 library(Seurat)
 library(matrixStats)
 library(weights)
 library(stringr)
 library(Matrix)
+library(optparse)
+
+####################
+# Main Code        #
+####################
+
+# make command line options
+option_list <- list(
+  make_option(c("-c", "--cell_type"), type="character", default=NULL,
+              help="cell type working on", metavar="character"),
+  make_option(c("-r", "--cohort_id"), type="character", default=NULL,
+              help="name of cohort", metavar="character"),
+  make_option(c("-s", "--seurat_object_path"), type="character", default=NULL,
+              help="location to Seurat object (rds)", metavar="character"),
+  make_option(c("-d", "--donor_rds_dir"), type="character", default=NULL,
+              help="where to store filtered gene lists, counts and weights", metavar="character"),
+  make_option(c("-g", "--genes_to_use_loc"), type="character", default=NULL,
+              help="file with list of genes to include", metavar="character"),
+  make_option(c("-m", "--smf"), type="character", default=NULL,
+              help="location of sample mapping file", metavar="character"),
+  make_option(c("-q", "--qtl_input_path"), type="character", default=NULL,
+              help="folder that contains QTL output from WG3, so qtlInput.txt.gz etc.", metavar="character"),
+  make_option(c("-a", "--seurat_assignment_column"), type="character", default=NULL,
+              help="name of column in Seurat metadata that has the assignment of the cell to a donor", metavar="character"),
+  make_option(c("-w", "--weight_method"), type="character", default=NULL,
+              help="which method to use for weighting: expression/zeroes/none", metavar="character")
+)
+
+# initialize optparser
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+# read the parameters
+cell_type = opt[['cell_type']]
+cohort_id = opt[['cohort_id']]
+seurat_object_path = opt[['seurat_object_path']]
+donor_rds_dir = opt[['donor_rds_dir']]
+genes_to_use_loc = opt[['genes_to_use_loc']]
+smf = opt[['smf']]
+qtl_input_path = opt[['qtl_input_path']]
+seurat_assignment_column = opt[['seurat_assignment_column']]
+weight_method = opt[['weight_method']]
+
+# args = commandArgs(trailingOnly=TRUE)
+# cell_type = args[1]
+# cohort_id = args[2]
+# seurat_object_path = args[3]
+# donor_rds_dir = args[4]
+# genes_to_use_loc = args[5]
+# smf = args[6]
+# qtl_input_path = args[7]
+# seurat_assignment_column = args[8]
+# weight_method = args[9]
 
 cat(paste("param1: cell type:",cell_type, "\n", 
 "param2: cohort id: ",cohort_id, "\n", 
