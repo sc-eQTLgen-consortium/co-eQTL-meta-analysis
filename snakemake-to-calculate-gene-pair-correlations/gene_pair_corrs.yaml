@@ -22,6 +22,8 @@ qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ong
 qtl_celltype_subdirectory: /
 # the location of the limixannotation file
 limix_annotation_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/annotations/LimixAnnotationFile.txt
+# location of the binary matrix jar
+binary_matrix_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/scripts/2024-06-20-BinaryMatrixTools.jar
 # the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
 relative_smf_path: smf.txt
 # prepend of name of RDS files

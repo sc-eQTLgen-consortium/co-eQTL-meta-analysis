@@ -39,6 +39,8 @@ cell_types = config["cell_type"]
 gene_list = config["gene_list_path"]
 # the location of the limixannotation file
 limix_annotation_loc = config["limix_annotation_loc"]
+# location of the binary matrix file
+binary_matrix_loc = config['binary_matrix_loc']
 
 # paste together the location of the QTL files
 qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
@@ -201,16 +203,16 @@ if all([os.path.exists(file) for file in donor_file_path]):
             chromosome = lambda wildcards: f"{wildcards.chromosome}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {binary_matrix_loc} \
               txttobin \
               {input} \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome}
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {binary_matrix_loc} \
               transpose \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               10000
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {binary_matrix_loc} \
               bintotxt \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {output.final_out}
