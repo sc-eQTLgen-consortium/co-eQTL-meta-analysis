@@ -20,19 +20,19 @@ list_of_donors = re.sub(r'[\[\]]','',sys.argv[1]).split(',')
 celltype = sys.argv[2]
 output = sys.argv[3]
 top_path = sys.argv[4]
-wg3_path = sys.argv[5]
+annotation_path = sys.argv[5]
 chromosome = str(sys.argv[6])
 
 print(f"First 10 donors of list: {list_of_donors[0:10]}")
 print(f"Cell Type: {celltype}")
 print(f"Output file: {output}-chr-{chromosome}.tsv.gz")
 print(f"Input path: {top_path}")
-print(f"Location of annotation file: {wg3_path}/input/LimixAnnotationFile.txt")
+print(f"Location of annotation file: {annotation_path}")
 
 """
 Code Body
 """
-anno_input = f"{wg3_path}/input/LimixAnnotationFile.txt"
+anno_input = f"{annotation_path}"
 
 print("Loading chromosome-gene annotation file.")
 anno_file = pd.read_csv(anno_input,sep='\t')
