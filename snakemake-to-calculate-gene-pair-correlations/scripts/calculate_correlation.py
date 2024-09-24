@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd 
 import argparse
 import gzip
-import os
+import sys
 from scipy import stats
 from scipy.special import betainc
 from scipy.io import mmread
