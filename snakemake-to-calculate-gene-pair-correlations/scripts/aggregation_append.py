@@ -56,15 +56,15 @@ for ind_ID in list_of_donors:
   corr_values = [sample.correlation.iloc[i] for i in range(len(sample.correlation)) if i in indexes]
   header = [sample.gene_pair.iloc[i] for i in range(len(sample.gene_pair)) if i in indexes]
 
-  print(ind_ID)
-  print(first_header)
-  print(header)
+  if len(header) == 0:
+    print(' '.join(['skipping', ind_ID, 'due to empty file']))
+  else:
+    if not header == first_header:
+      raise Exception("Error: gene pairs are not in the same order across files")
 
-  if not header == first_header:
-    raise Exception("Error: gene pairs are not in the same order across files")
-
-  handleout.write(f"\n{ind_ID}")
-  for value in corr_values:
-    handleout.write(f"\t{value}")
+    handleout.write(f"\n{ind_ID}")
+    for value in corr_values:
+      handleout.write(f"\t{value}")
+  
 
 
