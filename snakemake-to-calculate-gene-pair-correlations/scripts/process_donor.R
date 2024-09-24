@@ -158,6 +158,7 @@ for(donor in donor_list){
     print('using RNA slot/layer')
     if ('layers' %in% slotNames(donor_rds[['RNA']])) {
       print('using Seurat v5 style \'layer\'')
+      print(donor_rds@assays$RNA@layers$data)
       norm_sparse <- donor_rds@assays$RNA@layers$data
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$RNA@features)
