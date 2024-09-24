@@ -185,7 +185,6 @@ for(donor in donor_list){
   stop(paste('seurat object contains neither \'data\' nor \'RNA\' attributes'))
   }
   norm_sparse=norm_sparse[str_order(rownames(norm_sparse)), , drop = F]
-  print(norm_sparse)
   countOutput <- paste0(donor_rds_dir,cohort_id,"/counts/normalized-counts-",donor,"-",cell_type,".mtx")
   writeMM(norm_sparse, file=countOutput)
 }

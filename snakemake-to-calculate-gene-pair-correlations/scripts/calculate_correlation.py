@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd 
 import argparse
 import gzip
+import os
 from scipy import stats
 from scipy.special import betainc
 from scipy.io import mmread
@@ -148,7 +149,16 @@ def calc_z_score(pval,corr):
     return zscore
 
 print("Loading genes")
+if os.path.getsize(args.gene_list_donor) == 0:
+    print(' '.join([args.gene_list_donor, 'contains no genes, skipped']))
+    sys.exit()
+
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
+
+if os.path.getsize(args.gene_list) == 0:
+    print(' '.join([args.gene_list, 'contains no genes, skipped']))
+    sys.exit()
+
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
 # make sure these are all strings
 genes = [str(element) for element in genes]
