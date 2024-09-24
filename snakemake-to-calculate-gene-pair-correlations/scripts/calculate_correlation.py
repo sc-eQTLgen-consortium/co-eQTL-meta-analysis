@@ -160,18 +160,17 @@ def check_gz_nonempty(file_loc):
 
 print("preparing to write output")
 fileout = gzip.open(args.output, "wt", 4)
+fileout.write("gene_pair\tcorrelation\n")
 
 print("Loading genes")
 if check_gz_nonempty(args.gene_list_donor) is False:
     print(' '.join([args.gene_list_donor, 'contains no genes, skipped']))
-    fileout.write("gene_pair\tcorrelation\n")
     sys.exit()
 
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
 
 if check_gz_nonempty(args.gene_list) is False:
     print(' '.join([args.gene_list, 'contains no genes, skipped']))
-    fileout.write("gene_pair\tcorrelation\n")
     sys.exit()
 
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
@@ -198,8 +197,6 @@ if args.method == 'spearman':
         ranked_values.append(list(stats.rankdata(values[i])))
     values = ranked_values
     
-fileout = gzip.open(args.output, "wt", 4)
-fileout.write("gene_pair\tcorrelation\n")
 print("Calculating correlation")
 for i in range(0,all_genes):
     genei = genes[i]
