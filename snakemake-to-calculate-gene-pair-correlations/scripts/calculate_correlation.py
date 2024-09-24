@@ -149,6 +149,7 @@ def calc_z_score(pval,corr):
     return zscore
 
 print("Loading genes")
+print(os.path.getsize(args.gene_list_donor))
 if os.path.getsize(args.gene_list_donor) == 0:
     print(' '.join([args.gene_list_donor, 'contains no genes, skipped']))
     sys.exit()
