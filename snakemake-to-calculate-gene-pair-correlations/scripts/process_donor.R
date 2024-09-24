@@ -146,7 +146,7 @@ for(donor in donor_list){
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$data@features)
       # get the feature names for this layer
-      feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
+      feature_names <- rownames(feature_names_df[feature_names_df$data == T, , drop = F])
       # set as the rownames
       rownames(norm_sparse) <- feature_names
     } else {
@@ -162,7 +162,7 @@ for(donor in donor_list){
       # get the dataframe of feature names
       feature_names_df <- data.frame(donor_rds@assays$RNA@features)
       # get the feature names for this layer
-      feature_names <- rownames(feature_names_df[feature_names_df$data == T, ])
+      feature_names <- rownames(feature_names_df[feature_names_df$data == T, , drop = F])
       # set as the rownames
       rownames(norm_sparse) <- feature_names
     } else {
