@@ -116,7 +116,7 @@ for(donor in donor_list){
   write.table(filtered_genes, gzfile(genesOut),sep="\t",row.names = FALSE, col.names=FALSE, quote = FALSE)
 
   # Extract weights per donor
-  raw_counts <- raw_counts[rownames(raw_counts) %in% filtered_genes, ]
+  raw_counts <- raw_counts[rownames(raw_counts) %in% filtered_genes, , drop = F]
   weights <- NULL
   # do weighting depending on the method
   if (weight_method == 'expression') {
