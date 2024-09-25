@@ -34,7 +34,7 @@ normalize_mj <- function(seurat_object) {
   sample_scale = sample_sum_info / mean_sample_sum
   # divide each column by sample_scale
   norm_count_matrix@x <- norm_count_matrix@x / rep.int(sample_scale, diff(norm_count_matrix@p))
-  if ('layers' %in% slotNames(donor_rds[['RNA']])) {
+  if ('layers' %in% slotNames(seurat_object[['RNA']])) {
     print('using Seurat v5 style \'layer\'')
     seurat_object[['data']] <- CreateAssay5Object(data = norm_count_matrix)
 
