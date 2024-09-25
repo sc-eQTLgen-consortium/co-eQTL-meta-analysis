@@ -63,7 +63,6 @@ cell_type: # cell type(s) to calculate correlations for
     - Mature_absorptive_enterocytes
     - Mature_secretory_enterocytes
     - Memory_B
-    - Microfold_cell
     - Monocytes
     - Naive_B_cells
     - Plasma_cells
@@ -111,7 +110,6 @@ gene_list_path:
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_secretory_enterocytes.txt.gz
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Memory_B.txt.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Microfold_cell.txt.gz
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Monocytes.txt.gz
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Naive_B_cells.txt.gz
     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Plasma_cells.txt.gz
