@@ -1,7 +1,44 @@
+#!/usr/bin/env Rscript
+
 # output donor tables
 # to be done before running snakemake pipeline in order to have the donor information
 
-#!/usr/bin/env Rscript
+
+####################
+# Functions        #
+####################
+
+
+normalize_mj <- function(seurat_object) {
+  # get the count matrix where we have the correct cell type
+  count_matrix <- GetAssayData(seurat_object, slot = "counts")
+  # ignore genes that are never expressed
+  count_matrix <-  count_matrix[which(rowSums(count_matrix) != 0), ]
+  # create new object to store the counts in
+  norm_count_matrix <- count_matrix
+  # do mean sample-sum normalization
+  sample_sum_info = colSums(norm_count_matrix)
+  mean_sample_sum = mean(sample_sum_info)
+  sample_scale = sample_sum_info / mean_sample_sum
+  # divide each column by sample_scale
+  norm_count_matrix@x <- norm_count_matrix@x / rep.int(sample_scale, diff(norm_count_matrix@p))
+  if ('layers' %in% slotNames(seurat_object[['RNA']])) {
+    print('using Seurat v5 style \'layer\'')
+    seurat_object[['data']] <- CreateAssayObject(counts = count_matrix, data = norm_count_matrix)
+
+  } else {
+    print('using Seurat v3/4 style \'slot\'')
+    seurat_object[['data']] <- CreateAssayObject(counts = count_matrix, data = norm_count_matrix)
+  }
+  return(seurat_object)
+}
+
+
+
+####################
+# Main Code        #
+####################
+
 args = commandArgs(trailingOnly=TRUE)
 
 cell_type = args[1]
@@ -66,6 +103,13 @@ donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$origina
 
 print("donors filtered.")
 
+# add MJ normalization if not already present
+if (!('data' %in% names(sc_data))) {
+  cat("\nadding MJ style normalization\n")
+  sc_data <- normalize_mj(sc_data)
+}
+
+# get the expressing genes
 expressing_genes <- NULL
 if ('data' %in% names(sc_data)) {
   # use either the data slot that was created in WG3
