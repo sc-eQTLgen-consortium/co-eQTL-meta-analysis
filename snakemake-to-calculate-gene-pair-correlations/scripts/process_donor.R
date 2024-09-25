@@ -167,7 +167,7 @@ donor_list <- donortab[donortab$Freq >10,]$Var1
 
 # Filter low expressed genes per donor
 for(donor in donor_list){
-  cat("\nProcessing donor:", donor)
+  cat(paste("\nProcessing donor:", donor, "\n"))
   donor_rds <- sc_data_filtered[,sc_data_filtered[[seurat_assignment_column]] == donor ]
   #cell_barcodes <- colnames(donor_rds)
   #barcodesOut = paste0(donor_rds_dir,cohort_id,"/donor_barcodes/barcodes-",donor,"-",cell_type,".tsv.gz")
@@ -199,7 +199,7 @@ for(donor in donor_list){
   colnames(raw_counts_df) <- c('counts','gene_names')
   raw_counts <- raw_counts[str_order(rownames(raw_counts)),]
   filtered_genes <- raw_counts_df$gene_names[raw_counts_df$counts > 10] 
-  cat(" Number of genes after filtering:",length(filtered_genes))
+  cat(paste(" Number of genes after filtering:",length(filtered_genes), "\n"))
 
   donor_rds <- donor_rds[filtered_genes,]
 
