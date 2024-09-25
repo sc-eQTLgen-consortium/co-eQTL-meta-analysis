@@ -24,11 +24,11 @@ normalize_mj <- function(seurat_object) {
   norm_count_matrix@x <- norm_count_matrix@x / rep.int(sample_scale, diff(norm_count_matrix@p))
   if ('layers' %in% slotNames(seurat_object[['RNA']])) {
     print('using Seurat v5 style \'layer\'')
-    seurat_object[['data']] <- CreateAssayObject(counts = count_matrix, data = norm_count_matrix)
+    seurat_object[['data']] <- CreateAssayObject(data = norm_count_matrix)
 
   } else {
     print('using Seurat v3/4 style \'slot\'')
-    seurat_object[['data']] <- CreateAssayObject(counts = count_matrix, data = norm_count_matrix)
+    seurat_object[['data']] <- CreateAssayObject(data = norm_count_matrix)
   }
   return(seurat_object)
 }
