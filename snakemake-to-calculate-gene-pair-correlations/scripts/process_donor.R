@@ -17,6 +17,36 @@ library(Matrix)
 library(optparse)
 
 ####################
+# Functions        #
+####################
+
+
+normalize_mj <- function(seurat_object) {
+  # get the count matrix where we have the correct cell type
+  count_matrix <- GetAssayData(seurat_object, slot = "counts")
+  # ignore genes that are never expressed
+  count_matrix <-  count_matrix[which(rowSums(count_matrix) != 0), ]
+  # create new object to store the counts in
+  norm_count_matrix <- count_matrix
+  # do mean sample-sum normalization
+  sample_sum_info = colSums(norm_count_matrix)
+  mean_sample_sum = mean(sample_sum_info)
+  sample_scale = sample_sum_info / mean_sample_sum
+  # divide each column by sample_scale
+  norm_count_matrix@x <- norm_count_matrix@x / rep.int(sample_scale, diff(norm_count_matrix@p))
+  if ('layers' %in% slotNames(donor_rds[['RNA']])) {
+    print('using Seurat v5 style \'layer\'')
+    seurat_object[['data']] <- CreateAssay5Object(data = norm_count_matrix)
+
+  } else {
+    print('using Seurat v3/4 style \'slot\'')
+    seurat_object[['data']] <- CreateAssayObject(data = norm_count_matrix)
+  }
+  return(seurat_object)
+}
+
+
+####################
 # Main Code        #
 ####################
 
@@ -104,6 +134,12 @@ if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
+}
+
+# add MJ normalization if not already present
+if (!('data' %in% names(sc_data))) {
+  cat("\nadding MJ style normalization\n")
+  sc_data <- normalize_mj(sc_data)
 }
 
 # use gene list if supplied
