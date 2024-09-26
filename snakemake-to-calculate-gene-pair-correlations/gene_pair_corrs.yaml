@@ -54,8 +54,8 @@ weighting_method: expression
 
 cohort: lpmcv2_cth # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-    - CD4_T_cells
-    # - CD8_T_cells
+    # - CD4_T_cells
+    - CD8_T_cells
     # - Dendritic_cells
     # - Endothelial_cells
     # - Fibroblasts
@@ -101,8 +101,8 @@ transpose_matrix:
 
 # gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 gene_list_path: 
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD4_T_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD8_T_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD4_T_cells.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD8_T_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Endothelial_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Fibroblasts.txt.gz
