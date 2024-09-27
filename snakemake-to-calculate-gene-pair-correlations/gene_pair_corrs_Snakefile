@@ -52,7 +52,7 @@ if qtl_celltype_subdirectory is None or seurat_celltype_prepend == 'None':
 qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
 #qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
 # get the location of the .smf file
-smf = f"{qtl_celltype_dir}/{relative_smf_path}"
+smf = f"{qtl_celltype_directory}/{relative_smf_path}"
 #smf = smf.replace(" ","")
 
 # the chromosomes to consider

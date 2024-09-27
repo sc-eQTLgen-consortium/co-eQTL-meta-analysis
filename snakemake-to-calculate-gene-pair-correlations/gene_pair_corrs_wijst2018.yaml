@@ -15,11 +15,11 @@ snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-p
 # the location of the scripts that are used, would usually be the scripts directory of the repository
 scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 # the directory that contains the RDS files 
-input_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/input/L1/ # location of rds files
+input_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/input/ # location of rds files
 # the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
 qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/input/L1/ # location of the wg3-style QTL input
 # the subdirectory if applicable for the WG3-style eQTL input
-qtl_celltype_subdirectory: 
+qtl_celltype_subdirectory: L1
 # the location of the limixannotation file
 limix_annotation_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/annotations/LimixAnnotationFile.txt
 # location of the binary matrix jar
