@@ -167,7 +167,7 @@ names(donor_list)=c('original_labels')
 donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
 #donor <- unique(sc_data[[seurat_assignment_column]])[2]
 # let the user know what we dropped
-if (nrow(donortab) != donors_enough_cells) {
+if (nrow(donortab) != nrow(donors_enough_cells)) {
   warning(paste('dropping donors with not enough cells:', paste(setdiff(donortab$Var1, donors_enough_cells$Var1), collapse = ',')))
 }
 
