@@ -57,8 +57,8 @@ cell_type: # cell type(s) to calculate correlations for
     # - CD4_T_cells
     # - CD8_T_cells
     # - Dendritic_cells
-    - Endothelial_cells
-    # - Fibroblasts
+    # - Endothelial_cells
+    - Fibroblasts
     # - Glia_cells
     # - Mature_absorptive_enterocytes
     # - Mature_secretory_enterocytes
@@ -104,8 +104,8 @@ gene_list_path:
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD4_T_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD8_T_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Endothelial_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Fibroblasts.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Endothelial_cells.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Fibroblasts.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Glia_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_secretory_enterocytes.txt.gz

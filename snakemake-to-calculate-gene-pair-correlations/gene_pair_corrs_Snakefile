@@ -257,15 +257,14 @@ else:
                 --bind {top_dir} \
                 {simg_dir} Rscript \
                     {params.donor_rds_script} \
-                    {wildcards.cell_types} \
-                    {cohort} \
-                    {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} \
-                    {params.donor_data_path} \
-                    {params.gene_lists_out_path} \
-                    {params.gene_list_ct} \
-                    {smf} \
-                    {qtl_celltype_dir} \
-                    {seurat_assignment_column}
+                    --cell_type {wildcards.cell_types} \
+                    --cohort_id {cohort} \
+                    --seurat_object_path {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} \
+                    --donor_rds_dir {params.donor_data_path} \
+                    --gene_list_out_loc {params.gene_lists_out_path} \
+                    --smf {smf} \
+                    --qtl_input_path {qtl_celltype_dir} \
+                    --seurat_assignment_column {seurat_assignment_column}
             """
 
 

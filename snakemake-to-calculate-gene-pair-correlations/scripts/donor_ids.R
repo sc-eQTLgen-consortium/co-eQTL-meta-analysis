@@ -1,8 +1,17 @@
 #!/usr/bin/env Rscript
+############################################################################################################################
+# Authors: Marc-Jan Bonder, Dan Kaptijn, Roy Oelen
+# Name: donor_ids.R
+# Function: output donor tables, to be done before running snakemake pipeline in order to have the donor information
+############################################################################################################################
 
-# output donor tables
-# to be done before running snakemake pipeline in order to have the donor information
+####################
+# libraries        #
+####################
 
+library(Seurat)
+library(stringr)
+library(optparse)
 
 ####################
 # Functions        #
@@ -39,17 +48,52 @@ normalize_mj <- function(seurat_object) {
 # Main Code        #
 ####################
 
-args = commandArgs(trailingOnly=TRUE)
+# make command line options
+option_list <- list(
+  make_option(c("-c", "--cell_type"), type="character", default=NULL,
+              help="cell type working on", metavar="character"),
+  make_option(c("-r", "--cohort_id"), type="character", default=NULL,
+              help="name of cohort", metavar="character"),
+  make_option(c("-s", "--seurat_object_path"), type="character", default=NULL,
+              help="location to Seurat object (rds)", metavar="character"),
+  make_option(c("-d", "--donor_rds_dir"), type="character", default=NULL,
+              help="where to store filtered gene lists, counts and weights", metavar="character"),
+  make_option(c("-g", "--gene_list_out_loc"), type="character", default=NULL,
+              help="directory of where to put gene lists", metavar="character"),
+  make_option(c("-m", "--smf"), type="character", default=NULL,
+              help="location of sample mapping file", metavar="character"),
+  make_option(c("-q", "--qtl_input_path"), type="character", default=NULL,
+              help="folder that contains QTL output from WG3, so qtlInput.txt.gz etc.", metavar="character"),
+  make_option(c("-a", "--seurat_assignment_column"), type="character", default=NULL,
+              help="name of column in Seurat metadata that has the assignment of the cell to a donor", metavar="character")
+)
 
-cell_type = args[1]
-cohort_id = args[2]
-seurat_object_path = args[3]
-donor_rds_dir = args[4]
-gene_list_out = args[5]
-alt_gene_list = args[6] # THIS DOES NOT SEEM TO BE USED!
-smf = args[7]
-qtl_input_path = args[8]
-seurat_assignment_column = args[9]
+# initialize optparser
+opt_parser <- OptionParser(option_list=option_list)
+opt <- parse_args(opt_parser)
+
+# read the parameters
+cell_type = opt[['cell_type']]
+cohort_id = opt[['cohort_id']]
+seurat_object_path = opt[['seurat_object_path']]
+donor_rds_dir = opt[['donor_rds_dir']]
+gene_list_out = opt[['gene_list_out_loc']]
+smf = opt[['smf']]
+qtl_input_path = opt[['qtl_input_path']]
+seurat_assignment_column = opt[['seurat_assignment_column']]
+
+
+# args = commandArgs(trailingOnly=TRUE)
+
+# cell_type = args[1]
+# cohort_id = args[2]
+# seurat_object_path = args[3]
+# donor_rds_dir = args[4]
+# gene_list_out = args[5]
+# alt_gene_list = args[6] # THIS DOES NOT SEEM TO BE USED!
+# smf = args[7]
+# qtl_input_path = args[8]
+# seurat_assignment_column = args[9]
 
 cat(paste0("donor_ids.R run with", "\n",
 "param1: cell_type: ",cell_type, "\n",
@@ -57,13 +101,12 @@ cat(paste0("donor_ids.R run with", "\n",
 "param3: seurat object: ",seurat_object_path, "\n",
 "param4: output directory: ",donor_rds_dir, "\n",
 "param5: standard_gene_list: ",gene_list_out, "\n",
-"param6: alternative_gene_list: ",alt_gene_list, "\n",  # THIS DOES NOT SEEM TO BE USED!,
+# "param6: alternative_gene_list: ",alt_gene_list, "\n",  # THIS DOES NOT SEEM TO BE USED!,
 "param7: sample mapping file: ",smf, "\n",
 "param8: wg3 QTL inputs: ",qtl_input_path, "\n",
 "param9: sample assignment Seurat column: ",seurat_assignment_column, '\n'))
 
-library(Seurat)
-library(stringr)
+
 
 output_dir <- donor_rds_dir
 
