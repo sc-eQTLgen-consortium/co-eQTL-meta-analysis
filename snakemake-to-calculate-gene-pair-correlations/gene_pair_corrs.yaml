@@ -4,7 +4,7 @@
 ####### The following arguments are for indicating file locations on your system #####
 ######################################################################################
 
-# directory that should be bound in singularity, all files should be a subdirectory of this one
+# directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
 top_directory: /groups/umcg-franke-scrna/tmp04/
 # output directory of all the files, this is where the final output and the intermediate files will be saved
 output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/

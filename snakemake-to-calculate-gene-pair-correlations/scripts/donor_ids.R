@@ -110,11 +110,14 @@ cat(paste0("donor_ids.R run with", "\n",
 
 output_dir <- donor_rds_dir
 
+# load Seurat object
+print(paste("start loading object", seurat_object_path, '...'))
 sc_data <- readRDS(seurat_object_path)
 
-print("seurat object loaded, continuing with analysis")
+print(paste("seurat object loaded", seurat_object_path, ", continuing with analysis", sep  = ''))
 
-print("Filtering RDS file with smf and Pcs files")
+# load sample mapping file and PCs file
+print(paste("Filtering RDS file with smf and Pcs files at", smf, "and", paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep='')))
 smf = read.csv(smf,sep='\t')
 Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
 
@@ -129,20 +132,44 @@ if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
 # Filter out donors that are not in Pcs file
 Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
 
+# get donors in Seurat object
+seurat_donors <- unique(sc_data@meta.data[[seurat_assignment_column]])
+# and which are not in the SC data
+pc_donors_not_in_seurat <- setdiff(Pcs_donors, seurat_donors)
+# or not in the PC data
+seurat_donors_not_in_pcs <- setdiff(seurat_donors, Pcs_donors)
+# and let the user know if there is something awry
+if (length(pc_donors_not_in_seurat) > 0) {
+  warning(paste('dropping donors from PC file that are not in RDS/Seurat:', paste(pc_donors_not_in_seurat, collapse = ',')))
+}
+if (length(seurat_donors_not_in_pcs) > 0) {
+  warning(paste('dropping donors from RDS/Seurat, that are not in PC file', paste(seurat_donors_not_in_pcs, collapse = ',')))
+}
+
+# subset PC file to donors in Seurat
 Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
+# get T/F for the cells that have an assignment that is in the PCs file
 x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
+# subset if it is not all of them
 if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
   cells.use = colnames(sc_data[,x])
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
 }
 
-
+# get the number of cells per donor
 donortab  <- as.data.frame(table(sc_data@meta.data[[seurat_assignment_column]]))
-donor_list <- list(donortab[donortab$Freq >10,]$Var1)
+# get the donors with at least 10 cells
+donors_enough_cells <- donortab[donortab$Freq > 10, ]
+# and extrac just the donor names
+donor_list <- list(donors_enough_cells$Var1)
 names(donor_list)=c('original_labels')
 donor_list$filt_labels <- gsub(pattern='_', replacement='', x=donor_list$original_labels)
 #donor <- unique(sc_data[[seurat_assignment_column]])[2]
+# let the user know what we dropped
+if (nrow(donortab) != donors_enough_cells) {
+  warning(paste('dropping donors with not enough cells:', paste(setdiff(donortab$Var1, donors_enough_cells$Var1), collapse = ',')))
+}
 
 print("donors filtered.")
 
@@ -193,14 +220,18 @@ if ('data' %in% names(sc_data)) {
 }
 print("data frame loaded")
 
+# set correct colnames on the output of the rowsums
 colnames(expressing_genes) <- c('gene_names','sum_of_exp')
+# make sure the value is numeric
 expressing_genes$sum_of_exp <- as.numeric(expressing_genes$sum_of_exp)
+# and order by sum of expression
 expressing_genes <- expressing_genes[order(expressing_genes$sum_of_exp, decreasing = T),]
 
 ### outputting donor rds
 print("Selecting top expressed genes")
 genes <- expressing_genes[1:3000,]
 
+# write the tables
 write.table(genes[['gene_names']], paste(gene_list_out,cohort_id,'-',cell_type,'-genes.tsv',sep=''), sep='\t',row.names=F,quote=F, col.names = F)
 write.table(donor_list, paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-list.tsv'),sep='\t', row.names = F, quote = F)
 write.table(as.data.frame(table(sc_data[[seurat_assignment_column]])), paste0(output_dir,'/',cohort_id,'-',cell_type,'-donor-counts.tsv'),sep='\t', row.names = F, quote = F)

@@ -111,9 +111,10 @@ cat(paste("param1: cell type:",cell_type, "\n",
 sep=''))
 
 # selection of genes
-print("Loading big rds file")
+print(paste("Loading big rds file", seurat_object_path, '...'))
 sc_data <- readRDS(seurat_object_path)
 
+# read sample mapping and PC files
 print("Filtering RDS file with smf and Pcs files")
 smf = read.csv(smf,sep='\t')
 Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
@@ -121,7 +122,12 @@ Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\
 # Filter out donors that are not in the smf file
 x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
 if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
+  # get which we removed for debugging purposes
+  donors_removed <- setdiff(unique(sc_data@meta.data[[seurat_assignment_column]]), smf$genotype_id)
+  warning(paste('removed samples not present in smf:', paste(donors_removed, collapse = ',')))
+  # get the cellbarcodes to include
   cells.use = colnames(sc_data[,x])
+  # subset the Seurat object
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
 }
@@ -131,7 +137,12 @@ Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
 Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
 x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
 if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
+  # get which we removed for debugging purposes
+  donors_removed <- setdiff(unique(sc_data@meta.data[[seurat_assignment_column]]), Pcs_donors)
+  warning(paste('removed samples not present in PC file:', paste(donors_removed, collapse = ',')))
+  # get the cellbarcodes to include
   cells.use = colnames(sc_data[,x])
+  # subset the Seurat object
   subset_file = subset(sc_data, cells=cells.use)
   sc_data = subset_file
 }
