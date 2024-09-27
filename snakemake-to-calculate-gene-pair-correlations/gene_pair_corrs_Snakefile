@@ -43,8 +43,8 @@ limix_annotation_loc = config["limix_annotation_loc"]
 binary_matrix_loc = config['binary_matrix_loc']
 
 # some might values might be none, so reset those to be empty strings
-if seurat_object_prepend is None:
-    seurat_object_prepend = ''
+if seurat_celltype_prepend is None:
+    seurat_celltype_prepend = ''
 if qtl_celltype_subdirectory is None:
     qtl_celltype_subdirectory = ''
 
