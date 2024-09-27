@@ -7,13 +7,13 @@
 # directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
 top_directory: /groups/umcg-franke-scrna/tmp04/
 # output directory of all the files, this is where the final output and the intermediate files will be saved
-output_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/output/wg3_wijst2018_redone/
+output_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/output/
 # the location of the singularity image with all installed software
 singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif
 # the working directory for snakemake, location of this file and the snakefile
-snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
 # the location of the scripts that are used, would usually be the scripts directory of the repository
-scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
+scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 # the directory that contains the RDS files 
 input_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/input/L1/ # location of rds files
 # the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
