@@ -42,6 +42,12 @@ limix_annotation_loc = config["limix_annotation_loc"]
 # location of the binary matrix file
 binary_matrix_loc = config['binary_matrix_loc']
 
+# some might values might be none, so reset those to be empty strings
+if seurat_object_prepend is None:
+    seurat_object_prepend = ''
+if qtl_celltype_subdirectory is None:
+    qtl_celltype_subdirectory = ''
+
 # paste together the location of the QTL files
 qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
 #qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
