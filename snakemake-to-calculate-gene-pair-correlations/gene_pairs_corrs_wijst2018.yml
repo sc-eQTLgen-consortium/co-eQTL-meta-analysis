@@ -54,11 +54,11 @@ weighting_method: expression
 
 cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-    - B
-    - CD8_T
+    # - B
+    # - CD8_T
     - CD4_T
-    - Mono
-    - NK
+    # - Mono
+    # - NK
 
 
 ################################################################################################################
