@@ -20,7 +20,7 @@ This pipeline consists of a number of major steps, listed below
 
 ### calculating gene-gene correlations per donor
 
-we will need two major directories for files:
+we will need two major directories for files, and three supporting files:
 - a place to store the software used in this pipeline
 - a place to store intermediate and final results
 - the singularity image with all the software
@@ -29,7 +29,7 @@ we will need two major directories for files:
 
 #### setup the correlation pipeline steps
 
-In the template yaml file, (https://github.com/sc-eQTLgen-consortium/co-eQTL-meta-analysis/blob/main/snakemake-to-calculate-gene-pair-correlations/gene_pair_corrs.yaml), I chose this director: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software
+In the template yaml file, (https://github.com/sc-eQTLgen-consortium/co-eQTL-meta-analysis/blob/main/snakemake-to-calculate-gene-pair-correlations/gene_pair_corrs.yaml), I chose this directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software
 
 I next cd-ed into this directory and did a git clone of this repository:
 ```sh
