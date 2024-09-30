@@ -63,9 +63,9 @@ cell_type: # cell type(s) to calculate correlations for
     # - Mature_absorptive_enterocytes
     # - Mature_secretory_enterocytes
     # - Memory_B
-    - Monocytes
-    # - Plasma_cells
-    # - Stem_cells
+    # - Monocytes
+    - Plasma_cells
+    - Stem_cells
     # - Stromal_cells
     # - T_others
     # - Transit_amplifying_cells
@@ -110,9 +110,9 @@ gene_list_path:
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_secretory_enterocytes.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Memory_B.txt.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Monocytes.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Plasma_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stem_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Monocytes.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Plasma_cells.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stem_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stromal_cells.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_T_others.txt.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Transit_amplifying_cells.txt.gz
