@@ -167,13 +167,17 @@ if check_gz_nonempty(args.gene_list_donor) is False:
     print(' '.join([args.gene_list_donor, 'contains no genes, skipped']))
     sys.exit()
 
-gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
-
+print("Loading genes")
 if check_gz_nonempty(args.gene_list) is False:
     print(' '.join([args.gene_list, 'contains no genes, skipped']))
     sys.exit()
 
+# read them
+gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
+gene_list_set = set(gene_list)
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
+genes.sort()
+
 # make sure these are all strings
 genes = [str(element) for element in genes]
 # sort the genes, because we sorted the counts by genes in the process_donor.R step
@@ -200,17 +204,17 @@ if args.method == 'spearman':
 print("Calculating correlation")
 for i in range(0,all_genes):
     genei = genes[i]
-    if genei in gene_list:
+    if genei in gene_list_set:
         gene_index = gene_list.index(genei)
         x = values[gene_index]
     
     for j in range(i+1,all_genes):
         genej = genes[j]
-        if genej in gene_list:
+        if genej in gene_list_set:
             gene_index = gene_list.index(genej)
             y = values[gene_index]
 
-        if genei not in gene_list or genej not in gene_list:
+        if genei not in gene_list_set or genej not in gene_list_set:
             fileout.write(f"{genei}_{genej}\t{np.nan}\n")
             continue
 
