@@ -7,19 +7,19 @@
 # directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
 top_directory: /groups/umcg-franke-scrna/tmp04/
 # output directory of all the files, this is where the final output and the intermediate files will be saved
-output_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/output/
+output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/
 # the location of the singularity image with all installed software
 singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif
 # the working directory for snakemake, location of this file and the snakefile
-snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
 # the location of the scripts that are used, would usually be the scripts directory of the repository
-scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
+scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 # the directory that contains the RDS files 
-input_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/input/L1/ # location of rds files
+input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of rds files
 # the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
-qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/input/ # location of the wg3-style QTL input
+qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/ # location of the wg3-style QTL input
 # the subdirectory if applicable for the WG3-style eQTL input
-qtl_celltype_subdirectory: L1/
+qtl_celltype_subdirectory: 
 # the location of the limixannotation file
 limix_annotation_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/annotations/LimixAnnotationFile.txt
 # location of the binary matrix jar
@@ -27,9 +27,9 @@ binary_matrix_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortiu
 # the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
 relative_smf_path: smf.txt
 # prepend of name of RDS files
-seurat_object_prepend: 
+seurat_object_prepend: lpmcv2.20230808.
 # append of the RDS files
-seurat_object_append: .Qced.Normalized.SCs.Rds
+seurat_object_append: .rds
 
 
 ########################################################################################################
@@ -37,7 +37,7 @@ seurat_object_append: .Qced.Normalized.SCs.Rds
 ########################################################################################################
 
 # name of the column in the RDS Seurat object, that denotes the sample assignment
-seurat_assignment_column: Assignment
+seurat_assignment_column: soup_final_sample_assignment
 
 
 ###############################################################################################
@@ -52,13 +52,23 @@ weighting_method: expression
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: wg3_wijst2018 # ID of cohort, just as it is written in the wg3 file path
+cohort: lpmcv2_cth # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-    - B
-    - CD8_T
-    - CD4_T
-    - Mono
-    - NK
+    # - CD4_T_cells
+    # - CD8_T_cells
+    # - Dendritic_cells
+    # - Endothelial_cells
+    # - Fibroblasts
+    # - Glia_cells
+    # - Mature_absorptive_enterocytes
+    # - Mature_secretory_enterocytes
+    # - Memory_B
+    # - Monocytes
+    - Plasma_cells
+    - Stem_cells
+    # - Stromal_cells
+    # - T_others
+    # - Transit_amplifying_cells
 
 
 ################################################################################################################
@@ -66,8 +76,8 @@ cell_type: # cell type(s) to calculate correlations for
 ################################################################################################################
 
 donor_list:
-  donor_list_memory: 16 ### The amount of memory (GB) used per thread for the make_donor_lists step
-  donor_list_time: '05:59:59' ### Amount of time to request for each job
+  donor_list_memory: 64 ### The amount of memory (GB) used per thread for the make_donor_lists step
+  donor_list_time: '01:59:59' ### Amount of time to request for each job
 
 create_donor:
   create_donor_memory: 12 ### The amount of memory (GB) used per thread for the create_donor step
@@ -83,7 +93,7 @@ aggregate_metrics:
 
 transpose_matrix:
   transpose_matrix_memory: 24 ### The amount of memory (GB) used for the transpose_matrix step
-  transpose_matrix_time: '05:59:59' ### Amount of time to request for each job
+  transpose_matrix_time: '01:59:59' ### Amount of time to request for each job
   
 ##############################################################################################
 ####### The following arguments are situational. You don't have to fill anything in here #####
@@ -91,9 +101,19 @@ transpose_matrix:
 
 # gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 gene_list_path: 
-    - /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_B.Qced.Normalized.SCs.Rds.tsv.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_CD8_T.Qced.Normalized.SCs.Rds.tsv.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_CD4_T.Qced.Normalized.SCs.Rds.tsv.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_Mono.Qced.Normalized.SCs.Rds.tsv.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_NK.Qced.Normalized.SCs.Rds.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD4_T_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD8_T_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Endothelial_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Fibroblasts.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Glia_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_secretory_enterocytes.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Memory_B.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Monocytes.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Plasma_cells.txt.gz
+    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stem_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stromal_cells.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_T_others.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Transit_amplifying_cells.txt.gz
 
