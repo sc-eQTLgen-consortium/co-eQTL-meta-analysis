@@ -136,6 +136,37 @@ cell type(s) to calculate correlations for. The names need to match the file nam
 gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 
 #### running the correlation pipeline
+In its current state, this pipeline runs the correlation calculation on the machine where the pipeline is started. As such, it is recommended to do this on a machine where you have compute available. The pipeline will also take a while, depending on the size of the dataset. As such it is also recommended to do this in a way where you can disconnect and reconnect without the pipeline stopping, such as sattach, screen on tmux. Here is an example using screen and SLURM:
 
-TODO
+create a screen session:
 
+```sh
+screen -S correlation_calculation
+```
+
+ask for resources. The more CPUs you ask, the faster things will go, but also the more memory you require. Larger datasets will also require more memory.
+
+```sh
+srun --cpus-per-task=4 --mem=64gb --nodes=1 --qos=priority --job-name=correlation_calculation --time=71:59:59 --tmp=1000gb --pty bash -i # this requests an interactive session
+```
+
+activate the conda environment with snakemake
+
+```sh
+conda activate snakemake_env
+```
+
+cd to our snakemake directory that we got with the pwd before, and start the pipeline (remember to set a correct number of cores)
+
+```sh
+cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
+snakemake -s gene_pair_corrs_Snakefile --cores 4 --rerun-incomplete
+```
+
+The first step should be very quick, as it will only create donor lists. Run the same command again to run the rest of the pipeline
+
+```sh
+snakemake -s gene_pair_corrs_Snakefile --cores 4 --rerun-incomplete
+```
+
+After this finishes, you can continue to the next step, where we do the co-eQTL mapping.
