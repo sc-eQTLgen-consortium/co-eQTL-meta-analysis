@@ -1,0 +1,30 @@
+# config for eqtl pipeline
+# use empty string for missing files (eg kinship, randomeff, ...)
+
+#####################################################################################
+###### The following arguments are for indicating file locations on your system #####
+#####################################################################################
+
+image_folder: /groups/umcg-franke-scrna/tmp04/software/ ### The path to the folder within which the singularity image & "wp3.simg" "limixDec22.simg" is located
+top_dir: /groups/umcg-franke-scrna/tmp04/ ### This folder will be bound to Singularty (needs to be higher up then every data item).
+
+#####################################
+##       input files/folders       ###
+#####################################
+
+WG3_folder:/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/
+input_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/ ### The path to the outputs from WG3
+correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/output/wg3_wijst2018/
+out_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/output/
+
+######################################
+######        Do not change      #####
+######################################
+numberOfPermutations: '20'
+minorAlleleFrequency: '0.05'
+windowSize: '1000000' # gene + cis window from one side
+hardyWeinbergCutoff: '0.0001'
+compressFiles: true
+
+celltypes:
+    - L1/CD4_T

@@ -1,0 +1,198 @@
+from pathlib import Path
+import re
+import os
+CHROM = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22']
+
+configfile: "./coQTL_wp3_CD4_T.yaml"
+imageDir = config["image_folder"]
+includeDir = config["top_dir"]
+celltypes=config["celltypes"]
+outputFolder=config["out_folder"]
+scripts_folder = "/tools/WG3-pipeline-QTL/scripts/"
+
+limix_path="singularity exec --bind "+includeDir+" "+imageDir+"limixJune24.simg python /groups/umcg-franke-scrna/tmp04/users/umcg-mjbonder/Limix_QTL/"
+r_path="singularity exec --bind "+includeDir+" "+imageDir+"wp3.simg Rscript "
+
+##QTL mapping variables.
+genotypeFile= config["WG3_folder"]+ 'genotype_input/EUR_imputed_hg38_varFiltered_chr{chrom}'  # use {chrom} if genotype is splitted by chromosome
+sampleMappingFile =config["input_folder"]+'smf_filt.txt'
+minimum_test_samples = 20 #the minimum number of donors that are required for a feature to be tested
+#covariateFile= '' ##Not used
+#kinshipFile= config["WG3_folder"]+'input/sample.kinship' ##Not used
+
+##output of the correlation code (per chromosome)
+phenotypeFile = config["correlation_folder"]+"wg3_wijst2018-CD4_T-pearson-weighted-chr-{chrom}-final.tsv.gz"
+##Selection of tests to do SNP + feature
+feature_variant_filter = config["input_folder"]+'all_features_to_test_CD4_T_chr{chrom}.txt.gz'
+##location of gene 1 (of the pair)
+annoFile = config["input_folder"]+'LimixAnnotationFile_co_CD4_T_chr{chrom}.txt.gz'
+##location of gene 2 (of the pair)
+annoFile2 = config["input_folder"]+'LimixAnnotationFile_co2_CD4_T_chr{chrom}.txt.gz'
+##chromosome start end of the eGenes of your choice.
+chunkFile = config["input_folder"]+'cd4_chunking_all.txt'
+
+topDirInput = config["WG3_folder"]+'input'
+bgen_folder = config["WG3_folder"]+ 'genotype_input'
+
+chunk_chrom, chunk_start, chunk_end=[], [], []
+with open(chunkFile) as fp:
+    for line in fp:
+        re_match=re.match(r"([A-Za-z0-9]+):(\d+)-(\d+)", line.strip())
+        chunk_chrom.append(re_match[1])
+        chunk_start.append(re_match[2])
+        chunk_end.append(re_match[3])
+
+qtlChunks=expand(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/"+"{chrom}_{start}_{end}.finished", zip, chrom=chunk_chrom, start=chunk_start, end=chunk_end, allow_missing=True)
+qtlTmp=expand(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/qtl_results_all.txt.gz", zip, chrom=chunk_chrom, start=chunk_start, end=chunk_end, allow_missing=True)
+
+wildcard_constraints:
+    end = "([0-9]+)",
+    start = "([0-9]+)",
+    num = "([0-9]+)",
+    chrom = "[0-9]{1,2}|X|Y|MT"
+
+rule all:
+    input:
+        #expand(outputFolder+"/{ct}/qtl_results_all.txt", ct=celltypes),
+        expand(qtlTmp, ct=celltypes),
+        #expand(outputFolder/"{ct}"/"qtl.h5.tgz", ct=celltypes),
+        #expand(outputFolder/"{ct}"/"qtl.annotation.tgz", ct=celltypes),
+        #expand(outputFolder+"/{ct}/qtl.permutations.tgz", ct=celltypes),
+        #expand(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.sample", chrom=CHROM),
+        #outputFolder/"LDMatrices.tgz",
+        #expand(bgen_folder+"/EUR_imputed_hg38_stats.{chrom}.vars.gz", chrom=CHROM)
+        
+    output:
+        touch(expand(outputFolder+"/{ct}/done.txt", ct=celltypes))
+
+
+rule run_qtl_mapping:
+    input:
+        #af = annoFile,
+        #eaf = annoFile2,
+        #pf = phenotypeFile,
+        smf = sampleMappingFile,
+        #cf = covariateFile,
+        #kf = kinshipFile,
+        fvf = feature_variant_filter
+        #rf = config["randomeff_files"] if config["randomeff_files"]!='' else []
+    output:
+        touch(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/{chrom}_{start}_{end}.finished")
+    priority:10
+    params:
+        pf = phenotypeFile,
+        af = annoFile,
+        eaf = annoFile2,
+        od = outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/",
+        gen  = genotypeFile,
+        np = config["numberOfPermutations"],
+        maf = config["minorAlleleFrequency"],
+        hwe = config["hardyWeinbergCutoff"],
+        w = config["windowSize"],
+        mts = minimum_test_samples
+    resources:
+        memory = "7000",
+        time = "23:59:00"
+    shell:
+        (limix_path + "run_QTL_analysis_metaAnalysis_LM_V2.py"
+            " --bgen {params.gen} "
+            " -mts {params.mts} "
+            " -af {params.af} "
+            " -eaf {params.eaf} "
+            " -fvf {input.fvf} "
+            #" -cf {input.cf} "
+            " -pf {params.pf} "
+            #" -rf {input.kf} "
+            " -smf {input.smf} "
+            " -od {params.od} "
+            " -gr {wildcards.chrom}:{wildcards.start}-{wildcards.end} "
+            " -np {params.np} "
+            " -maf {params.maf} "
+            " -c -gm gaussnorm "
+            " -w {params.w} "
+            " -hwe {params.hwe} "
+            " -rs .8 ")
+
+rule top_feature:
+    input:
+        inFile = str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/{chrom}_{start}_{end}.finished"
+    output:
+        outF = touch( str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/qtl_results_all.txt.gz")
+    resources:
+        memory = "25000",
+        time = "4:59:00"
+    params:
+        dir = str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/"
+    run:
+        shell(limix_path + "post_processing/minimal_postprocess.py  -id {params.dir} -od {params.dir} -sfo -wc")
+
+
+#rule top_feature_group:
+#    input:
+#        inFile = str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/{chrom}_{start}_{end}.finished"
+#    output:
+#        outF = touch( str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/qtl_results_all.txt.gz"),
+#        fgf = str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/featureGrouping.txt"
+#    resources:
+#        memory = "5000",
+#        time = "2:59:00"
+#    params:
+#        dir = str(outputFolder)+"/{ct}/qtl/{chrom}_{start}_{end}/"
+#    run:
+#        shell(r_path + "/scratch/hb-sceqtlgen/oneK1K/eqtlgen_coeqtl_map/MJB/Permutation/create_FeatureGroupFile.R  --in_dir {params.dir} --out_dir {params.dir}")
+#        shell(limix_path + "post_processing/minimal_featureGroup_postprocess.py  -id {params.dir} -od {params.dir} -sfo -wc -fgf {output.fgf}")
+#
+#rule cat_qtl:
+#    priority:12
+#    input:
+#        files = qtlTmp
+#    output:
+#        outputFolder+"/{ct}/qtl_results_all.txt"
+#    params:
+#        folder = str(outputFolder)+"/{ct}/qtl/"
+#    run:
+#        shell( r_path + "/scratch/hb-sceqtlgen/oneK1K/eqtlgen_coeqtl_map/MJB/Permutation/aggregateResults.R  --out_file {output} --input_folder '{params.folder}'" )
+
+
+rule make_temporary_files:
+    input:
+        bgen_file=genotypeFile+".bgen"
+    output:
+        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.z"),
+        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.sample"),
+        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen_master.txt")
+    shell:
+        """
+        singularity exec --bind {includeDir} {imageDir}/wp3.simg python {scripts_folder}/make_z.py {input.bgen_file} {bgen_folder}
+        """
+
+rule create_bdose_file_by_chr:
+    input:
+        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen",
+        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bgi",
+        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.z",
+        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.sample",
+        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen_master.txt"
+    output:
+        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bdose"),
+        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bdose.bdose.tmp0"),
+        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bdose.meta.tmp0")
+    shell:
+        """
+        singularity exec --bind {includeDir} {imageDir}/wp3.simg /tools/ldstore_v2.0_x86_64/ldstore_v2.0_x86_64 --in-files {bgen_folder}/EUR_imputed_hg38_varFiltered_chr{wildcards.chrom}.bgen_master.txt --write-bdose --bdose-version 1.1
+        """
+
+rule Genotype_IO:
+    input:
+        genotypeFile+".bgen"
+    params:
+        genotypeFile
+    output:
+        genotypeFile+".bgen.bgi",
+        bgen_folder+"/EUR_imputed_hg38_stats.{chrom}.vars.gz",
+        bgen_folder+"/EUR_imputed_hg38_stats.{chrom}.samples.gz"
+    shell:
+        """
+        singularity exec --bind {includeDir} {imageDir}wp3.simg java -Xmx5g -Xms5g -jar /tools/Genotype-IO-1.0.6-SNAPSHOT-jar-with-dependencies.jar -I BGEN -i {params} -o {bgen_folder}/EUR_imputed_hg38_stats.{wildcards.chrom}
+        gzip {bgen_folder}/EUR_imputed_hg38_stats.{wildcards.chrom}*
+        """
