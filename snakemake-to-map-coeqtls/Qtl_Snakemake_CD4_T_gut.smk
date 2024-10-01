@@ -4,32 +4,44 @@ import os
 CHROM = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22']
 
 configfile: "./coQTL_wp3_CD4_T.yaml"
-imageDir = config["image_folder"]
+# top mount of binds
 includeDir = config["top_dir"]
+# image locations
+wg3_image_loc = config["wg3_image_loc"]
+limix_image_loc = config["limix_image_loc"]
+# location of genotype data
+genotype_dir = config["genotype_dir"]
+# and how each filename starts
+genotype_prepend = config["genotype_prepend"]
+# location of sample mapping file
+smf_loc = config["smf_loc"]
+
 celltypes=config["celltypes"]
 outputFolder=config["out_folder"]
 scripts_folder = "/tools/WG3-pipeline-QTL/scripts/"
 
-limix_path="singularity exec --bind "+includeDir+" "+imageDir+"limixJune24.simg python /groups/umcg-franke-scrna/tmp04/users/umcg-mjbonder/Limix_QTL/"
-r_path="singularity exec --bind "+includeDir+" "+imageDir+"wp3.simg Rscript "
+# the base limix command
+limix_path="singularity exec --bind "+includeDir+" "+limix_image_loc+" python /groups/umcg-franke-scrna/tmp04/users/umcg-mjbonder/Limix_QTL/"
+# the base R command
+r_path="singularity exec --bind "+includeDir+" "+wg3_image_loc+" Rscript "
 
 ##QTL mapping variables.
-genotypeFile= config["WG3_folder"]+ 'genotype_input/EUR_imputed_hg38_varFiltered_chr{chrom}'  # use {chrom} if genotype is splitted by chromosome
-sampleMappingFile =config["input_folder"]+'smf_filt.txt'
-minimum_test_samples = 20 #the minimum number of donors that are required for a feature to be tested
+genotypeFile= genotype_dir + genotype_prepend + '{chrom}'  # use {chrom} if genotype is splitted by chromosome
+sampleMappingFile = smf_loc
+minimum_test_samples = config["minimum_test_samples"] #the minimum number of donors that are required for a feature to be tested
 #covariateFile= '' ##Not used
 #kinshipFile= config["WG3_folder"]+'input/sample.kinship' ##Not used
 
 ##output of the correlation code (per chromosome)
-phenotypeFile = config["correlation_folder"]+"wg3_wijst2018-CD4_T-pearson-weighted-chr-{chrom}-final.tsv.gz"
+phenotypeFile = config["correlation_folder"]+config["correlation_prepend"] + "{chrom}" + config["correlation_append]
 ##Selection of tests to do SNP + feature
-feature_variant_filter = config["input_folder"]+'all_features_to_test_CD4_T_chr{chrom}.txt.gz'
+feature_variant_filter = config["features_file_folder"]+ config["features_file_prepend"] +'{chrom}' + config["features_file_append"]
 ##location of gene 1 (of the pair)
-annoFile = config["input_folder"]+'LimixAnnotationFile_co_CD4_T_chr{chrom}.txt.gz'
+annoFile = config["limix_annotation_folder"]+ config["limix_anno1_prepend"] + '{chrom}' + config["limix_anno_append"]
 ##location of gene 2 (of the pair)
-annoFile2 = config["input_folder"]+'LimixAnnotationFile_co2_CD4_T_chr{chrom}.txt.gz'
+annoFile2 = config["limix_annotation_folder"]+ config["limix_anno2_prepend"] + '{chrom}' + config["limix_anno_append"]
 ##chromosome start end of the eGenes of your choice.
-chunkFile = config["input_folder"]+'cd4_chunking_all.txt'
+chunkFile = config["chunking_file_loc"]
 
 topDirInput = config["WG3_folder"]+'input'
 bgen_folder = config["WG3_folder"]+ 'genotype_input'

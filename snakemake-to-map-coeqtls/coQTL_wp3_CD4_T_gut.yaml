@@ -5,17 +5,43 @@
 ###### The following arguments are for indicating file locations on your system #####
 #####################################################################################
 
-image_folder: /groups/umcg-franke-scrna/tmp04/software/ ### The path to the folder within which the singularity image & "wp3.simg" "limixDec22.simg" is located
-top_dir: /groups/umcg-franke-scrna/tmp04/ ### This folder will be bound to Singularty (needs to be higher up then every data item).
+# directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
+top_directory: /groups/umcg-franke-scrna/tmp04/
+# locaiton of the wg3 singularity image
+wg3_image_loc: /groups/umcg-franke-scrna/tmp04/software/wp3.simg
+# location of the limix singularity image
+limix_image_loc: /groups/umcg-franke-scrna/tmp04/software/limixDec22.simg
+# location of the smf file
+smf_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/smf_filt.txt
+# location of genotype data
+genotype_dir: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/genotype_input/
+# prepend of the genotype files
+genotype_prepend: EUR_imputed_hg38_varFiltered_chr
+# where to place the co-eQTL output and intermediate files
+out_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/output/
+# location of the correlation files
+correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/output/wg3_wijst2018/
+# how each correlation file starts
+correlation_prepend: wg3_wijst2018-CD4_T-pearson-weighted-chr-
+# how each correlation file ends
+correlation_append: -final.tsv.gz
+# location of the feature file with features to test
+features_file_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/
+# how the feature files start
+features_file_prepend: all_features_to_test_CD4_T_chr
+# how each feature file ends
+features_file_append: .txt.gz
 
 #####################################
 ##       input files/folders       ###
 #####################################
 
-WG3_folder:/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/
+WG3_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/
 input_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/ ### The path to the outputs from WG3
-correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/output/wg3_wijst2018/
-out_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/output/
+
+# minimal number of tests
+minimum_test_samples: 20
+
 
 ######################################
 ######        Do not change      #####
