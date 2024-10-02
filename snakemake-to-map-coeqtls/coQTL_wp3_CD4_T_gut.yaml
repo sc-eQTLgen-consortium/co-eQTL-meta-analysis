@@ -33,24 +33,16 @@ features_file_prepend: all_features_to_test_CD4_T_chr
 features_file_append: .txt.gz
 
 #####################################
-##       input files/folders       ###
+##  settings related to analysis  ###
 #####################################
-
-WG3_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/
-input_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/ ### The path to the outputs from WG3
 
 # minimal number of tests
 minimum_test_samples: 20
-
-
-######################################
-######        Do not change      #####
-######################################
-numberOfPermutations: '20'
+numberOfPermutations: '0'
 minorAlleleFrequency: '0.05'
 windowSize: '1000000' # gene + cis window from one side
 hardyWeinbergCutoff: '0.0001'
 compressFiles: true
 
 celltypes:
-    - L1/CD4_T
+    - CD4_T

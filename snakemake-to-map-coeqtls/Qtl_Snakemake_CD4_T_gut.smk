@@ -42,9 +42,11 @@ annoFile = config["limix_annotation_folder"]+ config["limix_anno1_prepend"] + '{
 annoFile2 = config["limix_annotation_folder"]+ config["limix_anno2_prepend"] + '{chrom}' + config["limix_anno_append"]
 ##chromosome start end of the eGenes of your choice.
 chunkFile = config["chunking_file_loc"]
+# how we'll name the variant filtered genotype files
+var_filtered_genotypes = genotype_dir + genotype_prepend + '{chrom}-varfiltered' 
 
 topDirInput = config["WG3_folder"]+'input'
-bgen_folder = config["WG3_folder"]+ 'genotype_input'
+bgen_folder = genotype_dir
 
 chunk_chrom, chunk_start, chunk_end=[], [], []
 with open(chunkFile) as fp:
@@ -170,28 +172,28 @@ rule make_temporary_files:
     input:
         bgen_file=genotypeFile+".bgen"
     output:
-        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.z"),
-        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.sample"),
-        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen_master.txt")
+        temp(var_filtered_genotypes+".bgen.z"),
+        temp(var_filtered_genotypes+".bgen.sample"),
+        temp(var_filtered_genotypes+".bgen_master.txt")
     shell:
         """
-        singularity exec --bind {includeDir} {imageDir}/wp3.simg python {scripts_folder}/make_z.py {input.bgen_file} {bgen_folder}
+        singularity exec --bind {includeDir} {wg3_image_loc} python {scripts_folder}/make_z.py {input.bgen_file} {bgen_folder}
         """
 
 rule create_bdose_file_by_chr:
     input:
-        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen",
-        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bgi",
-        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.z",
-        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.sample",
-        bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen_master.txt"
+        var_filtered_genotypes+"{chrom}.bgen",
+        var_filtered_genotypes+"{chrom}.bgen.bgi",
+        var_filtered_genotypes+"{chrom}.bgen.z",
+        var_filtered_genotypes+"{chrom}.bgen.sample",
+        var_filtered_genotypes+"{chrom}.bgen_master.txt"
     output:
-        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bdose"),
-        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bdose.bdose.tmp0"),
-        temp(bgen_folder+"/EUR_imputed_hg38_varFiltered_chr{chrom}.bgen.bdose.meta.tmp0")
+        temp(var_filtered_genotypes+"{chrom}.bgen.bdose"),
+        temp(var_filtered_genotypes+"{chrom}.bgen.bdose.bdose.tmp0"),
+        temp(var_filtered_genotypes+"{chrom}.bgen.bdose.meta.tmp0")
     shell:
         """
-        singularity exec --bind {includeDir} {imageDir}/wp3.simg /tools/ldstore_v2.0_x86_64/ldstore_v2.0_x86_64 --in-files {bgen_folder}/EUR_imputed_hg38_varFiltered_chr{wildcards.chrom}.bgen_master.txt --write-bdose --bdose-version 1.1
+        singularity exec --bind {includeDir} {wg3_image_loc} /tools/ldstore_v2.0_x86_64/ldstore_v2.0_x86_64 --in-files {var_filtered_genotypes}{wildcards.chrom}.bgen_master.txt --write-bdose --bdose-version 1.1
         """
 
 rule Genotype_IO:
@@ -201,10 +203,10 @@ rule Genotype_IO:
         genotypeFile
     output:
         genotypeFile+".bgen.bgi",
-        bgen_folder+"/EUR_imputed_hg38_stats.{chrom}.vars.gz",
-        bgen_folder+"/EUR_imputed_hg38_stats.{chrom}.samples.gz"
+        bgen_folder+"/geno_stats.{chrom}.vars.gz",
+        bgen_folder+"/geno_stats.{chrom}.samples.gz"
     shell:
         """
-        singularity exec --bind {includeDir} {imageDir}wp3.simg java -Xmx5g -Xms5g -jar /tools/Genotype-IO-1.0.6-SNAPSHOT-jar-with-dependencies.jar -I BGEN -i {params} -o {bgen_folder}/EUR_imputed_hg38_stats.{wildcards.chrom}
-        gzip {bgen_folder}/EUR_imputed_hg38_stats.{wildcards.chrom}*
+        singularity exec --bind {includeDir} {wg3_image_loc} java -Xmx5g -Xms5g -jar /tools/Genotype-IO-1.0.6-SNAPSHOT-jar-with-dependencies.jar -I BGEN -i {params} -o {bgen_folder}/geno_stats.{wildcards.chrom}
+        gzip {bgen_folder}/geno_stats.{wildcards.chrom}*
         """
