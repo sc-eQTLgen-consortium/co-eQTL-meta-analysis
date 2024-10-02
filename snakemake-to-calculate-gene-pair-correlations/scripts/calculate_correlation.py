@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd 
 import argparse
 import gzip
+import sys
 from scipy import stats
 from scipy.special import betainc
 from scipy.io import mmread
@@ -147,10 +148,39 @@ def calc_z_score(pval,corr):
         zscore *= -1
     return zscore
 
+def check_gz_nonempty(file_loc):
+    # check if a file is empty
+    with gzip.open(file_loc, 'rb') as f:
+        # try to open the file
+        try:
+            file_contents = f.read(1)
+            return len(file_contents) > 0
+        except:
+            return False
+
+print("preparing to write output")
+fileout = gzip.open(args.output, "wt", 4)
+fileout.write("gene_pair\tcorrelation\n")
+
 print("Loading genes")
+if check_gz_nonempty(args.gene_list_donor) is False:
+    print(' '.join([args.gene_list_donor, 'contains no genes, skipped']))
+    sys.exit()
+
+print("Loading genes")
+if check_gz_nonempty(args.gene_list) is False:
+    print(' '.join([args.gene_list, 'contains no genes, skipped']))
+    sys.exit()
+
+# read them
 gene_list = pd.read_csv(args.gene_list_donor, sep = "\t", header=None).iloc[:, 0].tolist()
 gene_list_set = set(gene_list)
 genes = pd.read_csv(args.gene_list, sep='\t', header=None).iloc[:,0].to_list()
+genes.sort()
+
+# make sure these are all strings
+genes = [str(element) for element in genes]
+# sort the genes, because we sorted the counts by genes in the process_donor.R step
 genes.sort()
 print("Loading weights")
 weight = pd.read_csv(args.weight[1], sep = "\t",header=0)
@@ -171,8 +201,6 @@ if args.method == 'spearman':
         ranked_values.append(list(stats.rankdata(values[i])))
     values = ranked_values
     
-fileout = gzip.open(args.output, "wt", 4)
-fileout.write("gene_pair\tcorrelation\n")
 print("Calculating correlation")
 for i in range(0,all_genes):
     genei = genes[i]

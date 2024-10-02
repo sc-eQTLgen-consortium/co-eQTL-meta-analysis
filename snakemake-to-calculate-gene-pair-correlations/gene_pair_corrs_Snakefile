@@ -5,36 +5,82 @@ import numpy as np
 import os
 import gzip
 
-out_dir = config["output_directory"]
+# directory that should be bound in singularity, all files should be a subdirectory of this one
 top_dir = config["top_directory"]
+# output directory of all the files, this is where the final output and the intermediate files will be saved
+out_dir = config["output_directory"]
+# the location of the singularity image with all installed software
 simg_dir = config["singularity_path"]
+# the working directory for snakemake, location of this file and the yaml
 snake_dir = config["snakefile_path"]
-scripts_dir = snake_dir+"scripts/"
-wg3_path = config["wg3_path"]
+# the location of the scripts that are used, would usually be the scripts directory of the repository
+scripts_dir = config["scripts_directory"]
+# the directory that contains the RDS files 
+input_directory = config["input_directory"]
+# the name of the cohort being used, this will be added to the name of some output files
 cohort = config["cohort"]
-wg3_dir = f"{wg3_path}/{cohort}/input/L1/"
-#wg3_dir = wg3_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
-smf = f"{wg3_path}/{cohort}/input/smf.txt"
+# the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
+qtl_celltype_directory = config['qtl_celltype_directory']
+# the subdirectory if applicable for the WG3-style eQTL input
+qtl_celltype_subdirectory = config["qtl_celltype_subdirectory"]
+# the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
+relative_smf_path = config["relative_smf_path"]
+# prepend of name of RDS files
+seurat_celltype_prepend = config['seurat_object_prepend']
+# append of the RDS files
+seurat_celltype_append = config['seurat_object_append']
+# name of the column in the RDS Seurat object, that denotes the sample assignment
+seurat_assignment_column = config['seurat_assignment_column']
+# weighting method for the correlations, can be expression, zeroes or none
+weighting_method = config['weighting_method']
+# cell types to create correlation matrices for
+cell_types = config["cell_type"]
+# gene lists to only calculate correlations for (instead of doing all genes)
+gene_list = config["gene_list_path"]
+# the location of the limixannotation file
+limix_annotation_loc = config["limix_annotation_loc"]
+# location of the binary matrix file
+binary_matrix_loc = config['binary_matrix_loc']
+
+# some might values might be none, so reset those to be empty strings
+if seurat_celltype_prepend is None or seurat_celltype_prepend == 'None':
+    seurat_celltype_prepend = ''
+if qtl_celltype_subdirectory is None or seurat_celltype_prepend == 'None':
+    qtl_celltype_subdirectory = ''
+
+# paste together the location of the QTL files
+qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
+#qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
+# get the location of the .smf file
+smf = f"{qtl_celltype_directory}/{relative_smf_path}"
 #smf = smf.replace(" ","")
 
+# the chromosomes to consider
 chromosomes = list(range(1,23))
-cell_types = config["cell_type"]
-gene_list = config["gene_list_path"]
+
+# initialize dictionary with gene lists per cell type
 gene_list_dict = {}
 # Create a dictionary with cell type as key and path to gene list for that cell type as value
-for file in gene_list:
-    for cell_type in cell_types:
-        if f"{cohort}_{cell_type}" in file:
-            gene_list_dict[cell_type] = file
-            break
+for i in range(0,len(cell_types), 1):
+    cell_type = cell_types[i]
+    # if a list with only one item is given, we'll use the same one each time
+    if len(gene_list) == 1:
+        gene_list_dict[cell_type] = gene_list[0]
+    # if there are multiple, we'll use the indices of the cell type, to get the list at the same index
+    elif len(gene_list) > 1:
+        gene_list_dict[cell_type] = gene_list[i]
+    # if there are no items in the gene list, we'll put na there
+    elif len(gene_list) == 0:
+        gene_list_dict[cell_type] = 'nan'
 
 # Check there is a gene list provided for every cell type
 if type(cell_types) is list and len(cell_types) != len(gene_list):
     raise Exception("There should be a gene list input for every cell type.")
 
-donor_file_path = [f"{snake_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv" for cell_type in cell_types]
+donor_file_path = [f"{out_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv" for cell_type in cell_types]
 #donor_file_path = donor_file_path.replace(" ","")
 print(f"Pipeline is being run for {cell_types} cells.")
+print(f"gene lists are {gene_list_dict}.")
 
 # Make sure pipeline is not run for empty gene lists
 if type(gene_list) == list:
@@ -48,7 +94,7 @@ if not line:
 if all([os.path.exists(file) for file in donor_file_path]):
     donors,donors_list = {},{}
     for cell_type in cell_types:
-        tmp_donor_file_path = f"{snake_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv"
+        tmp_donor_file_path = f"{out_dir}/donor_data/{cohort}-{cell_type}-donor-list.tsv"
         donors[cell_type] = pd.read_csv(tmp_donor_file_path, sep='\t')
         donors_list[cell_type] = [i for i in donors[cell_type]['original_labels']] 
     metrics = ['corr','pval','zscore']
@@ -63,7 +109,8 @@ if all([os.path.exists(file) for file in donor_file_path]):
         for donor in donors_list[cell_type]:
             combination['donor'].append(donor)
             combination['cell_type'].append(cell_type)
-        combination[f'gene_list'][cell_type] = genes_file # required to match gene list to a cell type (update: can be replaced by gene_list dictionary above)
+        #combination[f'gene_list'][cell_type] = genes_file # required to match gene list to a cell type (update: can be replaced by gene_list dictionary above)
+    combination['gene_list'] = gene_list_dict
 
     # Required for creatDonorFiles rule. All donors regardless of cell type are added to each cell type, files will subsequently be touched and deleted if not requested.
     for cell_type in all_donors_cell_type:
@@ -82,7 +129,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["create_donor"]["create_donor_memory"],
             time = config["create_donor"]["create_donor_time"]
         input:
-            snake_dir + "/donor_data/" + cohort + "-{cell_types}-donor-list.tsv"
+            out_dir + "/donor_data/" + cohort + "-{cell_types}-donor-list.tsv"
         output:
             counts = temp(expand(out_dir + cohort + "/counts/normalized-counts-{donor}-{cell_types}.mtx", donor=combination['donor'], allow_missing=True)),
             weights = temp(expand(out_dir + cohort + "/donor_weight/correlation-weight-{donor}-{cell_types}.tsv.gz", donor=combination['donor'], allow_missing=True)),
@@ -93,8 +140,23 @@ if all([os.path.exists(file) for file in donor_file_path]):
             ct = lambda wildcards: f"{wildcards.cell_types}"
         shell:
             """
+            mkdir -p {out_dir}{cohort}/counts/
+            mkdir -p {out_dir}{cohort}/donor_weight/
+            mkdir -p {out_dir}{cohort}/donor_gene_list/
             singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}touch_script.py "{params.all_donors_list}" {out_dir}{cohort} {params.ct}
-            singularity exec --bind {top_dir} {simg_dir} Rscript {scripts_dir}process_donor.R {wildcards.cell_types} {cohort} {wg3_dir} {out_dir} {params.gene_list} {smf}
+            singularity exec \
+                --bind {top_dir} \
+                {simg_dir} Rscript \
+                {scripts_dir}process_donor.R \
+                    --cell_type {wildcards.cell_types} \
+                    --cohort_id {cohort} \
+                    --seurat_object_path {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} \
+                    --donor_rds_dir {out_dir} \
+                    --genes_to_use_loc {params.gene_list} \
+                    --smf {smf} \
+                    --qtl_input_path {qtl_celltype_dir} \
+                    --seurat_assignment_column {seurat_assignment_column} \
+                    --weight_method {weighting_method}
             """
 
     rule calculate_correlations:
@@ -135,7 +197,7 @@ if all([os.path.exists(file) for file in donor_file_path]):
             cell_type = lambda wildcards: f"{wildcards.cell_types}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {wg3_path}{cohort} {params.chromosome}
+            singularity exec --bind {top_dir} {simg_dir} python {scripts_dir}aggregation_append.py "{params.list_of_donors}" {params.cell_type} {params.out_files} {out_dir}{cohort} {limix_annotation_loc} {params.chromosome}
             """
 
     rule transpose_matrix:
@@ -159,16 +221,16 @@ if all([os.path.exists(file) for file in donor_file_path]):
             chromosome = lambda wildcards: f"{wildcards.chromosome}"
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {binary_matrix_loc} \
               txttobin \
               {input} \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome}
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {binary_matrix_loc} \
               transpose \
               {params.output_path}/output-tmp-bin-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               10000
-            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {scripts_dir}2024-06-20-BinaryMatrixTools.jar \
+            singularity exec --bind {top_dir} {simg_dir} java -Xmx{resources.mem_per_thread_gb}g -Xms{resources.mem_per_thread_gb}g -jar {binary_matrix_loc} \
               bintotxt \
               {params.output_path}/output-tmp-bin-transpose-{params.cohort}-{params.cell_types}-{params.chromosome} \
               {output.final_out}
@@ -180,22 +242,35 @@ else:
 
     rule all:
         input:
-            expand(snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv", cell_types=cell_types)
+            expand(out_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv", cell_types=cell_types)
 
     rule makeDonorLists:
         resources:
             mem_per_thread_gb = lambda wildcards, attempt: attempt * config["donor_list"]["donor_list_memory"],
             time = config["donor_list"]["donor_list_time"]
         output:
-            snake_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
+            out_dir+"donor_data/"+cohort+"-{cell_types}-donor-list.tsv"
         params:
-            donor_data_path = (f"{snake_dir}/donor_data/").replace(" ",""),
+            donor_data_path = (f"{out_dir}/donor_data/").replace(" ",""),
             donor_rds_script = (f"{scripts_dir}donor_ids.R").replace(" ",""),
-            gene_lists_out_path = (f"{snake_dir}/gene_lists/").replace(" ",""),
+            gene_lists_out_path = (f"{out_dir}/gene_lists/").replace(" ",""),
             gene_list_ct = lambda wildcards: gene_list_dict[wildcards.cell_types]
         shell:
             """
-            singularity exec --bind {top_dir} {simg_dir} Rscript {params.donor_rds_script} {wildcards.cell_types} {cohort} {wg3_dir} {params.donor_data_path} {params.gene_lists_out_path} {params.gene_list_ct} {smf}
+            mkdir -p {params.donor_data_path}
+            mkdir -p {params.gene_lists_out_path}
+            singularity exec \
+                --bind {top_dir} \
+                {simg_dir} Rscript \
+                    {params.donor_rds_script} \
+                    --cell_type {wildcards.cell_types} \
+                    --cohort_id {cohort} \
+                    --seurat_object_path {input_directory}{seurat_celltype_prepend}{wildcards.cell_types}{seurat_celltype_append} \
+                    --donor_rds_dir {params.donor_data_path} \
+                    --gene_list_out_loc {params.gene_lists_out_path} \
+                    --smf {smf} \
+                    --qtl_input_path {qtl_celltype_dir} \
+                    --seurat_assignment_column {seurat_assignment_column}
             """
 
 
