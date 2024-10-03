@@ -3,7 +3,7 @@ import re
 import os
 CHROM = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22']
 
-configfile: "./coQTL_wp3_CD4_T.yaml"
+configfile: "./coQTL_wp3_CD4_T_gut.yaml"
 # top mount of binds
 includeDir = config["top_dir"]
 # image locations
@@ -43,7 +43,9 @@ annoFile2 = config["limix_annotation_folder"]+ config["limix_anno2_prepend"] + '
 ##chromosome start end of the eGenes of your choice.
 chunkFile = config["chunking_file_loc"]
 # how we'll name the variant filtered genotype files
-var_filtered_genotypes = genotype_dir + genotype_prepend + '{chrom}-varfiltered' 
+var_filtered_genotypes = genotype_dir + genotype_prepend + '{chrom}-varfiltered'
+var_filtered_genotypes = genotype_dir + genotype_prepend + '{chrom} 
+
 
 bgen_folder = genotype_dir
 

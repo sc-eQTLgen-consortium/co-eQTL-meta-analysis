@@ -28,9 +28,15 @@ correlation_append: -final.tsv.gz
 # location of the feature file with features to test
 features_file_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/
 # how the feature files start
-features_file_prepend: all_features_to_test_CD4_T_chr
+features_file_prepend: replication_features__CD4_T_cells_chr
 # how each feature file ends
 features_file_append: .txt.gz
+# annotation folder
+limix_annotation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/
+# prepend of each annotation file
+limix_anno1_prepend: replication_co_CD4_T_cells_chr
+limix_anno2_prepend: replication_co2_CD4_T_cells_chr
+
 
 #####################################
 ##  settings related to analysis  ###
