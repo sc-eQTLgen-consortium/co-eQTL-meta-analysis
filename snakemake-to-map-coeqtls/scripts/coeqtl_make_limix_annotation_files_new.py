@@ -75,6 +75,8 @@ if args.qtl_loc is not None:
 gwas = None
 if args.gwas_loc is not None:
     gwas = pd.read_csv(args.gwas_loc, sep = '\t')
+    # subset to genes we have
+    gwas=gwas[gwas.feature_id.isin(gene_list)]
     # if we had GWAS sumstats with gene IDs, we will test those as gene2
     features2=[i for i in gwas.feature_id]
     # and the variants
@@ -136,6 +138,9 @@ new_df.to_csv(args.features_out_loc, index = None, sep = '\t')
 
 # grab the variables
 limix_orig = limix_orig.drop_duplicates(subset='feature_id')
+# and subset to genes that we have
+limix_orig=limix_orig[limix_orig.feature_id.isin(gene_list)]
+# extract all info
 unq_ids = [f"{limix_orig.feature_id.iloc[i]}_{limix_orig.snp_id.iloc[i]}" for i in range(len(limix_orig.snp_id))]
 chromosome = [i for i in limix_orig.feature_chromosome]
 start = [i for i in limix_orig.feature_start]
