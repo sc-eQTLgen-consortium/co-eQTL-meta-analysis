@@ -36,7 +36,8 @@ limix_annotation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/on
 # prepend of each annotation file
 limix_anno1_prepend: replication_co_CD4_T_cells_chr
 limix_anno2_prepend: replication_co2_CD4_T_cells_chr
-
+# and the append of each annotation file
+limix_anno_append: .txt.gz
 
 #####################################
 ##  settings related to analysis  ###
