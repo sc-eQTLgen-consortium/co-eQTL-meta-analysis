@@ -204,5 +204,5 @@ annotation1 = new_limix.iloc[other_feats]
 
 output=args.co_limix_annotation_prepend + '.tsv.gz'
 annotation1.to_csv(output,index=None,sep='\t', compression = 'gzip')
-output=args.co_limix_annotation_prepend + '2.txt.gz'
+output=args.co_limix_annotation_prepend + '2.tsv.gz'
 annotation2.to_csv(output,index=None,sep='\t', compression = 'gzip')
