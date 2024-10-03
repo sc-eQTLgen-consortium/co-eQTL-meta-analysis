@@ -70,7 +70,7 @@ gwas = None
 if args.gwas_loc is not None:
     gwas = pd.read_csv(args.gwas_loc, sep = '\t')
     # subset to genes we have
-    gwas=gwas[gwas.feature_id.isin(gene_list)]
+    gwas=gwas[gwas.feature_id.isin(filtered_egenes)]
     # if we had GWAS sumstats with gene IDs, we will test those as gene2
     features2=[i for i in gwas.feature_id]
     # and the variants
@@ -94,8 +94,10 @@ all_egene_snps=pd.DataFrame()
 all_egene_snps['feature_id']=all_feats
 all_egene_snps['snp_id']=all_snps
 
-# get the unique combinations
+# get the combinations
 unq_ids = [f"{all_egene_snps.feature_id.iloc[i]}_{all_egene_snps.snp_id.iloc[i]}" for i in range(len(all_egene_snps.snp_id))]
+# make them unique
+unq_ids = np.unique(unq_ids)
 
 # I don't know exactly what is going on here, I should ask Dan
 now=time.time()
@@ -123,7 +125,10 @@ final_features = ['_'.join(sorted(i.split('_'))) for i in final_features]
 # add that to the new dataframe
 new_df['feature_id']=[i.split(';')[0] for i in final_features]
 # write this to a file
-new_df.to_csv(args.features_out_loc, index = None, sep = '\t')
+if args.features_out_loc.endswith('.gz'):
+    new_df.to_csv(args.features_out_loc, index = None, sep = '\t', compression = 'gzip')
+else:
+    new_df.to_csv(args.features_out_loc, index = None, sep = '\t')
 
 
 ####################
@@ -197,7 +202,7 @@ for i in range(len(features)):
 annotation2 = new_limix.iloc[feats_to_split]
 annotation1 = new_limix.iloc[other_feats]
 
-output=args.co_limix_annotation_prepend + '.txt'
-annotation1.to_csv(output,index=None,sep='\t')
-output=args.co_limix_annotation_prepend + '2.txt'
-annotation2.to_csv(output,index=None,sep='\t')
+output=args.co_limix_annotation_prepend + '.tsv.gz'
+annotation1.to_csv(output,index=None,sep='\t', compression = 'gzip')
+output=args.co_limix_annotation_prepend + '2.txt.gz'
+annotation2.to_csv(output,index=None,sep='\t', compression = 'gzip')
