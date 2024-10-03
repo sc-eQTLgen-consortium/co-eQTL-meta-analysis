@@ -5,7 +5,7 @@ CHROM = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16',
 
 configfile: "./coQTL_wp3_CD4_T_gut.yaml"
 # top mount of binds
-includeDir = config["top_dir"]
+includeDir = config["top_directory"]
 # image locations
 wg3_image_loc = config["wg3_image_loc"]
 limix_image_loc = config["limix_image_loc"]
