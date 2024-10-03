@@ -28,9 +28,9 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gwas_loc', type = str, help = 'location of gwas file (string)')
 parser.add_argument('-l', '--gene_loc', type = str, help = 'location of gene list file (string)')
+parser.add_argument('-v', '--variant_loc', type = str, help = 'location of variant list file (string)')
 parser.add_argument('-q', '--qtl_loc', type = str, help = 'location of previous eQTL summary stats')
 parser.add_argument('-f', '--features_out_loc', type = str, help = 'location to write the to-test features')
-parser.add_argument('-a', '--limix_annotation_loc', type = str, help = 'location of original feature annotations')
 parser.add_argument('-o', '--co_limix_annotation_prepend', type = str, help = 'location of original feature annotations')
 args = parser.parse_args()
 
