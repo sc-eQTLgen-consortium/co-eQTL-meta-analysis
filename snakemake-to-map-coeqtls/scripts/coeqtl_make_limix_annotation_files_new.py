@@ -39,9 +39,6 @@ args = parser.parse_args()
 # to-test features #
 ####################
 
-# read the limix annotation file (we'll need it later)
-limix_orig = pd.read_csv(args.limix_annotation_loc, sep = '\t', header = 0)
-
 # get genes
 genes = pd.read_csv(args.gene_loc, sep = '\t', header = None)
 # get the genes
