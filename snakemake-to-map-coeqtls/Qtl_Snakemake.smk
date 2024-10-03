@@ -33,7 +33,7 @@ minimum_test_samples = config["minimum_test_samples"] #the minimum number of don
 #kinshipFile= config["WG3_folder"]+'input/sample.kinship' ##Not used
 
 ##output of the correlation code (per chromosome)
-phenotypeFile = config["correlation_folder"]+config["correlation_prepend"] + "{chrom}" + config["correlation_append]
+phenotypeFile = config["correlation_folder"] + config["correlation_prepend"] + "{chrom}" + config["correlation_append"]
 ##Selection of tests to do SNP + feature
 feature_variant_filter = config["features_file_folder"]+ config["features_file_prepend"] +'{chrom}' + config["features_file_append"]
 ##location of gene 1 (of the pair)
