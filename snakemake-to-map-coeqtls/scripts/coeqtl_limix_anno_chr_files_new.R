@@ -45,7 +45,7 @@ annotation_prepend <- opt[['annotation_prepend']]
 features_test_prepend <- opt[['features_test_prepend']]
 
 # paste together the full paths, and read the files
-annot <- read.delim(paste0(annotation_prepend, ct,"_co_.tsv.gz"))
+annot <- read.delim(paste0(annotation_prepend, ct,"_co.tsv.gz"))
 e_annot <- read.delim(paste0(annotation_prepend, ct, "_co2.tsv.gz"))
 fvf <-  read.delim(paste0(features_test_prepend, ct, ".tsv.gz"))
 
