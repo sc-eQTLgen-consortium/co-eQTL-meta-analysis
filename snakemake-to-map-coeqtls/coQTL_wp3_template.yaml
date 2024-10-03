@@ -36,6 +36,11 @@ limix_annotation_folder: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-con
 # prepend of each annotation file
 limix_anno1_prepend: LimixAnnotationFile_co_CD4_T_chr
 limix_anno2_prepend: LimixAnnotationFile_co2_CD4_T_chr
+# and the append of each annotation file
+limix_anno_append: .txt.gz
+# location of the chunking file
+chunking_file_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/cd4_chunking_all.txt
+
 
 #####################################
 ##  settings related to analysis  ###
