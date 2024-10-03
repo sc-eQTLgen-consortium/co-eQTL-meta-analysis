@@ -10,7 +10,7 @@ top_directory: /groups/umcg-franke-scrna/tmp04/
 # locaiton of the wg3 singularity image
 wg3_image_loc: /groups/umcg-franke-scrna/tmp04/software/wp3.simg
 # location of the limix singularity image
-limix_image_loc: /groups/umcg-franke-scrna/tmp04/software/limixDec22.simg
+limix_image_loc: /groups/umcg-franke-scrna/tmp04/software/limixJune24.simg
 # location of the smf file
 smf_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/smf_filt.txt
 # location of genotype data
