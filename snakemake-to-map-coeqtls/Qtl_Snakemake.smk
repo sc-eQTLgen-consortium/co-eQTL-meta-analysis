@@ -43,8 +43,10 @@ annoFile2 = config["limix_annotation_folder"]+ config["limix_anno2_prepend"] + '
 ##chromosome start end of the eGenes of your choice.
 chunkFile = config["chunking_file_loc"]
 
-
+# rename to what is used in rest of script
 bgen_folder = genotype_dir
+# these are just the genotype names, but they are called varfiltered in the script
+var_filtered_genotypes = bgen_folder + genotype_prepend
 
 chunk_chrom, chunk_start, chunk_end=[], [], []
 with open(chunkFile) as fp:
