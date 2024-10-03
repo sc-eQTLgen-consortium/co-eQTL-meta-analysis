@@ -3,6 +3,12 @@
 # Authors: Dan Kaptijn, Marc-Jan Bonder, Roy Oelen
 # Name: coeqtl_limix_anno_chr_files_new.R
 # Function: create feature annotation files for co-eQTL mapping
+# Example usage: 
+# ~/start_Rscript.sh coeqtl_limix_anno_chr_files_new.R \
+#    --cell_type Mono \
+#    --annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/junk \
+#    --features_test_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/junk_features \
+#
 ############################################################################################################################
 
 ####################
