@@ -62,7 +62,7 @@ for (chr in 22:1){
   e_annotRel = annotRel[which(duplicated(annotRel$feature_id)),]
   annotRel = annotRel[which(!duplicated(annotRel$feature_id)),]
   
-  write.table(annotRel,file = gzfile(paste0(annotation_prepend, "_co_",ct,"_chr",chr,".txt.gz")),sep="\t",quote=F,row.names=F)
-  write.table(e_annotRel,file = gzfile(paste0(annotation_prepend, "_co2_",ct,"_chr",chr,".txt.gz")),sep="\t",quote=F,row.names=F)
-  write.table(fvfRel,file = gzfile(paste0(features_test_prepend, "_",ct,"_chr",chr,".txt.gz")),sep="\t",quote=F,row.names=F)
+  write.table(annotRel,file = gzfile(paste0(annotation_prepend, "co_",ct,"_chr",chr,".txt.gz")),sep="\t",quote=F,row.names=F)
+  write.table(e_annotRel,file = gzfile(paste0(annotation_prepend, "co2_",ct,"_chr",chr,".txt.gz")),sep="\t",quote=F,row.names=F)
+  write.table(fvfRel,file = gzfile(paste0(features_test_prepend, "",ct,"_chr",chr,".txt.gz")),sep="\t",quote=F,row.names=F)
 }
