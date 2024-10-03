@@ -27,7 +27,6 @@ import argparse
 # parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gwas_loc', type = str, help = 'location of gwas file (string)')
-parser.add_argument('-v', '--variant_loc', type = str, help = 'location of variant list file (string)')
 parser.add_argument('-l', '--gene_loc', type = str, help = 'location of gene list file (string)')
 parser.add_argument('-q', '--qtl_loc', type = str, help = 'location of previous eQTL summary stats')
 parser.add_argument('-f', '--features_out_loc', type = str, help = 'location to write the to-test features')
@@ -55,21 +54,19 @@ snps1 = []
 snps2 = []
 
 # get the eQTL summary stats
-eqtls = None
-if args.qtl_loc is not None:
-    eqtls = pd.read_csv(args.qtl_loc, sep = '\t')
-    # get genes with an eQTL effect
-    egenes = np.unique([i for i in eqtls.feature_id])
-    # filter genes to egenes
-    filtered_egenes= [i for i in egenes if i in gene_list]
-    # filter eQTL sum stats to genes in the data
-    eqtls = eqtls[eqtls.feature_id.isin(filtered_egenes)]
-    # set the index
-    eqtls.index=[i for i in range(len(eqtls.feature_id))]
-    # if we had eQTL sumstats, we would instead use those as the gene1
-    features1=[i for i in eqtls.feature_id]
-    # and the variants
-    snps1=[i for i in eqtls.snp_id]
+eqtls = pd.read_csv(args.qtl_loc, sep = '\t')
+# get genes with an eQTL effect
+egenes = np.unique([i for i in eqtls.feature_id])
+# filter genes to egenes
+filtered_egenes= [i for i in egenes if i in gene_list]
+# filter eQTL sum stats to genes in the data
+eqtls = eqtls[eqtls.feature_id.isin(filtered_egenes)]
+# set the index
+eqtls.index=[i for i in range(len(eqtls.feature_id))]
+# if we had eQTL sumstats, we would instead use those as the gene1
+features1=[i for i in eqtls.feature_id]
+# and the variants
+snps1=[i for i in eqtls.snp_id]
 
 # get variants from GWAS
 gwas = None
@@ -137,7 +134,7 @@ new_df.to_csv(args.features_out_loc, index = None, sep = '\t')
 ####################
 
 # grab the variables
-limix_orig = limix_orig.drop_duplicates(subset='feature_id')
+limix_orig = eqtls.drop_duplicates(subset='feature_id')
 # and subset to genes that we have
 limix_orig=limix_orig[limix_orig.feature_id.isin(gene_list)]
 # extract all info
