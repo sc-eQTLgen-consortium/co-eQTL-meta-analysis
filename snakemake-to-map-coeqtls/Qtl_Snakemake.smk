@@ -42,9 +42,6 @@ annoFile = config["limix_annotation_folder"]+ config["limix_anno1_prepend"] + '{
 annoFile2 = config["limix_annotation_folder"]+ config["limix_anno2_prepend"] + '{chrom}' + config["limix_anno_append"]
 ##chromosome start end of the eGenes of your choice.
 chunkFile = config["chunking_file_loc"]
-# how we'll name the variant filtered genotype files
-var_filtered_genotypes = genotype_dir + genotype_prepend + '{chrom}-varfiltered'
-var_filtered_genotypes = genotype_dir + genotype_prepend + '{chrom} 
 
 
 bgen_folder = genotype_dir
