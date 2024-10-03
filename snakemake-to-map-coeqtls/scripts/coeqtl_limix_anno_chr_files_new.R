@@ -5,9 +5,9 @@
 # Function: create feature annotation files for co-eQTL mapping
 # Example usage: 
 # ~/start_Rscript.sh coeqtl_limix_anno_chr_files_new.R \
-#    --cell_type Mono \
-#    --annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/junk \
-#    --features_test_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/junk_features \
+#   --cell_type CD4_T_cells \
+#   --annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_ \
+#   --features_test_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_features_
 #
 ############################################################################################################################
 
@@ -45,9 +45,9 @@ annotation_prepend <- opt[['annotation_prepend']]
 features_test_prepend <- opt[['features_test_prepend']]
 
 # paste together the full paths, and read the files
-annot <- read.delim(paste0(annotation_prepend, "_co_",ct,".tsv.gz"))
-e_annot <- read.delim(paste0(annotation_prepend, "_co2_",ct,".tsv.gz"))
-fvf <-  read.delim(paste0(features_test_prepend, "_",ct,".tsv.gz"))
+annot <- read.delim(paste0(annotation_prepend, ct,"_co_.tsv.gz"))
+e_annot <- read.delim(paste0(annotation_prepend, ct, "_co2.tsv.gz"))
+fvf <-  read.delim(paste0(features_test_prepend, ct, ".tsv.gz"))
 
 # do each chromosome
 for (chr in 22:1){
