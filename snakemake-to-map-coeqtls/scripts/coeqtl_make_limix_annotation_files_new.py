@@ -1,7 +1,7 @@
 """
 This script is creating gene annotation files
 
-authors: Roy Oelen
+authors: Dan Kaptijn, Marc-Jan Bonder, Roy Oelen
 """
 
 #############
@@ -41,7 +41,7 @@ args = parser.parse_args()
 ####################
 
 # read the limix annotation file (we'll need it later)
-limix_orig = pd.read_csv(args.limix_annotation_loc, sep = '\t', header = None)
+limix_orig = pd.read_csv(args.limix_annotation_loc, sep = '\t', header = 0)
 
 # get genes
 genes = pd.read_csv(args.gene_loc, sep = '\t', header = None)
