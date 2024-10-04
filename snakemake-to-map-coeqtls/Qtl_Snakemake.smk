@@ -202,7 +202,6 @@ rule Genotype_IO:
     params:
         bgen_folder + genotype_prepend + '{chrom}' + ".bgen"
     output:
-        genotypeFile+".bgen.bgi",
         bgen_folder+"/geno_stats.{genotype_prepend}{chrom}.vars.gz",
         bgen_folder+"/geno_stats.{genotype_prepend}{chrom}.samples.gz"
     shell:
