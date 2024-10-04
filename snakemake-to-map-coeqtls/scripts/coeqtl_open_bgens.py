@@ -23,13 +23,13 @@ import argparse
 # functions #
 #############
 
-def open_and_close_bgen(self, full_bgen_path):
+def open_and_close_bgen(full_bgen_path):
     # say we'll start to open the file
     print(''.join(['starting to open ', full_bgen_path]))
     # read the file
-    #bgen_handle = read_bgen(full_bgen_path, verbose = True)
+    bgen_handle = read_bgen(full_bgen_path, verbose = True)
     # and close the file
-    #bgen_genotype_close(bgen_handle)
+    bgen_genotype_close(bgen_handle)
     # and say we closed it
     print(''.join(['closed ', full_bgen_path]))
 
