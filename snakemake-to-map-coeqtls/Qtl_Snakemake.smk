@@ -198,9 +198,9 @@ rule create_bdose_file_by_chr:
 
 rule Genotype_IO:
     input:
-        genotypeFile+".bgen"
+        bgen_folder + genotype_prepend + '{chrom}' + ".bgen"
     params:
-        genotypeFile
+        bgen_folder + genotype_prepend + '{chrom}' + ".bgen"
     output:
         genotypeFile+".bgen.bgi",
         bgen_folder+"/geno_stats.{genotype_prepend}{chrom}.vars.gz",
