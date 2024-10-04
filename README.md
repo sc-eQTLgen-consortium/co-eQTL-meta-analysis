@@ -288,3 +288,40 @@ Now we can start modifying the yaml in the snakemake-to-map-coeqtls folder. You 
 
 #### yaml parameters for the co-eQTL mapping pipeline
 
+
+##### top_directory
+directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
+##### wg3_image_loc
+location of the wg3 singularity image
+##### limix_image_loc
+location of the limix singularity image
+##### smf_loc
+location of the smf file, this might be different from the WG3 one, read the note above
+##### genotype_dir
+location of genotype data
+##### genotype_prepend
+prepend of the genotype files, so how each genotype file name starts
+##### out_folder
+where to place the co-eQTL output and intermediate files
+##### correlation_folder
+location of the correlation files, this was the output of the previous snakemake pipeline where you calculated gene-gene correlations per donor
+##### correlation_prepend
+how each correlation file starts, so how each correlation file name starts
+##### correlation_append
+how each correlation file ends, so how each correlations file name ends
+##### features_file_folder
+location of the feature files with features to test, remember you have to generate these, read above
+##### features_file_prepend
+how the feature files start, so how each features file name starts
+##### features_file_append
+how each feature file ends, so how each features file name ends
+##### limix_annotation_folder
+location of the annotation files with gene-gene annotations to test, remember you have to generate these, read above
+##### limix_anno1_prepend
+prepend of each annotation file, so how each annotation-1 file name starts
+##### limix_anno2_prepend
+prepend of each annotation file, so how each annotation-2 file name starts
+##### limix_anno_append: .txt.gz
+and the append of each annotation file, so how each annotation file name ends
+##### chunking_file_loc
+location of the chunking file
