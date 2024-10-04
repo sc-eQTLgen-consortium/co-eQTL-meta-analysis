@@ -257,7 +257,7 @@ We will unfortunately have to do this for each celltype separately for now, thou
 Next the annotation file needs to split by chromosome, which is done by the script 'coeqtl_limix_anno_chr_files_new.R' This script expects the prepend of the --features_out_loc parameter of the previous script (without the cell type), the prepend of the --co_limix_annotation_prepend (without the cell type), and the cell type as used in the name of the files. The options and their names are listed below:
 
 ```sh
-~/start_Rscript.sh /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/coeqtl_limix_anno_chr_files_new.R -h
+~/start_Rscript.sh /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts/coeqtl_limix_anno_chr_files_new.R -h
 # Usage: coeqtl_limix_anno_chr_files_new.R [options]
 #
 #
@@ -325,3 +325,46 @@ prepend of each annotation file, so how each annotation-2 file name starts
 and the append of each annotation file, so how each annotation file name ends
 ##### chunking_file_loc
 location of the chunking file
+
+#### running the co-eQTL mapping pipeline
+In its current state, this pipeline runs the co-eQTL mapping on the machine where the pipeline is started. As such, it is recommended to do this on a machine where you have compute available. The pipeline will also take a while, depending on the size of the dataset. As such it is also recommended to do this in a way where you can disconnect and reconnect without the pipeline stopping, such as sattach, screen on tmux. Here is an example using screen and SLURM:
+
+create a screen session:
+
+```sh
+screen -S correlation_calculation
+```
+
+Activate the conda environment with snakemake
+
+```sh
+conda activate snakemake_env
+```
+
+cd to our snakemake directory that we got with the pwd before, and start the pipeline (This code is specific to slurm clusters)
+
+```sh
+cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
+snakemake -s Qtl_Snakemake.smk --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
+```
+
+
+#### Sometimes it can be useful to run the pipeline in an interactive session, however this will generally be a slower way of running the whole pipeline
+ask for resources. The more CPUs you ask, the faster things will go, but also the more memory you require. Larger datasets will also require more memory.
+
+```sh
+srun --cpus-per-task=4 --mem=64gb --nodes=1 --qos=priority --job-name=correlation_calculation --time=71:59:59 --tmp=1000gb --pty bash -i # this requests an interactive session
+```
+
+activate the conda environment with snakemake
+
+```sh
+conda activate snakemake_env
+```
+
+cd to our snakemake directory that we got with the pwd before, and start the pipeline (remember to set a correct number of cores)
+
+```sh
+cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
+snakemake -s Qtl_Snakemake.smk --cores 4 --rerun-incomplete
+```
