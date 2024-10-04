@@ -203,10 +203,10 @@ rule Genotype_IO:
         genotypeFile
     output:
         genotypeFile+".bgen.bgi",
-        bgen_folder+"/geno_stats.{chrom}.vars.gz",
-        bgen_folder+"/geno_stats.{chrom}.samples.gz"
+        bgen_folder+"/geno_stats.{genotype_prepend}{chrom}.vars.gz",
+        bgen_folder+"/geno_stats.{genotype_prepend}{chrom}.samples.gz"
     shell:
         """
-        singularity exec --bind {includeDir} {wg3_image_loc} java -Xmx5g -Xms5g -jar /tools/Genotype-IO-1.0.6-SNAPSHOT-jar-with-dependencies.jar -I BGEN -i {params} -o {bgen_folder}/geno_stats.{wildcards.chrom}
-        gzip {bgen_folder}/geno_stats.{wildcards.chrom}*
+        singularity exec --bind {includeDir} {wg3_image_loc} java -Xmx5g -Xms5g -jar /tools/Genotype-IO-1.0.6-SNAPSHOT-jar-with-dependencies.jar -I BGEN -i {params} -o {bgen_folder}/geno_stats.{genotype_prepend}{wildcards.chrom}
+        gzip {bgen_folder}/geno_stats.{genotype_prepend}{wildcards.chrom}*
         """
