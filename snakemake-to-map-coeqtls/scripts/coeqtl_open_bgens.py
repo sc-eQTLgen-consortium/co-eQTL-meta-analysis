@@ -30,7 +30,7 @@ def open_and_close_bgen(full_bgen_path):
     # read the file
     bgen_handle = read_bgen(full_bgen_path, verbose = True)
     # and close the file
-    bgen_genotype_close(bgen_handle)
+    bgen_handle.bgen_file_close()
     # and say we closed it
     print(''.join(['closed ', full_bgen_path]))
 

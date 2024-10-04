@@ -171,7 +171,7 @@ snakemake -s gene_pair_corrs_Snakefile --cores 4 --rerun-incomplete
 
 After this finishes, you can continue to the next step, where we do the co-eQTL mapping.
 
-### calculating gene-gene correlations per donor
+### performing co-eQTL mapping
 
 Before we can start the mapping we need to generate some files. The underlying LIMIX pipeline works best when using bgen files. To reduce memory usage, it is also best to separate the genotype data per chromosome. To convert and split that data, it is recommended to use plink2, which is fast and efficient. To for example split a VCF of genotype data into per-chromosome bgen files, one can use a command like this:
 
@@ -274,4 +274,8 @@ Next the annotation file needs to split by chromosome, which is done by the scri
 # 	-h, --help
 # 		Show this help message and exit
 ```
+
+Now we can start modifying the yaml in the snakemake-to-map-coeqtls folder. You can copy the contents of the yaml into a text editor, clone the github repo and make your own branch, or just edit in it nano. 
+
+#### yaml parameters for the co-eQTL mapping pipeline
 
