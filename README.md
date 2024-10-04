@@ -170,3 +170,108 @@ snakemake -s gene_pair_corrs_Snakefile --cores 4 --rerun-incomplete
 ```
 
 After this finishes, you can continue to the next step, where we do the co-eQTL mapping.
+
+### calculating gene-gene correlations per donor
+
+Before we can start the mapping we need to generate some files. The underlying LIMIX pipeline works best when using bgen files. To reduce memory usage, it is also best to separate the genotype data per chromosome. To convert and split that data, it is recommended to use plink2, which is fast and efficient. To for example split a VCF of genotype data into per-chromosome bgen files, one can use a command like this:
+
+```sh
+CHROMS=('1' '2' '3' '4' '5' '6' '7' '8' '9' '10' '11' '12' '13' '14' '15' '16' '17' '18' '19' '20' '21' '22')
+for chrom in ${CHROMS[*]}
+  do
+    /groups/umcg-franke-scrna/tmp04/software/plink2_amd/plink2 \
+    --vcf /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/genotype/combined/imputed/all/sc-eqtlgen-pipeline-wg1/lpmcv2_imputed_hg38_info_filled_rsid.vcf.gz \
+    --export bgen-1.2 \
+    --out /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/genotype/combined/imputed/all/sc-eqtlgen-pipeline-wg1/lpmcv2_imputed_hg38_info_filled_rsid_chr${chrom} \
+    --chr ${chrom}
+    done
+```
+
+An index needs to be generated for each of the bgen files. This index is created when the bgen file is opened for the first time. As the snakemake pipeline submits multiple parallel jobs, it might be that two processes try to open a file at the same time, while one of them might still be creating the index. As such, it is safest to just open each bgen file once, before running the pipeline, to make sure the index files are already fully generated. A small script to this, is included in the repository. If you have everything already set up from the previous step, you can go straight to running the script. If not, I will repeat the steps required here:
+
+```sh
+# make working directory
+mkdir -p /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software
+# go to working directory
+cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software
+# clone repo
+git clone https://github.com/sc-eQTLgen-consortium/co-eQTL-meta-analysis.git
+# activate snakemake environment]
+conda activate snakemake_env
+```
+
+now we will go into the directory that has the mapping pipeline and get the path to that
+
+```sh
+cd snakemake-to-map-coeqtls/
+pwd
+```
+
+make note of this directory. We will now install bgen reader into our snakemake environment to open the bgen files for indexing
+```sh
+pip install bgen_reader
+```
+
+with that sorted, we can now run the script for indexing the bgen files. The script is a subdirectory of the directory I told you to note earlier, and the script name is 'coeqtl_open_bgens.py'. It can use two parameters, the first is the directory of the bgen files, and the second is a regular expression to recognize the bgen files (*.bgen to just grab each bgen file for example). In my case the command looks like this:
+
+```sh
+python /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts/coeqtl_open_bgens.py \
+    --path /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/genotype_input/ \
+    --regex EUR_imputed_hg38_varFiltered_chr*.bgen
+```
+
+next we are going to have to start creating some annotation files for the gene-pairs, and the variants that we want to test. Because the multiple testing burden is quite high when you consider gene pairs, we are only testing co-eQTLs for which one of the genes already shows an eQTL effect. Additionally, there is the option to include GWAS variants for those genes, if you have this type of information available. Finally we can only test genes that we included when we calculated the per-sample gene-gene correlations, and will only create annotations for those gene pairs, because annotation files for each pair of expressed genes would quickly balloon in size. This script is once again in the scripts folder, and is named 'coeqtl_make_limix_annotation_files_new.py'. The options and their names are listed below:
+
+```sh
+python /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts/coeqtl_make_limix_annotation_files_new.py -h
+# usage: coeqtl_make_limix_annotation_files_new.py [-h] [-g GWAS_LOC] [-l GENE_LOC] [-v VARIANT_LOC] [-q QTL_LOC] [-f FEATURES_OUT_LOC] [-o CO_LIMIX_ANNOTATION_PREPEND]
+#
+# options:
+#   -h, --help            show this help message and exit
+#   -g GWAS_LOC, --gwas_loc GWAS_LOC
+#                         location of gwas file (string)
+#   -l GENE_LOC, --gene_loc GENE_LOC
+#                         location of gene list file (string)
+#   -v VARIANT_LOC, --variant_loc VARIANT_LOC
+#                         location of variant list file (string)
+#   -q QTL_LOC, --qtl_loc QTL_LOC
+#                         location of previous eQTL summary stats
+#   -f FEATURES_OUT_LOC, --features_out_loc FEATURES_OUT_LOC
+#                         location to write the to-test features
+#   -o CO_LIMIX_ANNOTATION_PREPEND, --co_limix_annotation_prepend CO_LIMIX_ANNOTATION_PREPEND
+#                         location of original feature annotations
+```
+
+We will unfortunately have to do this for each celltype separately for now, though you can loop the cell types in bash if you wanted to. In my case the command I used for my CD4+ T cells was the following:
+
+```sh
+/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/coeqtl_make_limix_annotation_files_new.py \
+    --gwas_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/GWAS_snp_gene_pairs_immune_related_disease.txt.gz \
+    --gene_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_Mono.Qced.Normalized.SCs.Rds.tsv.gz \
+    --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/Mono.DS.wg3_Ye_wg3_wijst2018_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.csTop_qtl_results.txt \
+    --features_out_loc /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_features_CD4_T_cells.tsv.gz \
+    --co_limix_annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_CD4_T_cells_co
+
+```
+
+Next the annotation file needs to split by chromosome, which is done by the script 'coeqtl_limix_anno_chr_files_new.R' This script expects the prepend of the --features_out_loc parameter of the previous script (without the cell type), the prepend of the --co_limix_annotation_prepend (without the cell type), and the cell type as used in the name of the files. The options and their names are listed below:
+
+```sh
+~/start_Rscript.sh /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/coeqtl_limix_anno_chr_files_new.R -h
+# Usage: coeqtl_limix_anno_chr_files_new.R [options]
+#
+#
+# Options:
+# 	-c CHARACTER, --cell_type=CHARACTER
+# 		cell type working on
+#
+# 	-a CHARACTER, --annotation_prepend=CHARACTER
+# 		base name and location of annotation files
+#
+# 	-f CHARACTER, --features_test_prepend=CHARACTER
+# 		base name and location of file with features to test
+#
+# 	-h, --help
+# 		Show this help message and exit
+```
+

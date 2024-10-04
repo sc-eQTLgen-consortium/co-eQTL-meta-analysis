@@ -19,6 +19,7 @@ import glob
 import argparse
 from bgen_reader import read_bgen
 
+
 #############
 # functions #
 #############
