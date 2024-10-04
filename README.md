@@ -275,6 +275,15 @@ Next the annotation file needs to split by chromosome, which is done by the scri
 # 		Show this help message and exit
 ```
 
+lastly we need to make sure that the SMF file is annotated correctly. If you used the wg3 pipeline, you might have an SMF that contains the batch in the phenotype_id column. However if you subsequently followed the co-eQTL pipeline, it will have created gene-gene correlations per sample, not sample and batch. You can generate a new smf using the following R code
+
+```r
+smf <- read.table('/groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/smf.txt', header = T, sep = '\t')
+smf$phenotype_id <- smf$genotype_id
+smf <- smf[!duplicated(smf$genotype_id), ]
+write.table(smf, '/groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/smf_doubleid.tsv', row.names = F, col.names = T, quote = F, sep = '\t')
+```
+
 Now we can start modifying the yaml in the snakemake-to-map-coeqtls folder. You can copy the contents of the yaml into a text editor, clone the github repo and make your own branch, or just edit in it nano. 
 
 #### yaml parameters for the co-eQTL mapping pipeline
