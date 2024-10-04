@@ -18,6 +18,8 @@ python coeqtl_open_bgens.py \
 import glob
 import argparse
 from bgen_reader import read_bgen
+from bgen_reader import bgen_genotype_close
+
 
 
 #############
@@ -30,7 +32,7 @@ def open_and_close_bgen(full_bgen_path):
     # read the file
     bgen_handle = read_bgen(full_bgen_path, verbose = True)
     # and close the file
-    bgen_handle.bgen_file_close()
+    bgen_genotype_close(bgen_handle)
     # and say we closed it
     print(''.join(['closed ', full_bgen_path]))
 
