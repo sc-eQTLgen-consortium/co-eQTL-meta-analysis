@@ -326,6 +326,9 @@ and the append of each annotation file, so how each annotation file name ends
 ##### chunking_file_loc
 location of the chunking file
 
+
+As the final step, we need to make sure that our new yaml is the one being used for the co-eQTL mapping pipeline. If you modified the original yaml in the repository, you are good to go. If you however made a new yaml file, you need to change the top line of the Qtl_Snakemake.smf file, so that it points to your yaml. It should be on line 6.
+
 #### running the co-eQTL mapping pipeline
 In its current state, this pipeline runs the co-eQTL mapping on the machine where the pipeline is started. As such, it is recommended to do this on a machine where you have compute available. The pipeline will also take a while, depending on the size of the dataset. As such it is also recommended to do this in a way where you can disconnect and reconnect without the pipeline stopping, such as sattach, screen on tmux. Here is an example using screen and SLURM:
 
@@ -345,7 +348,7 @@ cd to our snakemake directory that we got with the pwd before, and start the pip
 
 ```sh
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
-snakemake -s Qtl_Snakemake.smk --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
+snakemake -s Qtl_Snakemake.smk --jobs 100 --latency-wait 120 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.memory} --qos regular' --rerun-incomplete --keep-going
 ```
 
 
