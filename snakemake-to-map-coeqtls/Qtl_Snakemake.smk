@@ -1,9 +1,21 @@
 from pathlib import Path
 import re
 import os
+import argparse
+
+# only autosomal
 CHROM = ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22']
 
+# grab the config file default
 configfile: "./coQTL_wp3_CD4_T_gut.yaml"
+# parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument('-c', '--config', type = str, help = 'location of configuration yaml file (string)')
+args = parser.parse_args()
+# overwrite the default if that parameter was supplied
+if args.config is not None:
+    configfile = args.config
+
 # top mount of binds
 includeDir = config["top_directory"]
 # image locations
