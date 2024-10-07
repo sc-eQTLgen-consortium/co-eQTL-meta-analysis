@@ -321,7 +321,7 @@ location of the annotation files with gene-gene annotations to test, remember yo
 prepend of each annotation file, so how each annotation-1 file name starts
 ##### limix_anno2_prepend
 prepend of each annotation file, so how each annotation-2 file name starts
-##### limix_anno_append: .txt.gz
+##### limix_anno_append
 and the append of each annotation file, so how each annotation file name ends
 ##### chunking_file_loc
 location of the chunking file
@@ -329,7 +329,8 @@ location of the chunking file
 
 As the final step, we need to make sure that our new yaml is the one being used for the co-eQTL mapping pipeline. If you modified the original yaml in the repository, you are good to go. If you however made a new yaml file, you need to change the top line of the Qtl_Snakemake.smf file, so that it points to your yaml. It should be on line 6.
 
-#### running the co-eQTL mapping pipeline
+
+#### running the co-eQTL mapping pipeline with a job scheduler
 In its current state, this pipeline runs the co-eQTL mapping on the machine where the pipeline is started. As such, it is recommended to do this on a machine where you have compute available. The pipeline will also take a while, depending on the size of the dataset. As such it is also recommended to do this in a way where you can disconnect and reconnect without the pipeline stopping, such as sattach, screen on tmux. Here is an example using screen and SLURM:
 
 create a screen session:
@@ -352,8 +353,9 @@ snakemake -s Qtl_Snakemake.smk --jobs 100 --latency-wait 120 --cluster 'sbatch -
 ```
 
 
-#### Sometimes it can be useful to run the pipeline in an interactive session, however this will generally be a slower way of running the whole pipeline
-ask for resources. The more CPUs you ask, the faster things will go, but also the more memory you require. Larger datasets will also require more memory.
+#### running co-eQTL mapping pipeline without job scheduler
+Sometimes it can be useful to run the pipeline in an interactive session, however this will generally be a slower way of running the whole pipeline.
+Ask for resources. The more CPUs you ask, the faster things will go, but also the more memory you require. Larger datasets will also require more memory.
 
 ```sh
 srun --cpus-per-task=4 --mem=64gb --nodes=1 --qos=priority --job-name=correlation_calculation --time=71:59:59 --tmp=1000gb --pty bash -i # this requests an interactive session
