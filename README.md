@@ -140,7 +140,7 @@ cell type(s) to calculate correlations for. The names need to match the file nam
 ##### gene_list_path: 
 gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 
-#### running the correlation pipeline
+#### running the correlation pipeline with a job scheduler
 In its current state, this pipeline runs the correlation calculation on the machine where the pipeline is started. As such, it is recommended to do this on a machine where you have compute available. The pipeline will also take a while, depending on the size of the dataset. As such it is also recommended to do this in a way where you can disconnect and reconnect without the pipeline stopping, such as sattach, screen on tmux. Here is an example using screen and SLURM:
 
 create a screen session:
@@ -155,23 +155,23 @@ Activate the conda environment with snakemake
 conda activate snakemake_env
 ```
 
-cd to our snakemake directory that we got with the pwd before, and start the pipeline (This code is specific to slurm clusters)
+cd to our snakemake directory that we got with the pwd before, and start the pipeline (This code is specific to slurm clusters). Be sure to supply the yaml you created or modified:
 
 ```sh
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
-snakemake -s gene_pair_corrs_Snakefile --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
+snakemake -s gene_pair_corrs_Snakefile --configfile gene_pair_corrs.yaml --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
 ```
 
 The first step should be very quick, as it will only create donor lists. Run the same command again to run the rest of the pipeline
 
 ```sh
-snakemake -s gene_pair_corrs_Snakefile --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
+snakemake -s gene_pair_corrs_Snakefile --configfile gene_pair_corrs.yaml --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
 ```
 
 After this finishes, you can continue to the next step, where we do the co-eQTL mapping.
 
-
-#### Sometimes it can be useful to run the pipeline in an interactive session, however this will generally be a slower way of running the whole pipeline
+#### running the correlation pipeline without job scheduler
+Sometimes it can be useful to run the pipeline in an interactive session, however this will generally be a slower way of running the whole pipeline
 ask for resources. The more CPUs you ask, the faster things will go, but also the more memory you require. Larger datasets will also require more memory.
 
 ```sh
@@ -184,17 +184,17 @@ activate the conda environment with snakemake
 conda activate snakemake_env
 ```
 
-cd to our snakemake directory that we got with the pwd before, and start the pipeline (remember to set a correct number of cores)
+cd to our snakemake directory that we got with the pwd before, and start the pipeline (remember to set a correct number of cores). Be sure to supply the yaml you created or modified:
 
 ```sh
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
-snakemake -s gene_pair_corrs_Snakefile --cores 4 --rerun-incomplete
+snakemake -s gene_pair_corrs_Snakefile  --configfile gene_pair_corrs.yaml --cores 4 --rerun-incomplete
 ```
 
 The first step should be very quick, as it will only create donor lists. Run the same command again to run the rest of the pipeline
 
 ```sh
-snakemake -s gene_pair_corrs_Snakefile --cores 4 --rerun-incomplete
+snakemake -s gene_pair_corrs_Snakefile  --configfile gene_pair_corrs.yaml --cores 4 --rerun-incomplete
 ```
 
 After this finishes, you can continue to the next step, where we do the co-eQTL mapping.
