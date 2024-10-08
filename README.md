@@ -14,6 +14,11 @@ conda install -n snakemake_env pip
 pip install snakemake==7.32.3
 ```
 
+The pulp package was updated, and has some issues with Snakemake. We need to downgrade to 2.7.0 to make everything work again
+```sh
+pip install pulp==2.7.0
+```
+
 ## instructions
 
 This pipeline consists of a number of major steps, listed below
@@ -295,6 +300,8 @@ directory that should be bound in singularity, all files should be a subdirector
 location of the wg3 singularity image
 ##### limix_image_loc
 location of the limix singularity image
+##### limix_dir
+location of the limix software that is not in the container, get software from here: TODO
 ##### smf_loc
 location of the smf file, this might be different from the WG3 one, read the note above
 ##### genotype_dir
@@ -327,7 +334,7 @@ and the append of each annotation file, so how each annotation file name ends
 location of the chunking file
 
 
-As the final step, we need to make sure that our new yaml is the one being used for the co-eQTL mapping pipeline. If you modified the original yaml in the repository, you are good to go. If you however made a new yaml file, you need to change the top line of the Qtl_Snakemake.smf file, so that it points to your yaml. It should be on line 6.
+As the final step, we need to make sure that our new yaml is the one being used for the co-eQTL mapping pipeline. If you modified the original yaml in the repository, you are good to go. If you however made a new yaml file, you need to change the top line of the Qtl_Snakemake.file, so that it points to your yaml, or supply that specific yaml with --configfile (recommended). Should you wish to change the snakemake, the yaml referred to should be on line 6.
 
 
 #### running the co-eQTL mapping pipeline with a job scheduler
@@ -349,7 +356,7 @@ cd to our snakemake directory that we got with the pwd before, and start the pip
 
 ```sh
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
-snakemake -s Qtl_Snakemake.smk --jobs 100 --latency-wait 120 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.memory} --qos regular' --rerun-incomplete --keep-going
+snakemake -s Qtl_Snakemake.smk --configfile coQTL_wp3_CD4_T_gut.yaml --jobs 100 --latency-wait 120 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.memory} --qos regular' --rerun-incomplete --keep-going
 ```
 
 
@@ -371,5 +378,5 @@ cd to our snakemake directory that we got with the pwd before, and start the pip
 
 ```sh
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
-snakemake -s Qtl_Snakemake.smk --cores 4 --rerun-incomplete
+snakemake -s Qtl_Snakemake.smk --configfile coQTL_wp3_CD4_T_gut.yaml --cores 4 --rerun-incomplete
 ```

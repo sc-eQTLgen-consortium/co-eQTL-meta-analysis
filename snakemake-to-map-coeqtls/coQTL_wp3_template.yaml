@@ -11,6 +11,8 @@ top_directory: /groups/umcg-franke-scrna/tmp04/
 wg3_image_loc: /groups/umcg-franke-scrna/tmp04/software/wp3.simg
 # location of the limix singularity image
 limix_image_loc: /groups/umcg-franke-scrna/tmp04/software/limixJune24.simg
+# location of the limix software that is not in the container
+limix_dir: /groups/umcg-franke-scrna/tmp04/users/umcg-mjbonder/Limix_QTL/
 # location of the smf file
 smf_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/smf_filt.txt
 # location of genotype data
