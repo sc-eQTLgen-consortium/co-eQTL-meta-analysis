@@ -379,7 +379,7 @@ cd to our snakemake directory that we got with the pwd before, and start the pip
 
 ```sh
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
-snakemake -s Qtl_Snakemake.smk --configfile coQTL_wp3_CD4_T_gut.yaml --jobs 100 --latency-wait 120 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.memory} --qos regular' --rerun-incomplete --keep-going
+snakemake -s Qtl_Snakemake.smk --configfile coQTL_wp3_CD4_T_gut.yaml --jobs 100 --latency-wait 120 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.memory}M --qos regular' --rerun-incomplete --keep-going
 ```
 
 
