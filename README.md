@@ -149,6 +149,29 @@ create a screen session:
 screen -S correlation_calculation
 ```
 
+Activate the conda environment with snakemake
+
+```sh
+conda activate snakemake_env
+```
+
+cd to our snakemake directory that we got with the pwd before, and start the pipeline (This code is specific to slurm clusters)
+
+```sh
+cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
+snakemake -s gene_pair_corrs_Snakefile --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
+```
+
+The first step should be very quick, as it will only create donor lists. Run the same command again to run the rest of the pipeline
+
+```sh
+snakemake -s gene_pair_corrs_Snakefile --jobs 300 --latency-wait 60 --cluster 'sbatch --cpus-per-task=1 --nodes=1 --time={resources.time} --mem={resources.mem_per_thread_gb}G --qos regular' --rerun-incomplete --keep-going
+```
+
+After this finishes, you can continue to the next step, where we do the co-eQTL mapping.
+
+
+#### Sometimes it can be useful to run the pipeline in an interactive session, however this will generally be a slower way of running the whole pipeline
 ask for resources. The more CPUs you ask, the faster things will go, but also the more memory you require. Larger datasets will also require more memory.
 
 ```sh
