@@ -1,7 +1,5 @@
 # co-eQTL-meta-analysis
 
-Caution: Pipeline is not yet ready for public use
-
 ## prerequisites
 
 This pipeline makes use of the Snakemake. The pipeline was developed for Snakemake version 7.32.3. Python 3.12 is known to have issues with this Snakemake version, so python 3.11 is recommended.
