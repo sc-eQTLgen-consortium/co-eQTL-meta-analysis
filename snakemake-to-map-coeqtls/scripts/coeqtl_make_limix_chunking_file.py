@@ -51,7 +51,7 @@ args = parser.parse_args()
 eqtls = pd.read_csv(args.qtl_loc, sep = '\t')
 # subset if those parameters were supplied
 if args.significance_column is not None and args.significance_cutoff is not None:
-    eqtls = eqtls[eqtls[args.significance_column] < args.significance_cutoff, :]
+    eqtls = eqtls[eqtls[args.significance_column] < args.significance_cutoff]
 
 # subset to the columns we care about
 eqtl_features = eqtls[args.chromosome_column].astype(str) + ':' + eqtls[args.start_column].astype(str) + '-' + eqtls[args.end_column].astype(str)
