@@ -6,7 +6,7 @@ authors: Roy Oelen
 example usage:
 
 python coeqtl_make_limix_chunking_file.py \
-    --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/Mono.DS.wg3_Ye_wg3_wijst2018_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.csTop_qtl_results.txt \
+    --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/CD4_T.Ds.wg3_Ye_wg3_wijst2018_wg3_Trynka_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Nawijn_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.5.csTop_qtl_results.txt \
     --out_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/cd4_chunking_all.txt.gz
 
 """
@@ -51,7 +51,7 @@ args = parser.parse_args()
 eqtls = pd.read_csv(args.qtl_loc, sep = '\t')
 # subset if those parameters were supplied
 if args.significance_column is not None and args.significance_cutoff is not None:
-    eqtls = eqtls[eqtls[significance_column] < args.significance_cutoff, :]
+    eqtls = eqtls[eqtls[args.significance_column] < args.significance_cutoff, :]
 
 # subset to the columns we care about
 eqtl_features = eqtls[args.chromosome_column].astype(str) + ':' + eqtls[args.start_column].astype(str) + '-' + eqtls[args.end_column].astype(str)
