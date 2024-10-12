@@ -54,8 +54,8 @@ if args.significance_column is not None and args.significance_cutoff is not None
     eqtls = eqtls[eqtls[significance_column] < args.significance_cutoff, :]
 
 # subset to the columns we care about
-#eqtl_features = eqtls[args.chromosome_column] + '-' + eqtls[args.start_column] + '-' + eqtls[args.end_column]
-eqtl_features = eqtls[[args.chromosome_column, args.start_column, args.end_column]].agg('-'.join, axis=1)
+eqtl_features = eqtls[args.chromosome_column].astype(str) + '-' + eqtls[args.start_column].astype(str) + '-' + eqtls[args.end_column].astype(str)
+#eqtl_features = eqtls[[args.chromosome_column, args.start_column, args.end_column]].agg('-'.join, axis=1)
 # only keep unique entries
 eqtl_features = eqtls.unique()
 # check if the output file ends in gz
