@@ -303,6 +303,13 @@ Next the annotation file needs to split by chromosome, which is done by the scri
 # 		Show this help message and exit
 ```
 
+Additionally, we need to make a chunking file to split the co-eQTL jobs up. The format of the chunking file is a table that has the chromosome, a colon, the chunk start, a dash, and the chunk end. You can create these chunk files yourself, or you can use the eQTL output, and make a chunk per egene:
+```sh
+/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/coeqtl_make_limix_chunking_file.py \
+    --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/CD4_T.Ds.wg3_Ye_wg3_wijst2018_wg3_Trynka_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Nawijn_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.5.csTop_qtl_results.txt \
+    --out_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/cd4_chunking_all.txt.gz
+```
+
 lastly we need to make sure that the SMF file is annotated correctly. If you used the wg3 pipeline, you might have an SMF that contains the batch in the phenotype_id column. However if you subsequently followed the co-eQTL pipeline, it will have created gene-gene correlations per sample, not sample and batch. You can generate a new smf using the following R code
 
 ```r
