@@ -20,7 +20,7 @@ genotype_dir: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/genot
 # prepend of the genotype files
 genotype_prepend: lpmcv2_imputed_hg38_info_filled_rsid_chr
 # where to place the co-eQTL output and intermediate files
-out_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/output/
+out_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/output/indep/
 # location of the correlation files
 correlation_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/lpmcv2_cth/
 # how each correlation file starts
@@ -28,20 +28,20 @@ correlation_prepend: lpmcv2_cth-CD4_T_cells-pearson-weighted-chr-
 # how each correlation file ends
 correlation_append: -final.tsv.gz
 # location of the feature file with features to test
-features_file_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/
+features_file_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/indep/
 # how the feature files start
-features_file_prepend: replication_features_CD4_T_cells_chr
+features_file_prepend: indep_features_CD4_T_cells_chr
 # how each feature file ends
 features_file_append: .txt.gz
 # annotation folder
-limix_annotation_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/
+limix_annotation_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/indep/
 # prepend of each annotation file
-limix_anno1_prepend: replication_co_CD4_T_cells_chr
-limix_anno2_prepend: replication_co2_CD4_T_cells_chr
+limix_anno1_prepend: indep_co_CD4_T_cells_chr
+limix_anno2_prepend: indep_co2_CD4_T_cells_chr
 # and the append of each annotation file
 limix_anno_append: .txt.gz
 # location of the chunking file
-chunking_file_loc: /groups/umcg-franke-scrna/tmp02/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/cd4_chunking_all.txt
+chunking_file_loc: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/indep/chunking_indep_CD4_T_cells.tsv.gz
 
 
 #####################################
