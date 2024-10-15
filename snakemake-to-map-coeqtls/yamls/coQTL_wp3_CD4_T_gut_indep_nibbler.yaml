@@ -41,7 +41,7 @@ limix_anno2_prepend: indep_co2_CD4_T_cells_chr
 # and the append of each annotation file
 limix_anno_append: .txt.gz
 # location of the chunking file
-chunking_file_loc: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/indep/chunking_indep_CD4_T_cells.tsv.gz
+chunking_file_loc: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/indep/chunking_indep_CD4_T_cells.tsv
 
 
 #####################################
