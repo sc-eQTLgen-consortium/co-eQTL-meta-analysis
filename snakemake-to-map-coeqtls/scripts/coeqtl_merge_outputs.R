@@ -72,6 +72,8 @@ all_qtl <- do.call('rbind', table_per_chunk)
 # add MTC
 all_qtl[['BH']] <- p.adjust(all_qtl[['p_value']], method = 'BH')
 all_qtl[['bonferroni']] <- p.adjust(all_qtl[['p_value']], method = 'bonferroni')
+# order by P
+all_qtl <- all_qtl[order(all_qtl[['p_value']]), ]
 
 # gz file ends with .gz
 if (grepl('.gz$', output_file)) {
