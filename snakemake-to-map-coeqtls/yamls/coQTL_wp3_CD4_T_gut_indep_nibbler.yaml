@@ -43,6 +43,7 @@ limix_anno_append: .txt.gz
 # location of the chunking file
 chunking_file_loc: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/input/indep/chunking_indep_CD4_T_cells.tsv.gz
 
+#blah
 
 #####################################
 ##  settings related to analysis  ###
