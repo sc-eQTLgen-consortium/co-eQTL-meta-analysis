@@ -47,14 +47,18 @@ args = parser.parse_args()
 # to-test features #
 ####################
 
+# we need to make sure some of these columns are strings
+string_columns = [args.chromosome_column, args.start_column, args.end_column]
+# make that into the dtypes dict
+dtypes = {x : 'str'  for x in string_columns}
 # get the eQTL summary stats
-eqtls = pd.read_csv(args.qtl_loc, sep = '\t')
+eqtls = pd.read_csv(args.qtl_loc, sep = '\t', dtypes = dtypes)
 # subset if those parameters were supplied
 if args.significance_column is not None and args.significance_cutoff is not None:
     eqtls = eqtls[eqtls[args.significance_column] < args.significance_cutoff]
 
 # subset to the columns we care about
-eqtl_features = eqtls[args.chromosome_column].astype(int).astype(str) + ':' + eqtls[args.start_column].astype(int).astype(str) + '-' + eqtls[args.end_column].astype(int).astype(str)
+eqtl_features = eqtls[args.chromosome_column] + ':' + eqtls[args.start_column] + '-' + eqtls[args.end_column]
 # only keep unique entries
 eqtl_features.drop_duplicates(inplace = True)
 # check if the output file ends in gz
