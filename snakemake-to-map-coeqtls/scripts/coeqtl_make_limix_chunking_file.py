@@ -52,7 +52,7 @@ string_columns = [args.chromosome_column, args.start_column, args.end_column]
 # make that into the dtypes dict
 dtypes = {x : 'str'  for x in string_columns}
 # get the eQTL summary stats
-eqtls = pd.read_csv(args.qtl_loc, sep = '\t', dtypes = dtypes)
+eqtls = pd.read_csv(args.qtl_loc, sep = '\t', dtype = dtypes)
 # subset if those parameters were supplied
 if args.significance_column is not None and args.significance_cutoff is not None:
     eqtls = eqtls[eqtls[args.significance_column] < args.significance_cutoff]
