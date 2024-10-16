@@ -303,7 +303,7 @@ Next the annotation file needs to split by chromosome, which is done by the scri
 
 Additionally, we need to make a chunking file to split the co-eQTL jobs up. The format of the chunking file is a table that has the chromosome, a colon, the chunk start, a dash, and the chunk end. You can create these chunk files yourself, or you can use the eQTL output, and make a chunk per egene:
 ```sh
-/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/coeqtl_make_limix_chunking_file.py \
+python /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scrips/coeqtl_make_limix_chunking_file.py \
     --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/CD4_T.Ds.wg3_Ye_wg3_wijst2018_wg3_Trynka_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Nawijn_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.5.csTop_qtl_results.txt \
     --out_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/input/cd4_chunking_all.txt.gz
 ```
@@ -408,3 +408,14 @@ cd to our snakemake directory that we got with the pwd before, and start the pip
 cd /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/
 snakemake -s Qtl_Snakemake.smk --configfile coQTL_wp3_CD4_T_gut.yaml --cores 4 --rerun-incomplete
 ```
+
+#### merge outputs
+After the QTL mapping pipeline is finished, you will have QTL outputs for each chunk. These need to be combined to get one output file. You can use the script supplied in this repo. You need to supply an output file to write to, and the location of the chunk folders (will be the celltype/qtl directory of the output folder you supplied in the yaml).
+
+```sh
+~/start_Rscript.sh coeqtl_merge_outputs.R \
+    --input_dir /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/output/CD4_T_cells/qtl/ \
+    --output_file /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/output/CD4_T_cells/qtl/CD4_T_cells.tsv.gz
+```
+
+The output in this example would then be in the CD4_T_cells.tsv.gz file. 
