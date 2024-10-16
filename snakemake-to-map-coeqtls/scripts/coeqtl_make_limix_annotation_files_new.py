@@ -42,6 +42,8 @@ parser.add_argument('-v', '--variant_loc', type = str, help = 'location of varia
 parser.add_argument('-q', '--qtl_loc', type = str, help = 'location of previous eQTL summary stats')
 parser.add_argument('-f', '--features_out_loc', type = str, help = 'location to write the to-test features')
 parser.add_argument('-o', '--co_limix_annotation_prepend', type = str, help = 'location of original feature annotations')
+parser.add_argument('-s', '--variant_qtl_id_column', type = str, help = 'the column in the QTL data that has the variant identifier to use (will default to snp_id)')
+parser.add_argument('-t', '--feature_qtl_id_column', type = str, help = 'the column in the QTL data that has the feature/phenotype/trait identifier to use (will default to feature_id)')
 args = parser.parse_args()
 
 
@@ -62,6 +64,13 @@ snps2 = []
 
 # get the eQTL summary stats
 eqtls = pd.read_csv(args.qtl_loc, sep = '\t')
+# rename the variant ID if it was supplied
+if args.variant_qtl_id_column is not None:
+  eqtls['snp_id'] = eqtls[args.variant_qtl_id_column]
+# rename the feature ID if it was supplied
+if args.feature_qtl_id_column is not None:
+  eqtls['feature_id'] = eqtls[args.feature_qtl_id_column]
+
 # get genes with an eQTL effect
 egenes = np.unique([i for i in eqtls.feature_id])
 # filter genes to egenes
