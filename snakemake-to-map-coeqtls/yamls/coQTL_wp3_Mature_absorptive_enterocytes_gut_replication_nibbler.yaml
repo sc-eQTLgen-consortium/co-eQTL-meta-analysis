@@ -57,4 +57,4 @@ hardyWeinbergCutoff: '0.0001'
 compressFiles: true
 
 celltypes:
-    - CD4_T_cells
+    - Mature_absorptive_enterocytes
