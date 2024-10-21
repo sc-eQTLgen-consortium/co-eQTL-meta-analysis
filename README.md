@@ -266,18 +266,22 @@ python /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/o
 #                         location to write the to-test features
 #   -o CO_LIMIX_ANNOTATION_PREPEND, --co_limix_annotation_prepend CO_LIMIX_ANNOTATION_PREPEND
 #                         location of original feature annotations
+#   -s VARIANT_QTL_ID_COLUMN, --variant_qtl_id_column VARIANT_QTL_ID_COLUMN
+#                         the column in the QTL data that has the variant identifier to use (will default to snp_id)
+#   -t FEATURE_QTL_ID_COLUMN, --feature_qtl_id_column FEATURE_QTL_ID_COLUMN
+#                         the column in the QTL data that has the feature/phenotype/trait identifier to use (will default to feature_id)
 ```
 
 We will unfortunately have to do this for each celltype separately for now, though you can loop the cell types in bash if you wanted to. In my case the command I used for my CD4+ T cells was the following:
 
 ```sh
-/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/coeqtl_make_limix_annotation_files_new.py \
+/groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts/coeqtl_make_limix_annotation_files_new.py \
     --gwas_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/GWAS_snp_gene_pairs_immune_related_disease.txt.gz \
     --gene_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/gene_lists/F11_Decision_Tree_Geneswg3_wijst2018_Mono.Qced.Normalized.SCs.Rds.tsv.gz \
     --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/Mono.DS.wg3_Ye_wg3_wijst2018_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.csTop_qtl_results.txt \
     --features_out_loc /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_features_CD4_T_cells.tsv.gz \
-    --co_limix_annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_CD4_T_cells_co
-
+    --co_limix_annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_CD4_T_cells_co \
+    --variant_qtl_id_column rs_id
 ```
 
 Next the annotation file needs to split by chromosome, which is done by the script 'coeqtl_limix_anno_chr_files_new.R' This script expects the prepend of the --features_out_loc parameter of the previous script (without the cell type), the prepend of the --co_limix_annotation_prepend (without the cell type), and the cell type as used in the name of the files. The options and their names are listed below:
@@ -301,7 +305,41 @@ Next the annotation file needs to split by chromosome, which is done by the scri
 # 		Show this help message and exit
 ```
 
+Using the files we created in the previous step, the command would for example be
+
+```sh
+~/start_Rscript.sh /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/software/co-eQTL-meta-analysis/snakemake-to-map-coeqtls/scripts/coeqtl_limix_anno_chr_files_new.R \
+    --cell_type CD4_T_cells \
+    --annotation_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_ \
+    --features_test_prepend /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/input/replication_features_
+```
+
 Additionally, we need to make a chunking file to split the co-eQTL jobs up. The format of the chunking file is a table that has the chromosome, a colon, the chunk start, a dash, and the chunk end. You can create these chunk files yourself, or you can use the eQTL output, and make a chunk per egene:
+
+```sh
+python /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/software/co-eQTL-meta-analysis/snakemake-to-map-coeqtls/scripts/coeqtl_make_limix_chunking_file.py -h
+# usage: coeqtl_make_limix_chunking_file.py [-h] [-q QTL_LOC] [-o OUT_LOC] [-c CHROMOSOME_COLUMN] [-s START_COLUMN] [-e END_COLUMN] [-p SIGNIFICANCE_COLUMN] [-v SIGNIFICANCE_CUTOFF]
+
+# options:
+#   -h, --help            show this help message and exit
+#   -q QTL_LOC, --qtl_loc QTL_LOC
+#                         location of previous eQTL summary stats
+#   -o OUT_LOC, --out_loc OUT_LOC
+#                         location of original feature annotations
+#   -c CHROMOSOME_COLUMN, --chromosome_column CHROMOSOME_COLUMN
+#                         column in the QTL output that has the chromosome of the features
+#   -s START_COLUMN, --start_column START_COLUMN
+#                         column in the QTL output that has the start position of the features
+#   -e END_COLUMN, --end_column END_COLUMN
+#                         column in the QTL output that has the end position of the features
+#   -p SIGNIFICANCE_COLUMN, --significance_column SIGNIFICANCE_COLUMN
+#                         column in the QTL output that has the significance to filter the features on (leave empty to not filter)
+#   -v SIGNIFICANCE_CUTOFF, --significance_cutoff SIGNIFICANCE_CUTOFF
+#                         significance cutoff to filter QTL output on (leave empty to not filter)
+```
+
+example run:
+
 ```sh
 python /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scrips/coeqtl_make_limix_chunking_file.py \
     --qtl_loc /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/sceqtlgen_coeqtl_map/eQTLs_finemapped_20240626/CD4_T.Ds.wg3_Ye_wg3_wijst2018_wg3_Trynka_wg3_sawcer_wg3_oneK1K_wg3_okada_wg3_Nawijn_wg3_Li_wg3_Franke_split_v3_wg3_Franke_split_v2_wg3_multiome_UT_wg3_idaghdour.5.csTop_qtl_results.txt \
@@ -413,7 +451,26 @@ snakemake -s Qtl_Snakemake.smk --configfile coQTL_wp3_CD4_T_gut.yaml --cores 4 -
 After the QTL mapping pipeline is finished, you will have QTL outputs for each chunk. These need to be combined to get one output file. You can use the script supplied in this repo. You need to supply an output file to write to, and the location of the chunk folders (will be the celltype/qtl directory of the output folder you supplied in the yaml).
 
 ```sh
-~/start_Rscript.sh coeqtl_merge_outputs.R \
+~/start_Rscript.sh /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts//coeqtl_merge_outputs.R -h
+# Usage: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts/coeqtl_merge_outputs.R [options]
+
+
+# Options:
+# 	-i CHARACTER, --input_dir=CHARACTER
+# 		input directory of per-chunk co-eQTL mapping outputs
+#
+# 	-o CHARACTER, --output_file=CHARACTER
+# 		output file
+#
+# 	-h, --help
+# 		Show this help message and exit
+
+```
+
+example run:
+
+```sh
+~/start_Rscript.sh /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/coeqtl_redo_test/software/snakemake-to-map-coeqtls/scripts/coeqtl_merge_outputs.R \
     --input_dir /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/output/CD4_T_cells/qtl/ \
     --output_file /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/output/CD4_T_cells/qtl/CD4_T_cells.tsv.gz
 ```
