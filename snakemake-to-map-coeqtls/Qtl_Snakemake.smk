@@ -58,9 +58,12 @@ chunk_chrom, chunk_start, chunk_end=[], [], []
 with open(chunkFile) as fp:
     for line in fp:
         re_match=re.match(r"([A-Za-z0-9]+):(\d+)-(\d+)", line.strip())
-        chunk_chrom.append(re_match[1])
-        chunk_start.append(re_match[2])
-        chunk_end.append(re_match[3])
+        if re_match is not None:
+            chunk_chrom.append(re_match[1])
+            chunk_start.append(re_match[2])
+            chunk_end.append(re_match[3])
+        else:
+            print(' '.join(['skipped chunking line', line, '!']))
 
 qtlChunks=expand(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/"+"{chrom}_{start}_{end}.finished", zip, chrom=chunk_chrom, start=chunk_start, end=chunk_end, allow_missing=True)
 qtlTmp=expand(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/qtl_results_all.txt.gz", zip, chrom=chunk_chrom, start=chunk_start, end=chunk_end, allow_missing=True)
