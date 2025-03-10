@@ -63,7 +63,7 @@ with open(chunkFile) as fp:
             chunk_start.append(re_match[2])
             chunk_end.append(re_match[3])
         else:
-            print(' '.join(['skipped chunking line', line, '!']))
+            print(' '.join(['skipped chunking line', line.strip(), '!']))
 
 qtlChunks=expand(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/"+"{chrom}_{start}_{end}.finished", zip, chrom=chunk_chrom, start=chunk_start, end=chunk_end, allow_missing=True)
 qtlTmp=expand(outputFolder+"/{ct}/qtl/{chrom}_{start}_{end}/qtl_results_all.txt.gz", zip, chrom=chunk_chrom, start=chunk_start, end=chunk_end, allow_missing=True)
