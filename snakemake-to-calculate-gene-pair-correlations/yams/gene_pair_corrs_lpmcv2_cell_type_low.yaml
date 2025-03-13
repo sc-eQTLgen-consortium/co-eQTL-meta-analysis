@@ -1,0 +1,96 @@
+# config for calculating gene pair correlations
+
+######################################################################################
+####### The following arguments are for indicating file locations on your system #####
+######################################################################################
+
+# directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
+top_directory: /groups/umcg-franke-scrna/tmp04/
+# output directory of all the files, this is where the final output and the intermediate files will be saved
+output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/
+# the location of the singularity image with all installed software
+singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif
+# the working directory for snakemake, location of this file and the snakefile
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/software/co-eQTL-meta-analysis//snakemake-to-calculate-gene-pair-correlations/
+# the location of the scripts that are used, would usually be the scripts directory of the repository
+scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/software/co-eQTL-meta-analysis//snakemake-to-calculate-gene-pair-correlations/scripts/
+# the directory that contains the RDS files 
+input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_low/ # location of rds files
+# the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
+qtl_celltype_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_low_inflammationsplit_mincor/ # location of the wg3-style QTL input
+# the subdirectory if applicable for the WG3-style eQTL input
+qtl_celltype_subdirectory: 
+# the location of the limixannotation file
+limix_annotation_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/annotations/LimixAnnotationFile.txt
+# location of the binary matrix jar
+binary_matrix_loc: /groups/umcg-franke-scrna/tmp04/projects/sc-eqtlgen-consortium-pipeline/ongoing/wg3/wg3_wijst2018/calculate_correlation_metrics/scripts/2024-06-20-BinaryMatrixTools.jar
+# the relative location of the .smf file from the qtl celltype and qtl celltype sub directories
+relative_smf_path: smf.txt
+# prepend of name of RDS files
+seurat_object_prepend: lpmcv2.20230808.
+# append of the RDS files
+seurat_object_append: .rds
+
+
+########################################################################################################
+####### The following arguments are for settings that might differ, depending on the preprocessing #####
+########################################################################################################
+
+# name of the column in the RDS Seurat object, that denotes the sample assignment
+seurat_assignment_column: soup_final_sample_assignment
+
+
+###############################################################################################
+####### The following arguments are for settings that might differ, depending preferences #####
+###############################################################################################
+
+# weighting method for the correlations, can be expression, zeroes or none
+weighting_method: expression
+
+
+##########################################################################
+####### The following arguments are for information about your study #####
+##########################################################################
+
+cohort: lpmcv2_cell_type_low # ID of cohort, just as it is written in the wg3 file path
+cell_type: # cell type(s) to calculate correlations for
+     - Epithelial
+    # - Lymphoid
+    # - Myeloid
+    # - Stromal
+
+
+################################################################################################################
+####### The following arguments are common parameters that may need to be changed depending on the dataset #####
+################################################################################################################
+
+donor_list:
+  donor_list_memory: 64 ### The amount of memory (GB) used per thread for the make_donor_lists step
+  donor_list_time: '01:59:59' ### Amount of time to request for each job
+
+create_donor:
+  create_donor_memory: 12 ### The amount of memory (GB) used per thread for the create_donor step
+  create_donor_time: '05:59:59' ### Amount of time to request for each job
+
+process_donor:
+  process_donor_memory: 12 ### The amount of memory (GB) used per thread for the calculate_correlations step
+  process_donor_time: '05:59:59' ### Amount of time to request for each job
+
+aggregate_metrics:
+  aggregate_metrics_memory: 24 ### The amount of memory (GB) used per thread for the aggregate_metrics step
+  aggregate_metrics_time: '23:59:59' ### Amount of time to request for each job
+
+transpose_matrix:
+  transpose_matrix_memory: 24 ### The amount of memory (GB) used for the transpose_matrix step
+  transpose_matrix_time: '01:59:59' ### Amount of time to request for each job
+  
+##############################################################################################
+####### The following arguments are situational. You don't have to fill anything in here #####
+##############################################################################################
+
+# gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
+gene_list_path: 
+     - /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Epithelial.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Lymphoid.txt.gz
+    # - /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Myeloid.txt.gz
+    # - /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Stromal.txt.gz
