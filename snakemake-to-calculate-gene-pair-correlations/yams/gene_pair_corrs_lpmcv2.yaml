@@ -7,13 +7,13 @@
 # directory that should be bound in singularity, all files should be a subdirectory of this one. If you need multiple binds, separate them with a comma.
 top_directory: /groups/umcg-franke-scrna/tmp04/
 # output directory of all the files, this is where the final output and the intermediate files will be saved
-output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/calculate_correlation_metrics/output/
+output_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/
 # the location of the singularity image with all installed software
 singularity_path: /groups/umcg-franke-scrna/tmp04/software/wp3_extended_v2.sif
 # the working directory for snakemake, location of this file and the snakefile
-snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/
+snakefile_path: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/software/co-eQTL-meta-analysis//snakemake-to-calculate-gene-pair-correlations/
 # the location of the scripts that are used, would usually be the scripts directory of the repository
-scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/coexpression/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
+scripts_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/software/co-eQTL-meta-analysis/snakemake-to-calculate-gene-pair-correlations/scripts/
 # the directory that contains the RDS files 
 input_directory: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/seurat_preprocess_samples/objects/include_introns/lpmcv2.20230808.cell_type_medhigh/ # location of rds files
 # the directory containing the WG3-style eQTL input such as the qtlInput and PCs files, will be the same as the input_directory if you followed the WG3 pipeline to the letter
@@ -52,9 +52,9 @@ weighting_method: expression
 ####### The following arguments are for information about your study #####
 ##########################################################################
 
-cohort: lpmcv2_cth # ID of cohort, just as it is written in the wg3 file path
+cohort: lpmcv2_cell_type_medhigh # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-    # - CD4_T_cells
+     - CD4_T_cells
     # - CD8_T_cells
     # - Dendritic_cells
     # - Endothelial_cells
@@ -64,8 +64,8 @@ cell_type: # cell type(s) to calculate correlations for
     # - Mature_secretory_enterocytes
     # - Memory_B
     # - Monocytes
-    - Plasma_cells
-    - Stem_cells
+    # - Plasma_cells
+    # - Stem_cells
     # - Stromal_cells
     # - T_others
     # - Transit_amplifying_cells
@@ -101,19 +101,19 @@ transpose_matrix:
 
 # gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 gene_list_path: 
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD4_T_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_CD8_T_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Dendritic_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Endothelial_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Fibroblasts.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Glia_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_absorptive_enterocytes.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Mature_secretory_enterocytes.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Memory_B.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Monocytes.txt.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Plasma_cells.txt.gz
-    - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stem_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Stromal_cells.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_T_others.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/confinements/venema2022_features_Transit_amplifying_cells.txt.gz
+     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD4_T_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD8_T_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Dendritic_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Endothelial_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Fibroblasts.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Glia_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Mature_absorptive_enterocytes.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Mature_secretory_enterocytes.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Memory_B.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Monocytes.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Plasma_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Stem_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Stromal_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/T_others.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Transit_amplifying_cells.tsv.gz
 
