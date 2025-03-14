@@ -56,8 +56,8 @@ cohort: lpmcv2_cell_type_low # ID of cohort, just as it is written in the wg3 fi
 cell_type: # cell type(s) to calculate correlations for
     # - Epithelial
     # - Lymphoid
-     - Myeloid
-    # - Stromal
+    # - Myeloid
+     - Stromal
 
 
 ################################################################################################################
@@ -92,5 +92,5 @@ transpose_matrix:
 gene_list_path: 
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Epithelial.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Lymphoid.txt.gz
-     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Myeloid.txt.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Stromal.txt.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Myeloid.txt.gz
+     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_low/confinements/Stromal.txt.gz
