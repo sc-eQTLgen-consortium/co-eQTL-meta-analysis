@@ -56,9 +56,9 @@ cohort: lpmcv2_cell_type_medhigh # ID of cohort, just as it is written in the wg
 cell_type: # cell type(s) to calculate correlations for
     # - CD4_T_cells
     # - CD8_T_cells
-     - Dendritic_cells
+    # - Dendritic_cells
     # - Endothelial_cells
-    # - Fibroblasts
+     - Fibroblasts
     # - Glia_cells
     # - Mature_absorptive_enterocytes
     # - Mature_secretory_enterocytes
@@ -103,9 +103,9 @@ transpose_matrix:
 gene_list_path: 
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD4_T_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD8_T_cells.tsv.gz
-     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Dendritic_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Dendritic_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Endothelial_cells.tsv.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Fibroblasts.tsv.gz
+     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Fibroblasts.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Glia_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Mature_absorptive_enterocytes.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Mature_secretory_enterocytes.tsv.gz
