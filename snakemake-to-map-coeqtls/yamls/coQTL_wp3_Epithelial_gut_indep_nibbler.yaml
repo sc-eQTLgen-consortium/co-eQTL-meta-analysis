@@ -24,24 +24,24 @@ out_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coe
 # location of the correlation files
 correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/
 # how each correlation file starts
-correlation_prepend: lpmcv2_compartment-Epithelial-pearson-weighted-chr-
+correlation_prepend: lpmcv2_cell_type_low-Epithelial-pearson-weighted-chr-
 # how each correlation file ends
 correlation_append: -final.tsv.gz
 # location of the feature file with features to test
 features_file_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/
 # how the feature files start
-features_file_prepend: indep_features_Epithelial_chr
+features_file_prepend: independent_features_Epithelial_chr
 # how each feature file ends
 features_file_append: .txt.gz
 # annotation folder
 limix_annotation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/
 # prepend of each annotation file
-limix_anno1_prepend: indep_features_co_Epithelial_chr
-limix_anno2_prepend: indep_features_co2_Epithelial_chr
+limix_anno1_prepend: independent_features_co_Epithelial_chr
+limix_anno2_prepend: independent_features_co2_Epithelial_chr
 # and the append of each annotation file
 limix_anno_append: .txt.gz
 # location of the chunking file
-chunking_file_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/chunking_indep_Epithelial.txt
+chunking_file_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/Epithelial_chunking_all.txt
 
 
 #####################################
