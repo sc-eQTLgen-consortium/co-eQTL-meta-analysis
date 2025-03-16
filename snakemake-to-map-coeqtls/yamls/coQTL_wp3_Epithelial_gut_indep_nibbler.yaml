@@ -12,7 +12,7 @@ wg3_image_loc: /groups/umcg-franke-scrna/tmp04/software/wp3.simg
 # location of the limix singularity image
 limix_image_loc: /groups/umcg-franke-scrna/tmp04/software/limixJune24.simg
 # location of the limix software that is not in the container
-limix_dir: /groups/umcg-franke-scrna/tmp04/software/Limix_QTL/
+limix_dir: /groups/umcg-franke-scrna/tmp04/software/Limix_QTL_v2/
 # location of the smf file
 smf_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_low_inflammationsplit_mincor/smf_doubleid.tsv
 # location of genotype data
