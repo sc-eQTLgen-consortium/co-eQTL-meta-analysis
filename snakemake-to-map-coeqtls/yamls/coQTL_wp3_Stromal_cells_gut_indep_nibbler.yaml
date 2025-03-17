@@ -52,7 +52,7 @@ chunking_file_loc: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/
 minimum_test_samples: 20
 numberOfPermutations: '0'
 minorAlleleFrequency: '0.05'
-windowSize: '1000000' # gene + cis window from one side
+windowSize: '100000' # gene + cis window from one side
 hardyWeinbergCutoff: '0.0001'
 compressFiles: true
 
