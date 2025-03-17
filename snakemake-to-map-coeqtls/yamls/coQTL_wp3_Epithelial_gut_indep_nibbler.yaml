@@ -20,21 +20,21 @@ genotype_dir: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/genot
 # prepend of the genotype files
 genotype_prepend: lpmcv2_imputed_hg38_info_filled_rsid_chr
 # where to place the co-eQTL output and intermediate files
-out_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/output/independent/lpmcv2_cell_type_low/
+out_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/output/independent/lpmcv2_cell_type_low_filtered/
 # location of the correlation files
-correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/
+correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low_filtered/
 # how each correlation file starts
 correlation_prepend: lpmcv2_cell_type_low-Epithelial-pearson-weighted-chr-
 # how each correlation file ends
 correlation_append: -final.tsv.gz
 # location of the feature file with features to test
-features_file_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/
+features_file_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low_filtered/
 # how the feature files start
 features_file_prepend: independent_features_Epithelial_chr
 # how each feature file ends
 features_file_append: .txt.gz
 # annotation folder
-limix_annotation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low/
+limix_annotation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_low_filtered/
 # prepend of each annotation file
 limix_anno1_prepend: independent_features_co_Epithelial_chr
 limix_anno2_prepend: independent_features_co2_Epithelial_chr
@@ -52,7 +52,7 @@ chunking_file_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/
 minimum_test_samples: 20
 numberOfPermutations: '0'
 minorAlleleFrequency: '0.05'
-windowSize: '1000000' # gene + cis window from one side
+windowSize: '100000' # gene + cis window from one side
 hardyWeinbergCutoff: '0.0001'
 compressFiles: true
 
