@@ -53,7 +53,7 @@ weighting_method: expression
 
 cohort: lpmcv2_cell_type_medhigh # ID of cohort, just as it is written in the wg3 file path
 cell_type: # cell type(s) to calculate correlations for
-     - CD4_T_cells
+    # - CD4_T_cells
     # - CD8_T_cells
     # - Dendritic_cells
     # - Endothelial_cells
@@ -67,7 +67,7 @@ cell_type: # cell type(s) to calculate correlations for
     # - Stem_cells
     # - Stromal_cells
     # - T_others
-    # - Transit_amplifying_cells
+     - Transit_amplifying_cells
 
 
 ################################################################################################################
@@ -100,7 +100,7 @@ transpose_matrix:
 
 # gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
 gene_list_path: 
-     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD4_T_cells.tsv.gz
+    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD4_T_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/CD8_T_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Dendritic_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Endothelial_cells.tsv.gz
@@ -114,5 +114,5 @@ gene_list_path:
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Stem_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Stromal_cells.tsv.gz
     # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/T_others.tsv.gz
-    # - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Transit_amplifying_cells.tsv.gz
+     - /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/cell_type_medhigh/confinements/Transit_amplifying_cells.tsv.gz
 
