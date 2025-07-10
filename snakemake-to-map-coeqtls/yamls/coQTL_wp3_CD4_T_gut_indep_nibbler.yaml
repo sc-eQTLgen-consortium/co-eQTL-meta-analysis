@@ -14,15 +14,15 @@ limix_image_loc: /groups/umcg-franke-scrna/tmp02/software/limixJune24.simg
 # location of the limix software that is not in the container
 limix_dir: /groups/umcg-franke-scrna/tmp02/software/Limix_QTL_v2/
 # location of the smf file
-smf_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/smf_doubleid.tsv
+smf_loc: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/eqtl/sc-eqtlgen/input/elmentaite_adult_martin_immune/cell_type_medhigh_inflammationsplit_mincor/smf_doubleid.tsv
 # location of genotype data
 genotype_dir: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/genotype/combined/imputed/all/sc-eqtlgen-pipeline-wg1/
 # prepend of the genotype files
 genotype_prepend: lpmcv2_imputed_hg38_info_filled_rsid_chr
 # where to place the co-eQTL output and intermediate files
-out_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_medhigh_filtered/
+out_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_medhigh_filtered/
 # location of the correlation files
-correlation_folder: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_medhigh_filtered/
+correlation_folder: /groups/umcg-franke-scrna/tmp02/projects/venema-2022/ongoing/qtl/coeqtl/independent/lpmcv2_cell_type_medhigh_filtered/
 # how each correlation file starts
 correlation_prepend: lpmcv2_cth-CD4_T_cells-pearson-weighted-chr-
 # how each correlation file ends
