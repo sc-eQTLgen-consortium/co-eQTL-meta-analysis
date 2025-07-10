@@ -41,7 +41,7 @@ limix_anno2_prepend: independent_features_co2_CD4_T_cells_chr
 # and the append of each annotation file
 limix_anno_append: .txt.gz
 # location of the chunking file
-chunking_file_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/correlation_matrices/lpmcv2_cell_type_medhigh_pcregressed/CD4_T_cells_chunking_all.txt.gz
+chunking_file_loc: /groups/umcg-franke-scrna/tmp04/projects/venema-2022/ongoing/qtl/coeqtl/independent/correlation_matrices/lpmcv2_cell_type_medhigh_pcregressed/CD4_T_cells_chunking_all.txt
 
 
 #####################################
