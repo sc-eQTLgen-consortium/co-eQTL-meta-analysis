@@ -69,7 +69,9 @@ option_list <- list(
   make_option(c("-a", "--seurat_assignment_column"), type="character", default=NULL,
               help="name of column in Seurat metadata that has the assignment of the cell to a donor", metavar="character"),
   make_option(c("-w", "--weight_method"), type="character", default=NULL,
-              help="which method to use for weighting: expression/zeroes/none", metavar="character")
+              help="which method to use for weighting: expression/zeroes/none", metavar="character"), 
+  make_option(c("-n", "--skip_filter"), type="character", default=0,
+              help="skip filtering step of Seurat object with smf and QTL inputs: 0/1, default is 0", metavar="numeric")            
 )
 
 # initialize optparser
@@ -86,6 +88,15 @@ smf = opt[['smf']]
 qtl_input_path = opt[['qtl_input_path']]
 seurat_assignment_column = opt[['seurat_assignment_column']]
 weight_method = opt[['weight_method']]
+skip_filter_int = opt[['skip_filter']]
+
+# make the filter skip a boolean
+skip_filter <- F
+if (skip_filter_int == 1) {
+  skip_filter <- T
+} else if(skip_filter < 0 | skip_filter > 1) {
+  stop("skip_filter needs to be '0' or '1'\n")
+}
 
 # args = commandArgs(trailingOnly=TRUE)
 # cell_type = args[1]
@@ -98,53 +109,65 @@ weight_method = opt[['weight_method']]
 # seurat_assignment_column = args[8]
 # weight_method = args[9]
 
-cat(paste("param1: cell type:",cell_type, "\n", 
-"param2: cohort id: ",cohort_id, "\n", 
-"param3: seurat file: ",seurat_object_path, "\n", 
-"param4: output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/', "\n", 
-"param5: Using gene list: ", genes_to_use_loc, "\n", 
-"param6: Sample mapping file: ", smf, "\n", 
-"param7: wg3 QTL inputs: ", qtl_input_path, "\n", 
-"param8: sample assignment Seurat column: ", seurat_assignment_column, "\n", 
-"param9: weighting method: ", weight_method, "\n", 
+cat(paste("cell type:",cell_type, "\n", 
+"cohort id: ",cohort_id, "\n", 
+"seurat file: ",seurat_object_path, "\n", 
+"output directory: ",donor_rds_dir,cohort_id,'/','donor_rds','/', "\n", 
+"Using gene list: ", genes_to_use_loc, "\n", 
+"Sample mapping file: ", smf, "\n", 
+"wg3 QTL inputs: ", qtl_input_path, "\n", 
+"sample assignment Seurat column: ", seurat_assignment_column, "\n", 
+"weighting method: ", weight_method, "\n", 
 "inferred PCs file: ", qtl_input_path,cell_type,".qtlInput.Pcs.txt", "\n", 
+"skippping filter: "skip_filter, "\n", 
 sep=''))
 
 # selection of genes
 print(paste("Loading big rds file", seurat_object_path, '...'))
 sc_data <- readRDS(seurat_object_path)
 
+# init smf and PC variables
+smf <- NULL
+Pcs <- NULL
+
 # read sample mapping and PC files
-print("Filtering RDS file with smf and Pcs files")
-smf = read.csv(smf,sep='\t')
-Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
+if (!skip_filter) {
+  print("Filtering RDS file with smf and Pcs files")
+  smf = read.table(smf, sep='\t')
+  Pcs = read.table(paste(qtl_input_path, '/', cell_type, ".qtlInput.Pcs.txt", sep=''), sep='\t', row.names = 1)
+}
 
 # Filter out donors that are not in the smf file
-x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
-if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
-  # get which we removed for debugging purposes
-  donors_removed <- setdiff(unique(sc_data@meta.data[[seurat_assignment_column]]), smf$genotype_id)
-  warning(paste('removed samples not present in smf:', paste(donors_removed, collapse = ',')))
-  # get the cellbarcodes to include
-  cells.use = colnames(sc_data[,x])
-  # subset the Seurat object
-  subset_file = subset(sc_data, cells=cells.use)
-  sc_data = subset_file
+if (!skip_filter) {
+  x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
+  if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
+    # get which we removed for debugging purposes
+    donors_removed <- setdiff(unique(sc_data@meta.data[[seurat_assignment_column]]), smf$genotype_id)
+    warning(paste('removed samples not present in smf:', paste(donors_removed, collapse = ',')))
+    # get the cellbarcodes to include
+    cells.use = colnames(sc_data[,x])
+    # subset the Seurat object
+    subset_file = subset(sc_data, cells=cells.use)
+    sc_data = subset_file
+  }
 }
 
 # Filter out donors that are not in the Pcs file
-Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
-Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
-x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
-if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
-  # get which we removed for debugging purposes
-  donors_removed <- setdiff(unique(sc_data@meta.data[[seurat_assignment_column]]), Pcs_donors)
-  warning(paste('removed samples not present in PC file:', paste(donors_removed, collapse = ',')))
-  # get the cellbarcodes to include
-  cells.use = colnames(sc_data[,x])
-  # subset the Seurat object
-  subset_file = subset(sc_data, cells=cells.use)
-  sc_data = subset_file
+if (!skip_filter) {
+  #Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
+  Pcs_donors = str_split(rownames(Pcs),';',simplify=T)[,1]
+  Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
+  x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
+  if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
+    # get which we removed for debugging purposes
+    donors_removed <- setdiff(unique(sc_data@meta.data[[seurat_assignment_column]]), Pcs_donors)
+    warning(paste('removed samples not present in PC file:', paste(donors_removed, collapse = ',')))
+    # get the cellbarcodes to include
+    cells.use = colnames(sc_data[,x])
+    # subset the Seurat object
+    subset_file = subset(sc_data, cells=cells.use)
+    sc_data = subset_file
+  }
 }
 
 # add MJ normalization if not already present

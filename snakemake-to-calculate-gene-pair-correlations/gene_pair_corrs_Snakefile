@@ -41,19 +41,33 @@ gene_list = config["gene_list_path"]
 limix_annotation_loc = config["limix_annotation_loc"]
 # location of the binary matrix file
 binary_matrix_loc = config['binary_matrix_loc']
+# whether to skip the filtering
+skip_filter = config['skip_filter']
 
 # some might values might be none, so reset those to be empty strings
 if seurat_celltype_prepend is None or seurat_celltype_prepend == 'None':
     seurat_celltype_prepend = ''
 if qtl_celltype_subdirectory is None or seurat_celltype_prepend == 'None':
     qtl_celltype_subdirectory = ''
+if skip_filter is None or skip_filter == 'None' or skip_filter == '':
+    skip_filter = 0
+
+# then if skip-filter is set, some values do not matter
+smf = None
+if skip_filter == 0:
+    # get the location of the .smf file
+    smf = f"{qtl_celltype_directory}/{relative_smf_path}"
+else:
+    smf = 'undefined'
+
 
 # paste together the location of the QTL files
-qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
-#qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
-# get the location of the .smf file
-smf = f"{qtl_celltype_directory}/{relative_smf_path}"
-#smf = smf.replace(" ","")
+qtl_celltype_dir = None
+if skip_filter == 0:
+    qtl_celltype_dir = f"{qtl_celltype_directory}/{qtl_celltype_subdirectory}"
+    #qtl_celltype_dir = qtl_celltype_dir.replace(" ","") # This removes spaces, required with bad installation of snakemake which adds spaces in f-strings
+else:
+    qtl_celltype_dir = 'undefined'
 
 # the chromosomes to consider
 chromosomes = list(range(1,23))
@@ -156,7 +170,8 @@ if all([os.path.exists(file) for file in donor_file_path]):
                     --smf {smf} \
                     --qtl_input_path {qtl_celltype_dir} \
                     --seurat_assignment_column {seurat_assignment_column} \
-                    --weight_method {weighting_method}
+                    --weight_method {weighting_method} \
+                    --skip_filter {skip_filter}
             """
 
     rule calculate_correlations:
@@ -270,7 +285,8 @@ else:
                     --gene_list_out_loc {params.gene_lists_out_path} \
                     --smf {smf} \
                     --qtl_input_path {qtl_celltype_dir} \
-                    --seurat_assignment_column {seurat_assignment_column}
+                    --seurat_assignment_column {seurat_assignment_column} \
+                    --skip_filter {skip_filter}
             """
 
 
