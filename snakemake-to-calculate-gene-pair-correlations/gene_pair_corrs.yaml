@@ -39,7 +39,7 @@ seurat_object_append: .Qced.Normalized.SCs.Rds
 # name of the column in the RDS Seurat object, that denotes the sample assignment
 seurat_assignment_column: Assignment
 # whether to skip the filtering via smf and QTL files, this allows those variables to be empty as ''
-skip_filtering: 0
+skip_filter: 0
 
 ###############################################################################################
 ####### The following arguments are for settings that might differ, depending preferences #####
