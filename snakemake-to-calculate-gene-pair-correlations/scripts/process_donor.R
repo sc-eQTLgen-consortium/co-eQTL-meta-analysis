@@ -119,7 +119,7 @@ cat(paste("cell type:",cell_type, "\n",
 "sample assignment Seurat column: ", seurat_assignment_column, "\n", 
 "weighting method: ", weight_method, "\n", 
 "inferred PCs file: ", qtl_input_path,cell_type,".qtlInput.Pcs.txt", "\n", 
-"skippping filter: "skip_filter, "\n", 
+"skippping filter: ", skip_filter, "\n", 
 sep=''))
 
 # selection of genes
