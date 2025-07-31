@@ -42,7 +42,9 @@ limix_annotation_loc = config["limix_annotation_loc"]
 # location of the binary matrix file
 binary_matrix_loc = config['binary_matrix_loc']
 # whether to skip the filtering
-skip_filter = config['skip_filter']
+skip_config = 0
+if 'skip_filter' in config:
+    skip_filter = config['skip_filter']
 
 # some might values might be none, so reset those to be empty strings
 if seurat_celltype_prepend is None or seurat_celltype_prepend == 'None':

@@ -17,6 +17,35 @@ The pulp package was updated, and has some issues with Snakemake. We need to dow
 pip install pulp==2.7.0
 ```
 
+The pipeline assumes your Seurat object has already been split per cell type. If you have not done so yet, you do it like this:
+```r
+
+# load libraries
+library(Seurat)
+# location of the source object
+seurat_object_loc <- '/path/to/nonsplit/object.rds'
+# load this object
+seurat_object <- readRDS(seurat_object_loc)
+# set location to place the objects
+split_object_loc <- '/path/to/place/split/objects/'
+# the prepend for each file
+split_object_prepend <- 'split_'
+# the column denoting the cell type
+celltype_column <- 'celltype'
+# the append for each file
+split_object_append <- '.rds'
+for (celltype in unique(seurat_object@meta.data[[celltype_column]]) {
+ # subset the object to this compartment
+ seurat_object_celltype <- seurat_object[, !is.na(seurat_object@meta.data[[celltype_column]]) & seurat_object@meta.data[[celltype_column]] == celltype]
+ # paste the path together
+ output_path_celltype <- paste0(split_object_loc, '/', split_object_prepend, celltype, split_object_append)
+ # write the object
+ saveRDS(seurat_object_celltype, output_path_celltype)
+}
+
+
+```
+
 ## instructions
 
 This pipeline consists of a number of major steps, listed below
@@ -137,6 +166,9 @@ cell type(s) to calculate correlations for. The names need to match the file nam
 
 ##### gene_list_path: 
 gene lists to only calculate correlations for (instead of doing all genes), if not using a specific set, should be nan. If you want to use the same gene set for each celltype, supply one file. If you want a different geneset for each cell type, supply files in the same order as you supplied the respective celltypes the gene sets are for
+
+##### skip_filter: 
+skip the filtering step that only keeps samples that are present in the genotype data (smf) and the PC data (qtl_celltype). If setting this option to 1, the values of the qtl and smf related parameters will not be used.
 
 #### running the correlation pipeline with a job scheduler
 In its current state, this pipeline runs the correlation calculation on the machine where the pipeline is started. As such, it is recommended to do this on a machine where you have compute available. The pipeline will also take a while, depending on the size of the dataset. As such it is also recommended to do this in a way where you can disconnect and reconnect without the pipeline stopping, such as sattach, screen on tmux. Here is an example using screen and SLURM:
