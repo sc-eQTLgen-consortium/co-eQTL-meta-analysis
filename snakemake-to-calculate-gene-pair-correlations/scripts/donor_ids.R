@@ -115,7 +115,7 @@ cat(paste0("donor_ids.R run with", "\n",
 "sample mapping file: ",smf, "\n",
 "wg3 QTL inputs: ",qtl_input_path, "\n",
 "sample assignment Seurat column: ",seurat_assignment_column, '\n', 
-"skipping filter: "skip_filter, "\n")
+"skipping filter: ", skip_filter, "\n")
 )
 
 
