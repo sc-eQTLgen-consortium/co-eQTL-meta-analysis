@@ -65,7 +65,9 @@ option_list <- list(
   make_option(c("-q", "--qtl_input_path"), type="character", default=NULL,
               help="folder that contains QTL output from WG3, so qtlInput.txt.gz etc.", metavar="character"),
   make_option(c("-a", "--seurat_assignment_column"), type="character", default=NULL,
-              help="name of column in Seurat metadata that has the assignment of the cell to a donor", metavar="character")
+              help="name of column in Seurat metadata that has the assignment of the cell to a donor", metavar="character"), 
+  make_option(c("-n", "--skip_filter"), type="character", default=0,
+              help="skip filtering step of Seurat object with smf and QTL inputs: 0/1, default is 0", metavar="numeric")
 )
 
 # initialize optparser
@@ -81,7 +83,15 @@ gene_list_out = opt[['gene_list_out_loc']]
 smf = opt[['smf']]
 qtl_input_path = opt[['qtl_input_path']]
 seurat_assignment_column = opt[['seurat_assignment_column']]
+skip_filter_int = opt[['skip_filter']]
 
+# make the filter skip a boolean
+skip_filter <- F
+if (skip_filter_int == 1) {
+  skip_filter <- T
+} else if(skip_filter < 0 | skip_filter > 1) {
+  stop("skip_filter needs to be '0' or '1'\n")
+}
 
 # args = commandArgs(trailingOnly=TRUE)
 
@@ -96,15 +106,17 @@ seurat_assignment_column = opt[['seurat_assignment_column']]
 # seurat_assignment_column = args[9]
 
 cat(paste0("donor_ids.R run with", "\n",
-"param1: cell_type: ",cell_type, "\n",
-"param2: cohort: ",cohort_id, "\n",
-"param3: seurat object: ",seurat_object_path, "\n",
-"param4: output directory: ",donor_rds_dir, "\n",
-"param5: standard_gene_list: ",gene_list_out, "\n",
+"cell_type: ",cell_type, "\n",
+"cohort: ",cohort_id, "\n",
+"seurat object: ",seurat_object_path, "\n",
+"output directory: ",donor_rds_dir, "\n",
+"standard_gene_list: ",gene_list_out, "\n",
 # "param6: alternative_gene_list: ",alt_gene_list, "\n",  # THIS DOES NOT SEEM TO BE USED!,
-"param7: sample mapping file: ",smf, "\n",
-"param8: wg3 QTL inputs: ",qtl_input_path, "\n",
-"param9: sample assignment Seurat column: ",seurat_assignment_column, '\n'))
+"sample mapping file: ",smf, "\n",
+"wg3 QTL inputs: ",qtl_input_path, "\n",
+"sample assignment Seurat column: ",seurat_assignment_column, '\n', 
+"skipping filter: ", skip_filter, "\n")
+)
 
 
 
@@ -116,45 +128,53 @@ sc_data <- readRDS(seurat_object_path)
 
 print(paste("seurat object loaded", seurat_object_path, ", continuing with analysis", sep  = ''))
 
-# load sample mapping file and PCs file
-print(paste("Filtering RDS file with smf and Pcs files at", smf, "and", paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep='')))
-smf = read.csv(smf,sep='\t')
-Pcs = read.csv(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t')
+# init smf and PC variables
+smf <- NULL
+Pcs <- NULL
 
-# Filter out donors that are not in the smf file
-x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
-if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
-  cells.use = colnames(sc_data[,x])
-  subset_file = subset(sc_data, cells=cells.use)
-  sc_data = subset_file
-}
+# read sample mapping and PC files
+if (!skip_filter) {
+  # load sample mapping file and PCs file
+  print(paste("Filtering RDS file with smf and Pcs files at", smf, "and", paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep='')))
+  smf = read.table(smf, sep = '\t', header = T)
+  Pcs = read.table(paste(qtl_input_path,cell_type,".qtlInput.Pcs.txt",sep=''),sep='\t', row.names = 1, header = T)
 
-# Filter out donors that are not in Pcs file
-Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
+  # Filter out donors that are not in the smf file
+  x = sc_data@meta.data[[seurat_assignment_column]] %in% smf$genotype_id
+  if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
+    cells.use = colnames(sc_data[,x])
+    subset_file = subset(sc_data, cells=cells.use)
+    sc_data = subset_file
+  }
 
-# get donors in Seurat object
-seurat_donors <- unique(sc_data@meta.data[[seurat_assignment_column]])
-# and which are not in the SC data
-pc_donors_not_in_seurat <- setdiff(Pcs_donors, seurat_donors)
-# or not in the PC data
-seurat_donors_not_in_pcs <- setdiff(seurat_donors, Pcs_donors)
-# and let the user know if there is something awry
-if (length(pc_donors_not_in_seurat) > 0) {
-  warning(paste('dropping donors from PC file that are not in RDS/Seurat:', paste(pc_donors_not_in_seurat, collapse = ',')))
-}
-if (length(seurat_donors_not_in_pcs) > 0) {
-  warning(paste('dropping donors from RDS/Seurat, that are not in PC file', paste(seurat_donors_not_in_pcs, collapse = ',')))
-}
+  # Filter out donors that are not in Pcs file
+  # Pcs_donors = str_split(Pcs$X,';',simplify=T)[,1]
+  Pcs_donors = str_split(rownames(Pcs),';',simplify=T)[,1]
 
-# subset PC file to donors in Seurat
-Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
-# get T/F for the cells that have an assignment that is in the PCs file
-x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
-# subset if it is not all of them
-if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
-  cells.use = colnames(sc_data[,x])
-  subset_file = subset(sc_data, cells=cells.use)
-  sc_data = subset_file
+  # get donors in Seurat object
+  seurat_donors <- unique(sc_data@meta.data[[seurat_assignment_column]])
+  # and which are not in the SC data
+  pc_donors_not_in_seurat <- setdiff(Pcs_donors, seurat_donors)
+  # or not in the PC data
+  seurat_donors_not_in_pcs <- setdiff(seurat_donors, Pcs_donors)
+  # and let the user know if there is something awry
+  if (length(pc_donors_not_in_seurat) > 0) {
+    warning(paste('dropping donors from PC file that are not in RDS/Seurat:', paste(pc_donors_not_in_seurat, collapse = ',')))
+  }
+  if (length(seurat_donors_not_in_pcs) > 0) {
+    warning(paste('dropping donors from RDS/Seurat, that are not in PC file', paste(seurat_donors_not_in_pcs, collapse = ',')))
+  }
+
+  # subset PC file to donors in Seurat
+  Pcs_donors = Pcs_donors[Pcs_donors %in% sc_data@meta.data[[seurat_assignment_column]]]
+  # get T/F for the cells that have an assignment that is in the PCs file
+  x=sc_data@meta.data[[seurat_assignment_column]] %in% Pcs_donors
+  # subset if it is not all of them
+  if (sum(x) != length(sc_data@meta.data[[seurat_assignment_column]])){
+    cells.use = colnames(sc_data[,x])
+    subset_file = subset(sc_data, cells=cells.use)
+    sc_data = subset_file
+  }
 }
 
 # get the number of cells per donor
